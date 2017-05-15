@@ -80,5 +80,16 @@ namespace TopicService
                 ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW MESSAGE  PUSHED : {msg.Message}");
             });
         }
+
+        public async Task<IMessage> InternalPop()
+        {
+            var msg = new PubSubMessage() { Message = DateTime.Now.ToString() };
+            await Task.Run(() =>
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW TOPIC MESSAGE  POP : {msg.Message}");
+            });
+
+            return msg;
+        }
     }
 }

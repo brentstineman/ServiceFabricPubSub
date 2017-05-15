@@ -8,8 +8,17 @@ namespace PubSubDotnetSDK
 {
     public interface ITopicService : IService
     {
+        /// <summary>
+        /// Push a new message in the topic
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns></returns>
         Task Push(IMessage msg);
 
-
+        /// <summary>
+        /// Just for testing in sprint0
+        /// </summary>
+        /// <returns></returns>
+        Task<IMessage> InternalPop();
     }
 }

@@ -77,7 +77,7 @@ namespace SubscriberService
             var msg= new PubSubMessage() { Message = DateTime.Now.ToString() };
             await Task.Run(() =>
             {
-                ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW MESSAGE  POP : {msg.Message}");
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW SUBSCRIBER MESSAGE  POP : {msg.Message}");
             });
 
             return msg;
