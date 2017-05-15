@@ -20,6 +20,6 @@ namespace PubSubDotnetSDK
         /// </summary>
         /// <param name="subcriberId">Name the of caller subscriber service</param>
         /// <returns></returns>
-        Task<PubSubMessage> InternalPop();
+        Task<PubSubMessage> InternalPop(string subscriberId);
     }
 }

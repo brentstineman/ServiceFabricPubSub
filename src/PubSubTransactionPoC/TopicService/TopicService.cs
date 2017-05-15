@@ -85,7 +85,8 @@ namespace TopicService
         /// Should be removed in next sprint.
         /// </summary>
         /// <param name="subcriberId"></param>
-        /// <returns></returns>public async Task<IMessage> InternalPop()
+        /// <returns></returns>
+        public async Task<PubSubMessage> InternalPop(string subscriberId)
         {
             PubSubMessage msg = null;
             using (var tx = this.StateManager.CreateTransaction())
@@ -95,7 +96,7 @@ namespace TopicService
                     msg = msgCV.Value;
                 await tx.CommitAsync();
             }
-            ServiceEventSource.Current.ServiceMessage(this.Context, $"DEQUEUE FOR {subcriberId} : {msg?.Message}");
+            ServiceEventSource.Current.ServiceMessage(this.Context, $"DEQUEUE FOR {subscriberId} : {msg?.Message}");
             return msg;
         }
     }
