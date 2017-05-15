@@ -24,9 +24,9 @@ namespace TestWebApi.Controllers
         //}
 
         [HttpGet]
-        public async Task<PubSubMessage> Pop()
+        public async Task<PubSubMessage> Pop(string subscriberName)
         {
-            string name =
+            string name = subscriberName ??
                 FabricRuntime.GetActivationContext()
                     .GetConfigurationPackageObject("Config")
                     .Settings
