@@ -23,7 +23,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriberService", "Subscr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Client App", "Test Client App", "{E6E372A8-51E0-4684-B48B-AB5F3C071198}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientApp", "ClientApp\ClientApp.csproj", "{DB14FBB1-A374-49AE-9057-87B0AD159324}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientApp", "ClientApp\ClientApp\ClientApp.csproj", "{DB14FBB1-A374-49AE-9057-87B0AD159324}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConsoleHelper", "ClientApp\Microsoft.ConsoleHelper\Microsoft.ConsoleHelper.csproj", "{2BEBA84B-4404-4858-A056-EE42FC43E84C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +89,14 @@ Global
 		{DB14FBB1-A374-49AE-9057-87B0AD159324}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DB14FBB1-A374-49AE-9057-87B0AD159324}.Release|x64.ActiveCfg = Release|Any CPU
 		{DB14FBB1-A374-49AE-9057-87B0AD159324}.Release|x64.Build.0 = Release|Any CPU
+		{2BEBA84B-4404-4858-A056-EE42FC43E84C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BEBA84B-4404-4858-A056-EE42FC43E84C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BEBA84B-4404-4858-A056-EE42FC43E84C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2BEBA84B-4404-4858-A056-EE42FC43E84C}.Debug|x64.Build.0 = Debug|Any CPU
+		{2BEBA84B-4404-4858-A056-EE42FC43E84C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BEBA84B-4404-4858-A056-EE42FC43E84C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BEBA84B-4404-4858-A056-EE42FC43E84C}.Release|x64.ActiveCfg = Release|Any CPU
+		{2BEBA84B-4404-4858-A056-EE42FC43E84C}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -100,5 +110,6 @@ Global
 		{63A7A410-63B5-4F78-BAEA-84E5F56A7E01} = {07CC9061-3035-4667-A3CC-94529F7A18FE}
 		{86CAD58C-FBFA-403A-93FF-02EF3AEEF261} = {07CC9061-3035-4667-A3CC-94529F7A18FE}
 		{DB14FBB1-A374-49AE-9057-87B0AD159324} = {E6E372A8-51E0-4684-B48B-AB5F3C071198}
+		{2BEBA84B-4404-4858-A056-EE42FC43E84C} = {E6E372A8-51E0-4684-B48B-AB5F3C071198}
 	EndGlobalSection
 EndGlobal
