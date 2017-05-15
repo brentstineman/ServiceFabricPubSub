@@ -26,7 +26,9 @@ namespace TestWebApi.Controllers
         {
             var stockSvc = ServiceProxy.Create<ISubscriberService>(new Uri("fabric:/PubSubTransactionPoC/Subscriber1"),
                new ServicePartitionKey(0));
-            return await stockSvc.Pop();
+            var msg = await stockSvc.Pop();
+
+            return msg;
         }
 
         [HttpPost]

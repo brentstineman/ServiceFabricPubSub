@@ -59,13 +59,11 @@ namespace SubscriberService
 
         public async Task<PubSubMessage> Pop()
         {
-
-            
             // TODO : replace appname & service name by value comming from configuration
-            var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoc/Topic1"),
+            var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/Topic1"),
                 new ServicePartitionKey(0));
 
-            var msg = (PubSubMessage)await topicSvc.InternalPop("Subcriber1");
+            var msg = await topicSvc.InternalPop("Subcriber1");
             ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW SUBSCRIBER MESSAGE  POP : {msg}");
             return msg;
         }
