@@ -17,6 +17,7 @@ namespace AdminService
     {
         private const string KEY1 = "key1";
         private const string KEY2 = "key2";
+        private const string COLLECTION_KEYS = "keys";
 
         public AdminService(StatefulServiceContext context)
             : base(context)
@@ -59,7 +60,7 @@ namespace AdminService
 
         private async Task<string> GetKey(string keyName)
         {
-            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>("keys");
+            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>(AdminService.AdminService.V);
 
             using (var tx = this.StateManager.CreateTransaction())
             {
@@ -75,7 +76,7 @@ namespace AdminService
 
         private async Task GenerateServiceKeys()
         {
-            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>("keys");
+            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>(AdminService.AdminService.V);
 
             using (var tx = this.StateManager.CreateTransaction())
             {
