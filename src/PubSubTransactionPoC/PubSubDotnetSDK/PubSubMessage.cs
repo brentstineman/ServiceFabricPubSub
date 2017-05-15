@@ -6,6 +6,11 @@ namespace PubSubDotnetSDK
 {
     public class PubSubMessage : IMessage
     {
+        public PubSubMessage()
+        {
+            this.Message = null;
+        }
+
         public string Message { get; set; }
     }
 }

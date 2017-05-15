@@ -9,6 +9,8 @@ using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using PubSubDotnetSDK;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
+using Microsoft.ServiceFabric.Services.Remoting.Client;
+using Microsoft.ServiceFabric.Services.Client;
 
 namespace SubscriberService
 {
@@ -45,41 +47,26 @@ namespace SubscriberService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            // TODO: Replace the following sample code with your own logic 
-            //       or remove this RunAsync override if it's not needed in your service.
-
-            var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
-
+            // TODO : Register the subscriber with Topic service (in order to create the output queue)
+            
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-
-                using (var tx = this.StateManager.CreateTransaction())
-                {
-                    var result = await myDictionary.TryGetValueAsync(tx, "Counter");
-
-                    ServiceEventSource.Current.ServiceMessage(this.Context, "Current Counter Value: {0}",
-                        result.HasValue ? result.Value.ToString() : "Value does not exist.");
-
-                    await myDictionary.AddOrUpdateAsync(tx, "Counter", 0, (key, value) => ++value);
-
-                    // If an exception is thrown before calling CommitAsync, the transaction aborts, all changes are 
-                    // discarded, and nothing is saved to the secondary replicas.
-                    await tx.CommitAsync();
-                }
-
+                
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
         }
 
         public async Task<IMessage> Pop()
         {
-            var msg= new PubSubMessage() { Message = DateTime.Now.ToString() };
-            await Task.Run(() =>
-            {
-                ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW SUBSCRIBER MESSAGE  POP : {msg.Message}");
-            });
 
+            
+            // TODO : replace appname & service name by value comming from configuration
+            var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoc/Topic1"),
+                new ServicePartitionKey(0));
+
+            var msg = (PubSubMessage)await topicSvc.InternalPop("Subcriber1");
+            ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW SUBSCRIBER MESSAGE  POP : {msg}");
             return msg;
         }
     }

@@ -8,9 +8,9 @@
   <Section Name="ReplicatorSecurityConfig" />
 
   <!-- Add your custom configuration sections and parameters here. -->
-  <!--
-  <Section Name="MyConfigSection">
-    <Parameter Name="MyParameter" Value="Value1" />
+  
+  <Section Name="SubscriberConfiguration">
+    <Parameter Name="TopicServiceName" Value="Topic1" />
   </Section>
-  -->
+  
 </Settings>

@@ -38,6 +38,9 @@ namespace TopicService
             };
         }
 
+        
+        IReliableQueue<PubSubMessage> mainQueue = null;
+
         /// <summary>
         /// This is the main entry point for your service replica.
         /// This method executes when this replica of your service becomes primary and has write status.
@@ -45,50 +48,55 @@ namespace TopicService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            // TODO: Replace the following sample code with your own logic 
-            //       or remove this RunAsync override if it's not needed in your service.
+            mainQueue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("mainQueue");
 
-            //var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
-
+            int count = 1;
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-
-                //using (var tx = this.StateManager.CreateTransaction())
-                //{
-                //    var result = await myDictionary.TryGetValueAsync(tx, "Counter");
-
-                //    ServiceEventSource.Current.ServiceMessage(this.Context, "Current Counter Value: {0}",
-                //        result.HasValue ? result.Value.ToString() : "Value does not exist.");
-
-                //    await myDictionary.AddOrUpdateAsync(tx, "Counter", 0, (key, value) => ++value);
-
-                //    // If an exception is thrown before calling CommitAsync, the transaction aborts, all changes are 
-                //    // discarded, and nothing is saved to the secondary replicas.
-                //    await tx.CommitAsync();
-                //}
-
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+
+                // HACK : add message every second for test
+                using (var tx = this.StateManager.CreateTransaction())
+                {
+                    await mainQueue.EnqueueAsync(tx, new PubSubMessage() { Message=$"TEST  Message #{count++}"});
+                    await tx.CommitAsync();
+                }
             }
         }
 
-
+        /// <summary>
+        /// Enqueue a new message in the topic
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns></returns>
         public async Task Push(IMessage msg)
         {
-            await Task.Run(() =>
+            using (var tx = this.StateManager.CreateTransaction())
             {
-                ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW MESSAGE  PUSHED : {msg.Message}");
-            });
+                await mainQueue.EnqueueAsync(tx, (PubSubMessage)msg);
+                await tx.CommitAsync();
+                ServiceEventSource.Current.ServiceMessage(this.Context, $"ENQUEUE: {msg.Message}");
+            }
         }
 
-        public async Task<IMessage> InternalPop()
+        /// <summary>
+        /// HACK Method for sprint0. 
+        /// Should be removed in next sprint.
+        /// </summary>
+        /// <param name="subcriberId"></param>
+        /// <returns></returns>
+        public async Task<IMessage> InternalPop(string subcriberId)
         {
-            var msg = new PubSubMessage() { Message = DateTime.Now.ToString() };
-            await Task.Run(() =>
+            PubSubMessage msg = null;
+            using (var tx = this.StateManager.CreateTransaction())
             {
-                ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW TOPIC MESSAGE  POP : {msg.Message}");
-            });
-
+                var msgCV= await mainQueue.TryDequeueAsync(tx);
+                if (msgCV.HasValue)
+                    msg = msgCV.Value;
+                await tx.CommitAsync();
+            }
+            ServiceEventSource.Current.ServiceMessage(this.Context, $"DEQUEUE FOR {subcriberId} : {msg?.Message}");
             return msg;
         }
     }
