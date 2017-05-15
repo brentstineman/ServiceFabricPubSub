@@ -59,7 +59,7 @@ namespace TopicService
                 // HACK : add message every second for test
                 using (var tx = this.StateManager.CreateTransaction())
                 {
-                    await mainQueue.EnqueueAsync(tx, new PubSubMessage() { Message=$"TEST  Message #{count++}"});
+                    await mainQueue.EnqueueAsync(tx, new PubSubMessage() { Message=$"TEST  Message #{count++} : {DateTime.Now}"});
                     await tx.CommitAsync();
                 }
             }
