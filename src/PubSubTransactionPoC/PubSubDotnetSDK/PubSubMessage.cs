@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace PubSubDotnetSDK
 {
-    public class PubSubMessage : IMessage
+    [DataContract]
+    public class PubSubMessage
     {
+        [DataMember]
         public string Message { get; set; }
     }
 }

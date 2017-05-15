@@ -73,7 +73,7 @@ namespace TopicService
         }
 
 
-        public async Task Push(IMessage msg)
+        public async Task Push(PubSubMessage msg)
         {
             await Task.Run(() =>
             {
@@ -81,7 +81,7 @@ namespace TopicService
             });
         }
 
-        public async Task<IMessage> InternalPop()
+        public async Task<PubSubMessage> InternalPop()
         {
             var msg = new PubSubMessage() { Message = DateTime.Now.ToString() };
             await Task.Run(() =>

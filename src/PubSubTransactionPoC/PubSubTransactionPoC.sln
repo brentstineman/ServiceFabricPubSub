@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "PubSubTransactionPoC", "PubSubTransactionPoC\PubSubTransactionPoC.sfproj", "{91AFE73D-666D-4F6F-8852-F784BA2B972F}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubscriberService", "SubscriberService\SubscriberService.csproj", "{2929B354-4D0D-432C-A526-AD5932AAAA52}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PubSubDotnetSDK", "PubSubDotnetSDK\PubSubDotnetSDK.csproj", "{28D2B442-6BB7-440F-B27F-946DB89E92D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWebApi", "TestWebApi\TestWebApi.csproj", "{ED224079-3582-43D0-8C8E-940E07F69CD8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,12 @@ Global
 		{28D2B442-6BB7-440F-B27F-946DB89E92D8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{28D2B442-6BB7-440F-B27F-946DB89E92D8}.Release|x64.ActiveCfg = Release|Any CPU
 		{28D2B442-6BB7-440F-B27F-946DB89E92D8}.Release|x64.Build.0 = Release|Any CPU
+		{ED224079-3582-43D0-8C8E-940E07F69CD8}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{ED224079-3582-43D0-8C8E-940E07F69CD8}.Debug|x64.ActiveCfg = Debug|x64
+		{ED224079-3582-43D0-8C8E-940E07F69CD8}.Debug|x64.Build.0 = Debug|x64
+		{ED224079-3582-43D0-8C8E-940E07F69CD8}.Release|Any CPU.ActiveCfg = Release|x64
+		{ED224079-3582-43D0-8C8E-940E07F69CD8}.Release|x64.ActiveCfg = Release|x64
+		{ED224079-3582-43D0-8C8E-940E07F69CD8}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -13,12 +13,12 @@ namespace PubSubDotnetSDK
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        Task Push(IMessage msg);
+        Task Push(PubSubMessage msg);
 
         /// <summary>
         /// Just for testing in sprint0
         /// </summary>
         /// <returns></returns>
-        Task<IMessage> InternalPop();
+        Task<PubSubMessage> InternalPop();
     }
 }

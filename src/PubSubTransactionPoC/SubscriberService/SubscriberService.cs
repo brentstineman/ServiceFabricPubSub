@@ -72,7 +72,7 @@ namespace SubscriberService
             }
         }
 
-        public async Task<IMessage> Pop()
+        public async Task<PubSubMessage> Pop()
         {
             var msg= new PubSubMessage() { Message = DateTime.Now.ToString() };
             await Task.Run(() =>
