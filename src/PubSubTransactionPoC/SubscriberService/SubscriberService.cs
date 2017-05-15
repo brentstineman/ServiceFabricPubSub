@@ -65,7 +65,7 @@ namespace SubscriberService
             var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoc/Topic1"),
                 new ServicePartitionKey(0));
 
-            var msg = (PubSubMessage)await topicSvc.InternalPop("Subcriber1");
+            var msg = (PubSubMessage)await topicSvc.InternalPop("Subscriber1");
             ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW SUBSCRIBER MESSAGE  POP : {msg}");
             return msg;
         }
