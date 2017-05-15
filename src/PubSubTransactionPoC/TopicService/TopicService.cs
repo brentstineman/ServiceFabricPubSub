@@ -8,6 +8,7 @@ using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using PubSubDotnetSDK;
+using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 
 namespace TopicService
 {
@@ -31,7 +32,10 @@ namespace TopicService
         /// <returns>A collection of listeners.</returns>
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return new ServiceReplicaListener[0];
+            return new List<ServiceReplicaListener>()
+            {       
+                new ServiceReplicaListener( (context) => this.CreateServiceRemotingListener(context) )
+            };
         }
 
         /// <summary>
