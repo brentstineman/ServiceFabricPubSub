@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 
 namespace ClientApp
 {
-    class Program
+    public class Program
     {
         private static Groups _groups = new Groups();
         private static Commands _flatCommands = new Commands();
         private static UserInput _userInput = null;
+        public static Uri ServiceUri = null;
+
 
         #region Properties
         public static bool FlatDisplay { get; set; }
@@ -84,6 +86,8 @@ namespace ClientApp
             Console.ResetColor();
             PrintBanner();
 
+            Program.EnsureInitialized(Program.EnsureConfig.ServiceUri);
+
             try
             {
                 if (!FlatDisplay)
@@ -139,5 +143,22 @@ namespace ClientApp
 
             return true;
         }
-     }
+
+        public static void EnsureInitialized(EnsureConfig param)
+        {
+            if (ServiceUri == null && (param & EnsureConfig.ServiceUri) == EnsureConfig.ServiceUri)
+            {
+                string serviceUri = "";
+                var serviceUriString = _userInput.EnsureParam(serviceUri, "Service Uri", forceReEnter: ((EnsureConfig.None & EnsureConfig.ServiceUri) == EnsureConfig.ServiceUri));
+                ServiceUri = new Uri(serviceUriString);
+            }
+        }
+
+        [Flags]
+        public enum EnsureConfig
+        {
+            None = 0,
+            ServiceUri = 0x1
+        }
+    }
 }

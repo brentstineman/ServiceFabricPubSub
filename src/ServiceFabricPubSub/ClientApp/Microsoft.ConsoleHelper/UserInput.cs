@@ -25,7 +25,7 @@ namespace Microsoft.ConsoleHelper
             }
             else
             {
-                Console.Write(desc + " is required. Enter int value:");
+                Console.Write(desc + " is required. Enter int value: ");
             }
 
             var entered = Console.ReadLine();

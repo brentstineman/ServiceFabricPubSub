@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,7 +33,18 @@ namespace ClientApp
         #region Topic Commands
         public static async Task TopicPutMessage()
         {
-            throw new CommandFailedException("Failed");
+            try
+            {
+                WebClient client = new WebClient();
+                client.DownloadString($"{Program.ServiceUri.AbsoluteUri}/foo/bar");
+                
+                Console.WriteLine("Sent");
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed",ex);
+            }
+          
         }
         public static async Task TopicAddSubscriber()
         {
