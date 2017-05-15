@@ -13,14 +13,22 @@ namespace TestWebApi.Controllers
     [ServiceRequestActionFilter]
     public class TestController : ApiController
     {        
+        //[HttpGet]       
+        //public async Task<PubSubMessage> InternalPop()
+        //{            
+        //    var stockSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/Topic1"),
+        //       new ServicePartitionKey(0));
+        //    return await stockSvc.InternalPop();            
+        //}
+
         [HttpGet]
         public async Task<PubSubMessage> Pop()
-        {            
-            var stockSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/Topic1"),
+        {
+            var stockSvc = ServiceProxy.Create<ISubscriberService>(new Uri("fabric:/PubSubTransactionPoC/Subscriber1"),
                new ServicePartitionKey(0));
-            return await stockSvc.InternalPop();            
+            return await stockSvc.Pop();
         }
-        
+
         [HttpPost]
         // POST api/values 
         public async Task Push([FromBody]string value)
