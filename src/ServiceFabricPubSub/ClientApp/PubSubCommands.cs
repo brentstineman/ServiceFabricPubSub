@@ -15,10 +15,17 @@ namespace ClientApp
             //EnsureBasicParams(EnsureExtras.Azure);
         }
         public static async Task TenantSecurityKeyReset()
+        {         
+        }
+        public static async Task TenantAddTopic()
         {
-            //EnsureBasicParams(EnsureExtras.Azure);
-            Console.WriteLine("TenantSecurityKeyReset");
-            throw new ArgumentException();
+        }
+
+        public static async Task TenantDeleteTopic()
+        {
+        }
+        public static async Task TenantListTopics()
+        {
         }
         #endregion
 
@@ -31,10 +38,31 @@ namespace ClientApp
         {
             //EnsureBasicParams(EnsureExtras.Azure);
         }
+        public static async Task TopicDeleteSubscriber()
+        {
+            //EnsureBasicParams(EnsureExtras.Azure);
+        }
+
+        public static async Task TopicListSubscribers()
+        {
+            //EnsureBasicParams(EnsureExtras.Azure);
+        }
         #endregion
 
         #region Subscriber Commands
+        public static async Task SubscriberGetMessage()
+        {
+            //EnsureBasicParams(EnsureExtras.Azure);
+        }
+        public static async Task SubscriberGetQueueDepth()
+        {
+            //EnsureBasicParams(EnsureExtras.Azure);
+        }
 
+        public static async Task SubscriberDeleteAllQueuedMessages()
+        {
+            //EnsureBasicParams(EnsureExtras.Azure);
+        }
         #endregion
     }
 }

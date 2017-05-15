@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Microsoft.ConsoleHelper
 {
     /// <summary>
-    /// Utilities for getting user insertion. To be overritten for processing scripts
+    /// Utilities for getting user insertion
     /// </summary>
     public class UserInput
     {

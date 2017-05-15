@@ -50,22 +50,22 @@ namespace ClientApp
             var tenantsCmds = new Commands();
             tenantsCmds.RegisterCommand("Register new", PubSubCommands.TenantRegisterNew);
             tenantsCmds.RegisterCommand("Security Key reset", PubSubCommands.TenantSecurityKeyReset);
-            tenantsCmds.RegisterCommand("Add a Topic", PubSubCommands.TenantRegisterNew);
-            tenantsCmds.RegisterCommand("Delete a Topic", PubSubCommands.TenantRegisterNew);
-            tenantsCmds.RegisterCommand("List Topics", PubSubCommands.TenantRegisterNew);
+            tenantsCmds.RegisterCommand("Add a Topic", PubSubCommands.TenantAddTopic);
+            tenantsCmds.RegisterCommand("Delete a Topic", PubSubCommands.TenantDeleteTopic);
+            tenantsCmds.RegisterCommand("List Topics", PubSubCommands.TenantListTopics);
             _groups.AddGroup("Tenant", tenantsCmds);
 
             var topicCmds = new Commands();
             topicCmds.RegisterCommand("Put message", PubSubCommands.TopicPutMessage);
-            topicCmds.RegisterCommand("Add subscriber", PubSubCommands.TenantRegisterNew);
-            topicCmds.RegisterCommand("Delete subscriber", PubSubCommands.TenantRegisterNew);
-            topicCmds.RegisterCommand("List subscriber", PubSubCommands.TenantRegisterNew);
+            topicCmds.RegisterCommand("Add subscriber", PubSubCommands.TopicAddSubscriber);
+            topicCmds.RegisterCommand("Delete subscriber", PubSubCommands.TopicDeleteSubscriber);
+            topicCmds.RegisterCommand("List subscriber", PubSubCommands.TopicListSubscribers);
             _groups.AddGroup("Topic", topicCmds);
 
             var subscriberCmds = new Commands();
-            subscriberCmds.RegisterCommand("Get message", PubSubCommands.TenantRegisterNew);
-            subscriberCmds.RegisterCommand("Get subscriber queue depth", PubSubCommands.TenantRegisterNew);
-            subscriberCmds.RegisterCommand("Delete all queue messages", PubSubCommands.TenantRegisterNew);
+            subscriberCmds.RegisterCommand("Get message", PubSubCommands.SubscriberGetMessage);
+            subscriberCmds.RegisterCommand("Get subscriber queue depth", PubSubCommands.SubscriberGetQueueDepth);
+            subscriberCmds.RegisterCommand("Delete all queue messages", PubSubCommands.SubscriberDeleteAllQueuedMessages);
             _groups.AddGroup("Subscriber", subscriberCmds);
 
             var settingsCmds = new Commands();
