@@ -7,7 +7,7 @@ Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "FrontEnd", "FrontEnd\FrontE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Administration", "Administration\Administration.csproj", "{D03A8F08-1E43-42D1-8C27-ABAA35179F28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RequestRouter", "RequestRouter\RequestRouter.csproj", "{21826476-5320-44F2-AE0E-B12E9060E39E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RequestRouter", "RequestRouter\RequestRouterService.csproj", "{21826476-5320-44F2-AE0E-B12E9060E39E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Front End Application", "Front End Application", "{F2483589-300C-4889-8FF7-4857D37E8AA8}"
 EndProject
