@@ -57,7 +57,7 @@ namespace SubscriberService
             }
         }
 
-        public async Task<IMessage> Pop()
+        public async Task<PubSubMessage> Pop()
         {
 
             

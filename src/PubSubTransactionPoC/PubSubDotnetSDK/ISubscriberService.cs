@@ -8,6 +8,6 @@ namespace PubSubDotnetSDK
 {
     public interface ISubscriberService : IService
     {
-        Task<IMessage> Pop();
+        Task<PubSubMessage> Pop();
     }
 }

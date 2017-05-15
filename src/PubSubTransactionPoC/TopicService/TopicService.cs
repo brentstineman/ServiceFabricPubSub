@@ -70,7 +70,7 @@ namespace TopicService
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public async Task Push(IMessage msg)
+        public async Task Push(PubSubMessage msg)
         {
             using (var tx = this.StateManager.CreateTransaction())
             {
@@ -85,8 +85,7 @@ namespace TopicService
         /// Should be removed in next sprint.
         /// </summary>
         /// <param name="subcriberId"></param>
-        /// <returns></returns>
-        public async Task<IMessage> InternalPop(string subcriberId)
+        /// <returns></returns>public async Task<IMessage> InternalPop()
         {
             PubSubMessage msg = null;
             using (var tx = this.StateManager.CreateTransaction())

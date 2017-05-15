@@ -13,13 +13,13 @@ namespace PubSubDotnetSDK
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        Task Push(IMessage msg);
+        Task Push(PubSubMessage msg);
 
         /// <summary>
         /// Just for testing in sprint0
         /// </summary>
         /// <param name="subcriberId">Name the of caller subscriber service</param>
         /// <returns></returns>
-        Task<IMessage> InternalPop(string subcriberId);
+        Task<PubSubMessage> InternalPop();
     }
 }
