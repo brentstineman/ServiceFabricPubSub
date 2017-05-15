@@ -44,6 +44,10 @@ namespace RequestRouterService.Controllers
 
         private async Task<bool> AuthenticateRequest()
         {
+            return true;
+
+            // TODO: Put some of this back when we have a better idea of the service.
+            /*
             bool isAuthenticated = false;
 
             // TODO: Call the real service.
@@ -56,6 +60,7 @@ namespace RequestRouterService.Controllers
             }
 
             return isAuthenticated;
+            */
         }
 
         // GET api/tenantId/topicName
