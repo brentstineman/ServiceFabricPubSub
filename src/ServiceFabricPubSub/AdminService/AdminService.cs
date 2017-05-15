@@ -15,6 +15,9 @@ namespace AdminService
     /// </summary>
     internal sealed class AdminService : StatefulService
     {
+        private const string KEY1 = "key1";
+        private const string KEY2 = "key2";
+
         public AdminService(StatefulServiceContext context)
             : base(context)
         { }
@@ -38,31 +41,62 @@ namespace AdminService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            // TODO: Replace the following sample code with your own logic 
-            //       or remove this RunAsync override if it's not needed in your service.
+            // Generate keys only once
+            // have to check first to see if it's already been initialized
+            // because RunAsync will run multiple times throughout a service's lifetime 
+            await GenerateServiceKeys();
+        }
 
-            var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
+        public async Task<string> GetKey1()
+        {
+            return await GetKey(KEY1);
+        }
 
-            while (true)
+        public async Task<string> GetKey2()
+        {
+            return await GetKey(KEY2);
+        }
+
+        private async Task<string> GetKey(string keyName)
+        {
+            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>("keys");
+
+            using (var tx = this.StateManager.CreateTransaction())
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                using (var tx = this.StateManager.CreateTransaction())
+                var key = await topics.TryGetValueAsync(tx, keyName);
+                if (key.HasValue)
                 {
-                    var result = await myDictionary.TryGetValueAsync(tx, "Counter");
-
-                    ServiceEventSource.Current.ServiceMessage(this.Context, "Current Counter Value: {0}",
-                        result.HasValue ? result.Value.ToString() : "Value does not exist.");
-
-                    await myDictionary.AddOrUpdateAsync(tx, "Counter", 0, (key, value) => ++value);
-
-                    // If an exception is thrown before calling CommitAsync, the transaction aborts, all changes are 
-                    // discarded, and nothing is saved to the secondary replicas.
-                    await tx.CommitAsync();
+                    return key.Value;
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                throw new Exception("No Key initialized.");
             }
+        }
+
+        private async Task GenerateServiceKeys()
+        {
+            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>("keys");
+
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                var key1 = await topics.TryGetValueAsync(tx, KEY1);
+
+                var notInitialized = !(key1.HasValue || string.IsNullOrWhiteSpace(key1.Value));
+                if (notInitialized)
+                {
+                    //TODO generator a valid security key. using basic placeholder for now
+                    await topics.TryAddAsync(tx, KEY1, Guid.NewGuid().ToString());
+                }
+
+                var key2 = await topics.TryGetValueAsync(tx, KEY2);
+
+                var notInitialized2 = !(key2.HasValue || string.IsNullOrWhiteSpace(key2.Value));
+                if (notInitialized2)
+                {
+                    //TODO generator a valid security key. using basic placeholder for now
+                    await topics.TryAddAsync(tx, KEY2, Guid.NewGuid().ToString());
+                }
+            } 
         }
     }
 }
