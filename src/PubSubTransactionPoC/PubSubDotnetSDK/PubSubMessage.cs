@@ -8,7 +8,11 @@ namespace PubSubDotnetSDK
     [DataContract]
     public class PubSubMessage
     {
-        [DataMember]
+        public PubSubMessage()
+        {
+            this.Message = null;
+        }
+
         public string Message { get; set; }
     }
 }

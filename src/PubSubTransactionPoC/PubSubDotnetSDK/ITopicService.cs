@@ -18,6 +18,7 @@ namespace PubSubDotnetSDK
         /// <summary>
         /// Just for testing in sprint0
         /// </summary>
+        /// <param name="subcriberId">Name the of caller subscriber service</param>
         /// <returns></returns>
         Task<PubSubMessage> InternalPop();
     }
