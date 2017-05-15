@@ -26,19 +26,17 @@ namespace TestWebApi.Controllers
         [HttpGet]
         public async Task<PubSubMessage> Pop()
         {
-            //string name =
-            //    FabricRuntime.GetActivationContext()
-            //        .GetConfigurationPackageObject("Config")
-            //        .Settings
-            //        .Sections["WebApiConfigSection"]
-            //        .Parameters["SubscriberName"]
-            //        .Value;
+            string name =
+                FabricRuntime.GetActivationContext()
+                    .GetConfigurationPackageObject("Config")
+                    .Settings
+                    .Sections["WebApiConfigSection"]
+                    .Parameters["SubscriberName"]
+                    .Value;
 
-            //var stockSvc = ServiceProxy.Create<ISubscriberService>(new Uri("fabric:/PubSubTransactionPoC/" + name),
-            //   new ServicePartitionKey(0));
-
-            var stockSvc = ServiceProxy.Create<ISubscriberService>(new Uri("fabric:/PubSubTransactionPoC/Subscriber1"),
+            var stockSvc = ServiceProxy.Create<ISubscriberService>(new Uri("fabric:/PubSubTransactionPoC/" + name),
                new ServicePartitionKey(0));
+            
             var msg = await stockSvc.Pop();
 
             return msg;
