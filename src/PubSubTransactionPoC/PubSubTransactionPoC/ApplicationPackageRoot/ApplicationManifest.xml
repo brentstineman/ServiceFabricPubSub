@@ -14,13 +14,24 @@
     <Parameter Name="Topic1_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="Topic1_PartitionCount" DefaultValue="1" />
     <Parameter Name="Topic1_TargetReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="SubscriberName" DefaultValue="Subscriber1" />
+    <Parameter Name="TopicName" DefaultValue="Topic1" />
   </Parameters>
   <!-- Import the ServiceManifest from the ServicePackage. The ServiceManifestName and ServiceManifestVersion 
        should match the Name and Version attributes of the ServiceManifest element defined in the 
        ServiceManifest.xml file. -->
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="TestWebApiPkg" ServiceManifestVersion="1.0.0" />
-    <ConfigOverrides />
+    <ConfigOverrides>
+      <ConfigOverride Name="Config">
+        <Settings>
+          <Section Name="WebApiConfigSection">
+            <Parameter Name="SubscriberName" Value="[SubscriberName]" />
+            <Parameter Name="TopicName" Value="[TopicName]" />
+          </Section>
+        </Settings>
+      </ConfigOverride>
+    </ConfigOverrides>
   </ServiceManifestImport>
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="SubscriberServicePkg" ServiceManifestVersion="1.0.0" />
