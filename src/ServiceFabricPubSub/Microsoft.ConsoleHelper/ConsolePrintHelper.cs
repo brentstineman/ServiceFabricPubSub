@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.ConsoleHelper
 {
-    public static class PrintHelper
+    public static class ConsolePrintHelper
     {
         public static void PrintCommands(Groups group)
         {
@@ -24,8 +24,15 @@ namespace Microsoft.ConsoleHelper
                 Console.WriteLine("Select command group:");
                 commands = group.TopLevelCommands;
             }
-            Console.WriteLine("=================================================================");
+            PrintSeparationLine(30, '-');
             PrintCommandsImpl(commands);
+        }
+
+        public static void PrintSeparationLine(int length, char c = '=') {
+            StringBuilder sb = new StringBuilder(length);
+            for (int i = 0; i < length; i++)
+                sb.Append(c);
+            Console.WriteLine(sb.ToString());
         }
 
         public static void PrintCommands(Commands commands)

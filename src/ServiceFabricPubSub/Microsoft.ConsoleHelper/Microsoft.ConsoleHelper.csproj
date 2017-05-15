@@ -41,10 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncPump.cs" />
+    <Compile Include="CommandFailedException.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="Execution.cs" />
     <Compile Include="Groups.cs" />
-    <Compile Include="PrintHelper.cs" />
+    <Compile Include="ConsolePrintHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserInput.cs" />
   </ItemGroup>

@@ -10,17 +10,19 @@ namespace ClientApp
 {
     class Program
     {
-        static Groups groups = new Groups();
-        static Commands flatCommands = new Commands();
-        static bool flatDisplay = false;
-        static UserInput userInput = null;
+        private static Groups _groups = new Groups();
+        private static Commands _flatCommands = new Commands();
+        private static UserInput _userInput = null;
+
+        #region Properties
+        public static bool FlatDisplay { get; set; }
+        #endregion
 
         [STAThread]
         static void Main(string[] args)
         {
-
             SetupCommands();
-            userInput = new UserInput();
+            _userInput = new UserInput();
 
             AsyncPump.Run(async delegate
             {
@@ -31,42 +33,81 @@ namespace ClientApp
                 }
             });
             Console.WriteLine("Enter any key to terminate: ");
-            Console.ReadKey(true);
         }
 
+        static void PrintBanner()
+        {
+            ConsolePrintHelper.PrintSeparationLine(40);
+            Console.WriteLine("Publish/Subscriber Service Fabric Client");
+            ConsolePrintHelper.PrintSeparationLine(40);
+        }
+
+        /// <summary>
+        /// Creates the commands and the groups 
+        /// </summary>
         static void SetupCommands()
         {
-            var commands = new Commands();
-            commands.RegisterCommand("Test", PubSubCommands.HelloCmd);
-            groups.AddGroup("Test groups", commands);
+            var tenantsCmds = new Commands();
+            tenantsCmds.RegisterCommand("Register new", PubSubCommands.TenantRegisterNew);
+            tenantsCmds.RegisterCommand("Security Key reset", PubSubCommands.TenantSecurityKeyReset);
+            tenantsCmds.RegisterCommand("Add a Topic", PubSubCommands.TenantRegisterNew);
+            tenantsCmds.RegisterCommand("Delete a Topic", PubSubCommands.TenantRegisterNew);
+            tenantsCmds.RegisterCommand("List Topics", PubSubCommands.TenantRegisterNew);
+            _groups.AddGroup("Tenant", tenantsCmds);
 
-            flatCommands = groups.ToFlatCommands();
+            var topicCmds = new Commands();
+            topicCmds.RegisterCommand("Put message", PubSubCommands.TopicPutMessage);
+            topicCmds.RegisterCommand("Add subscriber", PubSubCommands.TenantRegisterNew);
+            topicCmds.RegisterCommand("Delete subscriber", PubSubCommands.TenantRegisterNew);
+            topicCmds.RegisterCommand("List subscriber", PubSubCommands.TenantRegisterNew);
+            _groups.AddGroup("Topic", topicCmds);
+
+            var subscriberCmds = new Commands();
+            subscriberCmds.RegisterCommand("Get message", PubSubCommands.TenantRegisterNew);
+            subscriberCmds.RegisterCommand("Get subscriber queue depth", PubSubCommands.TenantRegisterNew);
+            subscriberCmds.RegisterCommand("Delete all queue messages", PubSubCommands.TenantRegisterNew);
+            _groups.AddGroup("Subscriber", subscriberCmds);
+
+            var settingsCmds = new Commands();
+            settingsCmds.RegisterCommand("Toggle display mode", GenericCommands.ToggleFlatDisplayCmd);
+            _groups.AddGroup("Settings", settingsCmds);
+
+            _flatCommands = _groups.ToFlatCommands();
         }
 
+        /// <summary>
+        /// Main entry point for the input and command validation
+        /// </summary>
         static async Task<bool> Run()
         {
+            Console.Clear();
             Console.ResetColor();
+            PrintBanner();
+
             try
             {
-                if (!flatDisplay)
-                    PrintHelper.PrintCommands(groups);
+                if (!FlatDisplay)
+                    ConsolePrintHelper.PrintCommands(_groups);
                 else
-                    PrintHelper.PrintCommands(flatCommands);
+                    ConsolePrintHelper.PrintCommands(_flatCommands);
 
                 int? numericCommand;
                 bool switchGroup;
-                userInput.GetUserCommandSelection(out switchGroup, out numericCommand);
+                _userInput.GetUserCommandSelection(out switchGroup, out numericCommand);
                 if (numericCommand.HasValue)
                 {
+                    //select and execute the right command
+
                     int index = numericCommand.Value - 1;
                     Func<Task> operation = null;
                     if (index >= 0)
                     {
-                        operation = flatDisplay ? flatCommands.GetCommand(index) : groups.GetCommand(switchGroup, index);
+                        operation = FlatDisplay ? _flatCommands.GetCommand(index) : _groups.GetCommand(switchGroup, index);
                     }
 
                     if (operation != null)
                     {
+                        ConsolePrintHelper.PrintSeparationLine(80, '-');
                         await operation();
                     }
                     else
@@ -77,11 +118,23 @@ namespace ClientApp
                 else
                     Console.WriteLine("Missing command");
             }
+            catch (CommandFailedException commandFailed)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"The command failed: {commandFailed.Message}");
+                if(commandFailed.InnerException != null)
+                    Console.WriteLine("Inner: ", commandFailed.InnerException.Message);
+                Console.ReadKey();
+            }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Ooops, something wrong: {0}", ex.Message);
-                Console.WriteLine();
+                Console.ReadKey();
+            }
+            finally
+            {
+                
             }
 
             return true;

@@ -21,7 +21,7 @@ namespace Microsoft.ConsoleHelper
 
             if (available)
             {
-                PrintHelper.WriteColoredValue(desc, param.Value.ToString(), ConsoleColor.Magenta, forceReEnter ? ". Re-Enter same, or new int value:" : ". Press enter to use, or give new int value:");
+                ConsolePrintHelper.WriteColoredValue(desc, param.Value.ToString(), ConsoleColor.Magenta, forceReEnter ? ". Re-Enter same, or new int value:" : ". Press enter to use, or give new int value:");
             }
             else
             {
@@ -52,14 +52,14 @@ namespace Microsoft.ConsoleHelper
 
             if (available)
             {
-                PrintHelper.WriteColoredValue(desc, param, ConsoleColor.Magenta, forceReEnter ? ". Re-Enter same, or new value:" : ". Press enter to use, or give new value:");
+                ConsolePrintHelper.WriteColoredValue(desc, param, ConsoleColor.Magenta, forceReEnter ? ". Re-Enter same, or new value:" : ". Press enter to use, or give new value:");
             }
             else
             {
                 Console.Write(desc + " is required. Enter value:");
             }
 
-            var entered = isPassword ? PrintHelper.ReadPassword() : Console.ReadLine();
+            var entered = isPassword ? ConsolePrintHelper.ReadPassword() : Console.ReadLine();
 
             if (!string.IsNullOrWhiteSpace(entered))
             {
@@ -71,7 +71,7 @@ namespace Microsoft.ConsoleHelper
 
         public virtual string EnterOptionalParam(string desc, string skipResultDescription)
         {
-            PrintHelper.WriteColoredValue(desc + " (optional). Enter value (or press Enter to ", skipResultDescription, ConsoleColor.Magenta, "):");
+            ConsolePrintHelper.WriteColoredValue(desc + " (optional). Enter value (or press Enter to ", skipResultDescription, ConsoleColor.Magenta, "):");
 
             var entered = Console.ReadLine();
             Console.WriteLine();
@@ -91,11 +91,11 @@ namespace Microsoft.ConsoleHelper
 
             if (!string.IsNullOrWhiteSpace(param))
             {
-                PrintHelper.WriteColoredValue(desc, param, ConsoleColor.Magenta, ". Enter 'Y': to Reset, 'A': to assign, Q: to Quit, Any another key to skip:");
+                ConsolePrintHelper.WriteColoredValue(desc, param, ConsoleColor.Magenta, ". Enter 'Y': to Reset, 'A': to assign, Q: to Quit, Any another key to skip:");
             }
             else
             {
-                PrintHelper.WriteColoredValue(desc, param, ConsoleColor.Magenta, ". Enter 'A': to assign, Q: to Quit, Any another key to skip:");
+                ConsolePrintHelper.WriteColoredValue(desc, param, ConsoleColor.Magenta, ". Enter 'A': to assign, Q: to Quit, Any another key to skip:");
             }
             var ch = Char.ToUpper(Console.ReadKey().KeyChar);
             Console.WriteLine();
