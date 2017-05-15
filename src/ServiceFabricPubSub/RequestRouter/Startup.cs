@@ -1,7 +1,7 @@
 ﻿using System.Web.Http;
 using Owin;
 
-namespace RequestRouter
+namespace RequestRouterService
 {
     public static class Startup
     {
@@ -14,8 +14,8 @@ namespace RequestRouter
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
+                routeTemplate: "api/{controller}/{tenantId}/{topicName}",
+                defaults: new { tenantId = RouteParameter.Optional, topicName = RouteParameter.Optional }
             );
 
             appBuilder.UseWebApi(config);

@@ -21,10 +21,10 @@ namespace RequestRouter
                 // When Service Fabric creates an instance of this service type,
                 // an instance of the class is created in this host process.
 
-                ServiceRuntime.RegisterServiceAsync("RequestRouterType",
-                    context => new RequestRouter(context)).GetAwaiter().GetResult();
+                ServiceRuntime.RegisterServiceAsync("RequestRouterServiceType",
+                    context => new RequestRouterService(context)).GetAwaiter().GetResult();
 
-                ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(RequestRouter).Name);
+                ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(RequestRouterService).Name);
 
                 // Prevents this host process from terminating so services keeps running. 
                 Thread.Sleep(Timeout.Infinite);

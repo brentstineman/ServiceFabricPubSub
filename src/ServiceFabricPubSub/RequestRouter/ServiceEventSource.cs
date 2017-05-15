@@ -9,7 +9,7 @@ using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace RequestRouter
 {
-    [EventSource(Name = "MyCompany-FrontEnd-RequestRouter")]
+    [EventSource(Name = "MyCompany-FrontEnd-RequestRouterService")]
     internal sealed class ServiceEventSource : EventSource
     {
         public static readonly ServiceEventSource Current = new ServiceEventSource();
