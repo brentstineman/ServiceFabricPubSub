@@ -39,7 +39,7 @@ namespace TopicService
         }
 
         
-        IReliableQueue<PubSubMessage> mainQueue = null;
+        
 
         /// <summary>
         /// This is the main entry point for your service replica.
@@ -48,7 +48,7 @@ namespace TopicService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            mainQueue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("mainQueue");
+            var mainQueue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("mainQueue");
 
             int count = 1;
             while (true)
@@ -56,12 +56,7 @@ namespace TopicService
                 cancellationToken.ThrowIfCancellationRequested();
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
 
-                // HACK : add message every second for test
-                using (var tx = this.StateManager.CreateTransaction())
-                {
-                    await mainQueue.EnqueueAsync(tx, new PubSubMessage() { Message=$"TEST  Message #{count++} : {DateTime.Now}"});
-                    await tx.CommitAsync();
-                }
+                await Push(new PubSubMessage() { Message = $"TEST  Message #{count++} : {DateTime.Now}" }); // HACK FOR TEST
             }
         }
 
@@ -72,9 +67,17 @@ namespace TopicService
         /// <returns></returns>
         public async Task Push(PubSubMessage msg)
         {
+            //var mainQueue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("mainQueue");
+            var q1= await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>($"queue_Subscriber1");
+            var q2 = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>($"queue_Subscriber2");
+            var q3 = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>($"queue_Subscriber3");
+
             using (var tx = this.StateManager.CreateTransaction())
             {
-                await mainQueue.EnqueueAsync(tx, (PubSubMessage)msg);
+                //await mainQueue.EnqueueAsync(tx, (PubSubMessage)msg);
+                await q1.EnqueueAsync(tx, msg);
+                await q2.EnqueueAsync(tx, msg);
+                await q3.EnqueueAsync(tx, msg);
                 await tx.CommitAsync();
                 ServiceEventSource.Current.ServiceMessage(this.Context, $"ENQUEUE: {msg.Message}");
             }
@@ -88,10 +91,12 @@ namespace TopicService
         /// <returns></returns>
         public async Task<PubSubMessage> InternalPop(string subscriberId)
         {
+            var q = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>($"queue_{subscriberId}");
+
             PubSubMessage msg = null;
             using (var tx = this.StateManager.CreateTransaction())
             {
-                var msgCV= await mainQueue.TryDequeueAsync(tx);
+                var msgCV= await q.TryDequeueAsync(tx);
                 if (msgCV.HasValue)
                     msg = msgCV.Value;
                 await tx.CommitAsync();

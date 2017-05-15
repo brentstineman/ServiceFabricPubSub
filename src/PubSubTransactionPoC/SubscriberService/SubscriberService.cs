@@ -62,8 +62,8 @@ namespace SubscriberService
             // TODO : replace appname & service name by value comming from configuration
             var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/Topic1"),
                 new ServicePartitionKey(0));
-
-            var msg = await topicSvc.InternalPop("Subcriber1");
+            
+            var msg = await topicSvc.InternalPop(this.Context.ServiceName.Segments[2]);
             ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW SUBSCRIBER MESSAGE  POP : {msg}");
             return msg;
         }
