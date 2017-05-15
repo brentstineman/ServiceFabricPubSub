@@ -6,15 +6,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
+using RequestRouterService;
 
 namespace RequestRouter
 {
     /// <summary>
     /// The FabricRuntime creates an instance of this class for each service type instance. 
     /// </summary>
-    internal sealed class RequestRouter : StatelessService
+    internal sealed class RequestRouterService : StatelessService
     {
-        public RequestRouter(StatelessServiceContext context)
+        public RequestRouterService(StatelessServiceContext context)
             : base(context)
         { }
 

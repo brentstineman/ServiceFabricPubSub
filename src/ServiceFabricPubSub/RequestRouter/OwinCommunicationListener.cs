@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Fabric;
 using System.Globalization;
 using System.Threading;
@@ -7,8 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.Owin.Hosting;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Owin;
+using RequestRouter;
 
-namespace RequestRouter
+namespace RequestRouterService
 {
     internal class OwinCommunicationListener : ICommunicationListener
     {
