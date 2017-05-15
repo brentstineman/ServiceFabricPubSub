@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientApp", "ClientApp.csproj", "{DB14FBB1-A374-49AE-9057-87B0AD159324}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientApp", "ClientApp\ClientApp.csproj", "{DB14FBB1-A374-49AE-9057-87B0AD159324}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConsoleHelper", "..\Microsoft.ConsoleHelper\Microsoft.ConsoleHelper.csproj", "{2BEBA84B-4404-4858-A056-EE42FC43E84C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConsoleHelper", "Microsoft.ConsoleHelper\Microsoft.ConsoleHelper.csproj", "{2BEBA84B-4404-4858-A056-EE42FC43E84C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
