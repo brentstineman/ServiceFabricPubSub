@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "ServiceFabricPubSub", "TenantApplication\ServiceFabricPubSub.sfproj", "{91AFE73D-666D-4F6F-8852-F784BA2B972F}"
+Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "TenantApplication", "TenantApplication\TenantApplication.sfproj", "{91AFE73D-666D-4F6F-8852-F784BA2B972F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopicService", "TopicService\TopicService.csproj", "{5FFB8E3D-7FF9-43D5-AD1C-F30805122488}"
 EndProject
