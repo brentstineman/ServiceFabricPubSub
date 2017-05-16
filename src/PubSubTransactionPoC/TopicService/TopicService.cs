@@ -56,8 +56,8 @@ namespace TopicService
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
-                await Push(new PubSubMessage() { Message = $"TEST  Message #{count++} : {DateTime.Now}" }); // HACK FOR TEST                
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
+                await Push(new PubSubMessage() { Message = $"TEST  Message #{count++} : {DateTime.Now}" }).ConfigureAwait(false); // HACK FOR TEST
             }
         }
 
@@ -118,14 +118,14 @@ namespace TopicService
         {
             var queueName = $"queue_{subscriberId}";
 
-            var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList");
+            var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList").ConfigureAwait(false);
             using (var tx = this.StateManager.CreateTransaction())
             {
-                if (!await lst.ContainsKeyAsync(tx, queueName))
+                if (!await lst.ContainsKeyAsync(tx, queueName).ConfigureAwait(false))
                 {
                     await lst.AddAsync(tx, queueName, true);
                 }
-                await tx.CommitAsync();
+                await tx.CommitAsync().ConfigureAwait(false);
             }
 
         }
@@ -138,6 +138,7 @@ namespace TopicService
         /// <returns></returns>
         public async Task Push(PubSubMessage msg)
         {
+            var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList").ConfigureAwait(false);
             var inputQueue = await this.StateManager.GetOrAddAsync<IReliableConcurrentQueue<PubSubMessage>>("inputQueue");
             using (var tx = this.StateManager.CreateTransaction())
             {
@@ -157,23 +158,23 @@ namespace TopicService
         public async Task<PubSubMessage> InternalPop(string subscriberId)
         {
             var queueName = $"queue_{subscriberId}";
-            var q = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>(queueName);
+            var q = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>(queueName).ConfigureAwait(false);
 
-            var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList");
+            var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList").ConfigureAwait(false);
 
 
             PubSubMessage msg = null;
             using (var tx = this.StateManager.CreateTransaction())
             {
-                if (!await lst.ContainsKeyAsync(tx,queueName))
+                if (!await lst.ContainsKeyAsync(tx,queueName).ConfigureAwait(false))
                 {
-                    await lst.AddAsync(tx, queueName,true);
+                    await lst.AddAsync(tx, queueName,true).ConfigureAwait(false);
                 }
 
-                var msgCV= await q.TryDequeueAsync(tx);
+                var msgCV= await q.TryDequeueAsync(tx).ConfigureAwait(false);
                 if (msgCV.HasValue)
                     msg = msgCV.Value;
-                await tx.CommitAsync();
+                await tx.CommitAsync().ConfigureAwait(false);
             }
             ServiceEventSource.Current.ServiceMessage(this.Context, $"DEQUEUE FOR {subscriberId} : {msg?.Message}");
             return msg;

@@ -47,16 +47,16 @@ namespace SubscriberService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false); // DELAY HACK TO AVOID STRANGER ERROR IF TOO QUICK STARTUP
             var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/Topic1"),
                  new ServicePartitionKey(0));
-            await topicSvc.RegisterSubscriber(this.Context.ServiceName.Segments[2]);
+            await topicSvc.RegisterSubscriber(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
 
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -65,8 +65,8 @@ namespace SubscriberService
             // TODO : replace appname & service name by value comming from configuration
             var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/Topic1"),
                 new ServicePartitionKey(0));
-            
-            var msg = await topicSvc.InternalPop(this.Context.ServiceName.Segments[2]);
+           
+            var msg = await topicSvc.InternalPop(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
             ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW SUBSCRIBER MESSAGE  POP : {msg}");
             return msg;
         }
