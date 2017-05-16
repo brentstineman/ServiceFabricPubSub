@@ -91,20 +91,20 @@ namespace TopicService
                 // enq 1 message
                 while (inputQueue.Count > 0)
                 {
-                    var msg = await inputQueue.TryDequeueAsync(tx);
+                    var msg = await inputQueue.TryDequeueAsync(tx).ConfigureAwait(false);
                     if (!msg.HasValue) return;
-                    IAsyncEnumerable<KeyValuePair<string, bool>> asyncEnumerable = await lst.CreateEnumerableAsync(tx);
+                    IAsyncEnumerable<KeyValuePair<string, bool>> asyncEnumerable = await lst.CreateEnumerableAsync(tx).ConfigureAwait(false);
                     using (IAsyncEnumerator<KeyValuePair<string, bool>> asyncEnumerator = asyncEnumerable.GetAsyncEnumerator())
                     {
-                        while (await asyncEnumerator.MoveNextAsync(CancellationToken.None))
+                        while (await asyncEnumerator.MoveNextAsync(CancellationToken.None).ConfigureAwait(false))
                         {
                             var queue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>(asyncEnumerator.Current.Key);
-                            await queue.EnqueueAsync(tx, msg.Value);
+                            await queue.EnqueueAsync(tx, msg.Value).ConfigureAwait(false);
                         }
+                        ServiceEventSource.Current.ServiceMessage(this.Context, $"ENQUEUE: {msg.Value.Message} into {asyncEnumerator.Current.Key}");
                     }
-                    ServiceEventSource.Current.ServiceMessage(this.Context, $"ENQUEUE: {msg.Value.Message}");
                 }                
-                await tx.CommitAsync();
+                await tx.CommitAsync().ConfigureAwait(false);
                 
             }
         }
@@ -123,7 +123,7 @@ namespace TopicService
             {
                 if (!await lst.ContainsKeyAsync(tx, queueName).ConfigureAwait(false))
                 {
-                    await lst.AddAsync(tx, queueName, true);
+                    await lst.AddAsync(tx, queueName, true).ConfigureAwait(false);
                 }
                 await tx.CommitAsync().ConfigureAwait(false);
             }
