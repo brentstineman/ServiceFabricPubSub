@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Fabric.Description;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -39,7 +40,10 @@ namespace Administration.Controllers
         public async Task<string> Get(string TenantName, string AppVersion)
         {
 
-            if(!isValidTenantName(TenantName)) return "500 - Invalid TenantName.";
+            if(!isValidTenantName(TenantName))
+                //return "500 - Invalid TenantName.";
+                throw new HttpResponseException(HttpStatusCode.NotAcceptable);
+
 
             string ApplicationType = "TenantApplicationType";
 
