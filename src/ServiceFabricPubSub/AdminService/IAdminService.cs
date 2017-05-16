@@ -9,8 +9,9 @@ namespace AdminService
     {
         Task<string> GetKey1();
         Task<string> GetKey2();
+        Task RegenerateKey1();
+        Task RegenerateKey2();
         Task CreateNewTopic(string topicName);
         Task DeleteTopic(string topicName);
-        Task RegenerateKeys();
     }
 }

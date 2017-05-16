@@ -21,6 +21,8 @@ namespace AdminService
         private const string KEY1 = "key1";
         private const string KEY2 = "key2";
         private const string COLLECTION_KEYS = "keys";
+        private const string TOPIC_SERVICE_NAME = "TopicServiceType";
+
         private readonly FabricClient fabric;
         private readonly string applicationName;
 
@@ -70,6 +72,16 @@ namespace AdminService
         {
             return await GetKey(KEY2);
         }
+        
+        public Task RegenerateKey1()
+        {
+            return RegenerateKey(KEY1);
+        }
+
+        public  Task RegenerateKey2()
+        {
+            return RegenerateKey(KEY2);
+        }
 
         public Task CreateNewTopic(string topicName)
         {
@@ -87,12 +99,11 @@ namespace AdminService
                     PartitionCount = 1
                 },
                 HasPersistedState = true,
-                //InitializationData = Encoding.UTF8.GetBytes(parameters),
-                ServiceTypeName = "TopicServiceType",
+                ServiceTypeName = TOPIC_SERVICE_NAME,
                 ServiceName = CreateTopicUri(topicName)
             };
 
-            return fabric.ServiceManager.CreateServiceAsync(serviceDescription);         
+            return fabric.ServiceManager.CreateServiceAsync(serviceDescription);
         }
 
         public Task DeleteTopic(string topicName)
@@ -104,9 +115,21 @@ namespace AdminService
             return fabric.ServiceManager.DeleteServiceAsync(description);
         }
 
+        private async Task RegenerateKey(string keyName)
+        {
+            var topics = await GetTopicDictionary();
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                string newKey = GenerateNewKey();
+                await topics.SetAsync(tx, keyName, newKey);
+
+                await tx.CommitAsync();
+            }
+        }
+
         private async Task<string> GetKey(string keyName)
         {
-            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>(COLLECTION_KEYS);
+            var topics = await GetTopicDictionary();
 
             using (var tx = this.StateManager.CreateTransaction())
             {
@@ -122,7 +145,7 @@ namespace AdminService
 
         private async Task GenerateServiceKeys()
         {
-            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>(COLLECTION_KEYS);
+            var topics = await GetTopicDictionary();
 
             using (var tx = this.StateManager.CreateTransaction())
             {
@@ -131,8 +154,8 @@ namespace AdminService
                 var isKey1Initialized = key1.HasValue && !string.IsNullOrWhiteSpace(key1.Value);
                 if (!isKey1Initialized)
                 {
-                    //TODO generator a valid security key. using basic placeholder for now
-                    await topics.TryAddAsync(tx, KEY1, Guid.NewGuid().ToString());
+                    string newKey = GenerateNewKey();
+                    await topics.TryAddAsync(tx, KEY1, newKey);
                 }
 
                 var key2 = await topics.TryGetValueAsync(tx, KEY2);
@@ -140,12 +163,20 @@ namespace AdminService
                 var isKey2Initialized = key2.HasValue && !string.IsNullOrWhiteSpace(key2.Value);
                 if (!isKey2Initialized)
                 {
-                    //TODO generator a valid security key. using basic placeholder for now
-                    await topics.TryAddAsync(tx, KEY2, Guid.NewGuid().ToString());
+                    string newKey = GenerateNewKey();
+                    await topics.TryAddAsync(tx, KEY2, newKey);
                 }
 
                 await tx.CommitAsync();
             } 
+        }
+
+        private string GenerateNewKey()
+        {
+            // TODO generator a valid security key. using basic placeholder for now
+            // should also encrypt as the key is stored in plain text when stored in
+            // statefule service
+            return Guid.NewGuid().ToString();
         }
 
         private Uri CreateTopicUri(string topicName)
@@ -153,9 +184,9 @@ namespace AdminService
             return new Uri($"{this.applicationName}/topics/{topicName}");
         }
 
-        public Task RegenerateKeys()
+        private async Task<IReliableDictionary<string, string>> GetTopicDictionary()
         {
-            throw new NotImplementedException();
+            return await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>(COLLECTION_KEYS);
         }
     }
 }
