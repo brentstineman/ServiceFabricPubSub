@@ -1,5 +1,5 @@
 # Tenant Application
-Open TenantApplication.sln to develop and debug ServiceFabric project. This project consist from:
+Open ServiceFabricPubSub.sln to develop and debug ServiceFabric project. This project consist from:
 
 * PubSubDotnetSDK - library with basic interfaces for services and PubSubMessage object
 
