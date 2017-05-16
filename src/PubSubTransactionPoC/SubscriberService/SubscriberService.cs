@@ -47,8 +47,11 @@ namespace SubscriberService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            // TODO : Register the subscriber with Topic service (in order to create the output queue)
-            
+            await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+            var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/Topic1"),
+                 new ServicePartitionKey(0));
+            await topicSvc.RegisterSubscriber(this.Context.ServiceName.Segments[2]);
+
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();

@@ -22,7 +22,7 @@ namespace TopicService
             : base(context)
         { }
 
-      
+
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
@@ -34,13 +34,13 @@ namespace TopicService
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
             return new List<ServiceReplicaListener>()
-            {       
+            {
                 new ServiceReplicaListener( (context) => this.CreateServiceRemotingListener(context) )
             };
         }
 
-        
-        
+
+
 
         /// <summary>
         /// This is the main entry point for your service replica.
@@ -57,6 +57,28 @@ namespace TopicService
                 await Push(new PubSubMessage() { Message = $"TEST  Message #{count++} : {DateTime.Now}" }); // HACK FOR TEST
             }
         }
+
+        /// <summary>
+        /// Create a new outputqueue for a new subscriber instance
+        /// </summary>
+        /// <param name="subscriberId"></param>
+        /// <returns></returns>
+        public async Task RegisterSubscriber(string subscriberId)
+        {
+            var queueName = $"queue_{subscriberId}";
+
+            var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList");
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                if (!await lst.ContainsKeyAsync(tx, queueName))
+                {
+                    await lst.AddAsync(tx, queueName, true);
+                }
+                await tx.CommitAsync();
+            }
+
+        }
+
 
         /// <summary>
         /// Enqueue a new message in the topic

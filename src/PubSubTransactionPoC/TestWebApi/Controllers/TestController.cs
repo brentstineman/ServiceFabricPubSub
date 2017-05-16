@@ -33,9 +33,8 @@ namespace TestWebApi.Controllers
                     .Sections["WebApiConfigSection"]
                     .Parameters["SubscriberName"]
                     .Value;
-
-            var stockSvc = ServiceProxy.Create<ISubscriberService>(new Uri("fabric:/PubSubTransactionPoC/" + name),
-               new ServicePartitionKey(0));
+            var svcName = $"fabric:/PubSubTransactionPoC/{name}";
+            var stockSvc = ServiceProxy.Create<ISubscriberService>(new Uri(svcName),new ServicePartitionKey(0));
             
             var msg = await stockSvc.Pop();
 

@@ -15,6 +15,16 @@ namespace PubSubDotnetSDK
         /// <returns></returns>
         Task Push(PubSubMessage msg);
 
+
+        /// <summary>
+        /// Use to register a new (or restarted subscriber)
+        /// </summary>
+        /// <param name="subscriberId"></param>
+        /// <returns></returns>
+        Task RegisterSubscriber(string subscriberId);
+
+        
+
         /// <summary>
         /// Just for testing in sprint0
         /// </summary>
