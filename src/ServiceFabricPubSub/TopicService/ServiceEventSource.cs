@@ -9,7 +9,7 @@ using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace TopicService
 {
-    [EventSource(Name = "MyCompany-TenantApplication-TopicService")]
+    [EventSource(Name = "MyCompany-PubSubTransactionPoC-TopicService")]
     internal sealed class ServiceEventSource : EventSource
     {
         public static readonly ServiceEventSource Current = new ServiceEventSource();

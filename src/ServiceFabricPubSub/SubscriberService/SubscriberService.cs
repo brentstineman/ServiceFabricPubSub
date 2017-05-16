@@ -7,17 +7,23 @@ using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
+using PubSubDotnetSDK;
+using Microsoft.ServiceFabric.Services.Remoting.Runtime;
+using Microsoft.ServiceFabric.Services.Remoting.Client;
+using Microsoft.ServiceFabric.Services.Client;
 
 namespace SubscriberService
 {
     /// <summary>
     /// An instance of this class is created for each service replica by the Service Fabric runtime.
     /// </summary>
-    internal sealed class SubscriberService : StatefulService
+    internal sealed class SubscriberService : StatefulService, ISubscriberService
     {
         public SubscriberService(StatefulServiceContext context)
             : base(context)
         { }
+
+       
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
@@ -28,7 +34,10 @@ namespace SubscriberService
         /// <returns>A collection of listeners.</returns>
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return new ServiceReplicaListener[0];
+            return new List<ServiceReplicaListener>()
+            {
+                new ServiceReplicaListener( (context) => this.CreateServiceRemotingListener(context) )
+            };
         }
 
         /// <summary>
@@ -38,31 +47,28 @@ namespace SubscriberService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            // TODO: Replace the following sample code with your own logic 
-            //       or remove this RunAsync override if it's not needed in your service.
-
-            var myDictionary = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, long>>("myDictionary");
+            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false); // DELAY HACK TO AVOID STRANGER ERROR IF TOO QUICK STARTUP
+            var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/Topic1"),
+                 new ServicePartitionKey(0));
+            await topicSvc.RegisterSubscriber(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
 
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-
-                using (var tx = this.StateManager.CreateTransaction())
-                {
-                    var result = await myDictionary.TryGetValueAsync(tx, "Counter");
-
-                    ServiceEventSource.Current.ServiceMessage(this.Context, "Current Counter Value: {0}",
-                        result.HasValue ? result.Value.ToString() : "Value does not exist.");
-
-                    await myDictionary.AddOrUpdateAsync(tx, "Counter", 0, (key, value) => ++value);
-
-                    // If an exception is thrown before calling CommitAsync, the transaction aborts, all changes are 
-                    // discarded, and nothing is saved to the secondary replicas.
-                    await tx.CommitAsync();
-                }
-
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
             }
+        }
+
+        public async Task<PubSubMessage> Pop()
+        {
+            // TODO : replace appname & service name by value comming from configuration
+            var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/Topic1"),
+                new ServicePartitionKey(0));
+           
+            var msg = await topicSvc.InternalPop(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
+            ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW SUBSCRIBER MESSAGE  POP : {msg}");
+            return msg;
         }
     }
 }
