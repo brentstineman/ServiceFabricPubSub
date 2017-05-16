@@ -7,13 +7,15 @@ using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
+using Microsoft.ServiceFabric.Services.Remoting.Runtime;
+
 
 namespace AdminService
 {
     /// <summary>
     /// An instance of this class is created for each service replica by the Service Fabric runtime.
     /// </summary>
-    internal sealed class AdminService : StatefulService
+    internal sealed class AdminService : StatefulService, IAdminService
     {
         private const string KEY1 = "key1";
         private const string KEY2 = "key2";
@@ -32,7 +34,12 @@ namespace AdminService
         /// <returns>A collection of listeners.</returns>
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return new ServiceReplicaListener[0];
+            return new List<ServiceReplicaListener>()
+            {
+                new ServiceReplicaListener(
+                    (context) =>
+                        this.CreateServiceRemotingListener(context))
+            };
         }
 
         /// <summary>
@@ -52,7 +59,7 @@ namespace AdminService
         {
             return await GetKey(KEY1);
         }
-
+            
         public async Task<string> GetKey2()
         {
             return await GetKey(KEY2);
@@ -60,7 +67,7 @@ namespace AdminService
 
         private async Task<string> GetKey(string keyName)
         {
-            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>(AdminService.AdminService.V);
+            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>(COLLECTION_KEYS);
 
             using (var tx = this.StateManager.CreateTransaction())
             {
@@ -76,14 +83,14 @@ namespace AdminService
 
         private async Task GenerateServiceKeys()
         {
-            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>(AdminService.AdminService.V);
+            var topics = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, string>>(COLLECTION_KEYS);
 
             using (var tx = this.StateManager.CreateTransaction())
             {
                 var key1 = await topics.TryGetValueAsync(tx, KEY1);
 
-                var notInitialized = !(key1.HasValue || string.IsNullOrWhiteSpace(key1.Value));
-                if (notInitialized)
+                var isKey1Initialized = key1.HasValue && !string.IsNullOrWhiteSpace(key1.Value);
+                if (!isKey1Initialized)
                 {
                     //TODO generator a valid security key. using basic placeholder for now
                     await topics.TryAddAsync(tx, KEY1, Guid.NewGuid().ToString());
@@ -91,12 +98,14 @@ namespace AdminService
 
                 var key2 = await topics.TryGetValueAsync(tx, KEY2);
 
-                var notInitialized2 = !(key2.HasValue || string.IsNullOrWhiteSpace(key2.Value));
-                if (notInitialized2)
+                var isKey2Initialized = key2.HasValue && !string.IsNullOrWhiteSpace(key2.Value);
+                if (!isKey2Initialized)
                 {
                     //TODO generator a valid security key. using basic placeholder for now
                     await topics.TryAddAsync(tx, KEY2, Guid.NewGuid().ToString());
                 }
+
+                await tx.CommitAsync();
             } 
         }
     }

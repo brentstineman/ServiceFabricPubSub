@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.4
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "FrontEnd", "FrontEnd\FrontEnd.sfproj", "{7D5A98FF-ED77-468D-9687-3C843F4867BD}"
 EndProject
@@ -24,6 +24,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Client App", "Test Client App", "{E6E372A8-51E0-4684-B48B-AB5F3C071198}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientApp", "ClientApp\ClientApp\ClientApp.csproj", "{DB14FBB1-A374-49AE-9057-87B0AD159324}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{ABDE009C-7837-4B1D-BE58-AED5E7E64FD9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminServiceTestClient", "AdminServiceTestClient\AdminServiceTestClient.csproj", "{B37E5750-732E-45D1-ADBF-0B172DC28344}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.ConsoleHelper", "ClientApp\Microsoft.ConsoleHelper\Microsoft.ConsoleHelper.csproj", "{2BEBA84B-4404-4858-A056-EE42FC43E84C}"
 EndProject
@@ -97,6 +101,15 @@ Global
 		{2BEBA84B-4404-4858-A056-EE42FC43E84C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2BEBA84B-4404-4858-A056-EE42FC43E84C}.Release|x64.ActiveCfg = Release|Any CPU
 		{2BEBA84B-4404-4858-A056-EE42FC43E84C}.Release|x64.Build.0 = Release|Any CPU
+		{B37E5750-732E-45D1-ADBF-0B172DC28344}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B37E5750-732E-45D1-ADBF-0B172DC28344}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B37E5750-732E-45D1-ADBF-0B172DC28344}.Debug|x64.ActiveCfg = Debug|x64
+		{B37E5750-732E-45D1-ADBF-0B172DC28344}.Debug|x64.Build.0 = Debug|x64
+		{B37E5750-732E-45D1-ADBF-0B172DC28344}.Debug|x64.Deploy.0 = Debug|x64
+		{B37E5750-732E-45D1-ADBF-0B172DC28344}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B37E5750-732E-45D1-ADBF-0B172DC28344}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B37E5750-732E-45D1-ADBF-0B172DC28344}.Release|x64.ActiveCfg = Release|Any CPU
+		{B37E5750-732E-45D1-ADBF-0B172DC28344}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -111,5 +124,7 @@ Global
 		{86CAD58C-FBFA-403A-93FF-02EF3AEEF261} = {07CC9061-3035-4667-A3CC-94529F7A18FE}
 		{DB14FBB1-A374-49AE-9057-87B0AD159324} = {E6E372A8-51E0-4684-B48B-AB5F3C071198}
 		{2BEBA84B-4404-4858-A056-EE42FC43E84C} = {E6E372A8-51E0-4684-B48B-AB5F3C071198}
+		{ABDE009C-7837-4B1D-BE58-AED5E7E64FD9} = {07CC9061-3035-4667-A3CC-94529F7A18FE}
+		{B37E5750-732E-45D1-ADBF-0B172DC28344} = {ABDE009C-7837-4B1D-BE58-AED5E7E64FD9}
 	EndGlobalSection
 EndGlobal
