@@ -13,6 +13,19 @@ namespace RequestRouterService.Controllers
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
+            // TODO: Check if the tenant is valid. (TenantApplication/tenantId)
+            HttpServiceUriBuilder adminServiceUriBuilder = new HttpServiceUriBuilder()
+            {
+                ServiceName = $"TenantApplication/{tenantId}",
+                ServicePathAndQuery = ""
+            };
+
+            HttpResponseMessage adminServiceResponseMessage;
+            using (HttpClient httpClient = new HttpClient())
+            {
+                adminServiceResponseMessage = await httpClient.GetAsync(adminServiceUriBuilder.Build());
+            }
+
             // Assuming the message body will contain the content for the data to put to the topic.
             string messageBody = await this.Request.Content.ReadAsStringAsync();
 
