@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.VisualStudio.Azure.Fabric.MSBuild.1.5.0\build\Microsoft.VisualStudio.Azure.Fabric.Application.props" Condition="Exists('..\packages\Microsoft.VisualStudio.Azure.Fabric.MSBuild.1.5.0\build\Microsoft.VisualStudio.Azure.Fabric.Application.props')" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>0d11b48e-c7b3-4e8e-8df5-ff7415ed90e0</ProjectGuid>
+    <ProjectGuid>91afe73d-666d-4f6f-8852-f784ba2b972f</ProjectGuid>
     <ProjectVersion>1.5</ProjectVersion>
     <MinToolsVersion>1.5</MinToolsVersion>
   </PropertyGroup>
@@ -30,6 +30,7 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TestWebApi\TestWebApi.csproj" />
     <ProjectReference Include="..\AdminService\AdminService.csproj" />
     <ProjectReference Include="..\SubscriberService\SubscriberService.csproj" />
     <ProjectReference Include="..\TopicService\TopicService.csproj" />
