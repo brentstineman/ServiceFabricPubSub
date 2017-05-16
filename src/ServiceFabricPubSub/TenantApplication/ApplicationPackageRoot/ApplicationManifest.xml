@@ -14,6 +14,9 @@
     <Parameter Name="Topic1_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="Topic1_PartitionCount" DefaultValue="1" />
     <Parameter Name="Topic1_TargetReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="AdminService_PartitionCount" DefaultValue="1" />
+    <Parameter Name="AdminService_MinReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="AdminService_TargetReplicaSetSize" DefaultValue="3" />
     <Parameter Name="SubscriberName" DefaultValue="Subscriber1" />
     <Parameter Name="TopicName" DefaultValue="Topic1" />
   </Parameters>
