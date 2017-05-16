@@ -7,7 +7,8 @@
   <ServiceTypes>
     <!-- This is the name of your ServiceType. 
          This name must match the string used in RegisterServiceType call in Program.cs. -->
-    <StatefulServiceType ServiceTypeName="AdminServiceType" HasPersistedState="true" />
+    <StatefulServiceType ServiceTypeName="AdminServiceType" 
+                         HasPersistedState="true" />
   </ServiceTypes>
 
   <!-- Code package is your service executable. -->

@@ -7,8 +7,8 @@
     <ProjectGuid>{21826476-5320-44F2-AE0E-B12E9060E39E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RequestRouter</RootNamespace>
-    <AssemblyName>RequestRouter</AssemblyName>
+    <RootNamespace>RequestRouterService</RootNamespace>
+    <AssemblyName>RequestRouterService</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -97,10 +97,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\RequestController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="OwinCommunicationListener.cs" />
-    <Compile Include="RequestRouter.cs" />
+    <Compile Include="RequestRouterService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ServiceEventSource.cs" />
     <Compile Include="Startup.cs" />

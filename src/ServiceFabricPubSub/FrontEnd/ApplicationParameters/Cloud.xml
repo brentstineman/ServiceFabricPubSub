@@ -2,5 +2,6 @@
 <Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/FrontEnd" xmlns="http://schemas.microsoft.com/2011/01/fabric">
   <Parameters>
     <Parameter Name="Administration_InstanceCount" Value="-1" />
+    <Parameter Name="RequestRouterService_InstanceCount" Value="-1" />
   </Parameters>
 </Application>
