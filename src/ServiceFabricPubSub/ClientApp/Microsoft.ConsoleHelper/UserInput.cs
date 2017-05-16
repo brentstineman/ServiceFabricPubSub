@@ -56,7 +56,7 @@ namespace Microsoft.ConsoleHelper
             }
             else
             {
-                Console.Write(desc + " is required. Enter value:");
+                Console.Write(desc + ": ");
             }
 
             var entered = isPassword ? ConsolePrintHelper.ReadPassword() : Console.ReadLine();

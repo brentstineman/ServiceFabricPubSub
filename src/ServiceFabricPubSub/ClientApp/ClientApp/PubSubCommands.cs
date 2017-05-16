@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -35,15 +36,22 @@ namespace ClientApp
         {
             try
             {
-                WebClient client = new WebClient();
-                client.DownloadString($"{Program.ServiceUri.AbsoluteUri}/foo/bar");
-                
+                Program.EnsureParam(Program.EnsureConfig.TenantId);
+                Program.EnsureParam(Program.EnsureConfig.TopicId);
+
+
+                HttpClient client = new HttpClient();
+                var response = await client.GetAsync($"{Program.ServiceUri.AbsoluteUri}/api/request/{Program.TenantId}/{Program.TopicId}", HttpCompletionOption.ResponseContentRead);
+
+                response.EnsureSuccessStatusCode();
+
                 Console.WriteLine("Sent");
+                Console.ReadKey();
             }
             catch (Exception ex)
             {
-                throw new CommandFailedException("Web call failed",ex);
-            }
+                throw new CommandFailedException("Web call failed", ex);
+            }            
           
         }
         public static async Task TopicAddSubscriber()

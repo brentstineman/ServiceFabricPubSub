@@ -14,6 +14,8 @@ namespace ClientApp
         private static Commands _flatCommands = new Commands();
         private static UserInput _userInput = null;
         public static Uri ServiceUri = null;
+        public static string TenantId = null;
+        public static string TopicId = null;
 
 
         #region Properties
@@ -23,6 +25,7 @@ namespace ClientApp
         [STAThread]
         static void Main(string[] args)
         {
+            CheckInputArgs(args);
             SetupCommands();
             _userInput = new UserInput();
 
@@ -35,6 +38,21 @@ namespace ClientApp
                 }
             });
             Console.WriteLine("Enter any key to terminate: ");
+        }
+
+        private static void CheckInputArgs(string[] args)
+        {
+            if (args.Length == 1)
+            {
+                ServiceUri = new Uri(args[0]);
+            }
+            else if (args.Length > 0)
+            {
+                Console.WriteLine("Usage: ClientApp.exe [Service_Fabric_Url]");
+                Console.ReadKey();
+                System.Environment.Exit(-1);
+            }
+
         }
 
         static void PrintBanner()
@@ -144,6 +162,10 @@ namespace ClientApp
             return true;
         }
 
+        /// <summary>
+        /// Used to ask basic config parameters at startup
+        /// </summary>
+        /// <param name="param"></param>
         public static void EnsureInitialized(EnsureConfig param)
         {
             if (ServiceUri == null && (param & EnsureConfig.ServiceUri) == EnsureConfig.ServiceUri)
@@ -154,11 +176,30 @@ namespace ClientApp
             }
         }
 
+        /// <summary>
+        /// Used to ask for parameters inside a command
+        /// </summary>
+        /// <param name="param"></param>
+        public static void EnsureParam(EnsureConfig param)
+        {
+            if (String.IsNullOrEmpty(TopicId) && (param & EnsureConfig.TopicId) == EnsureConfig.TopicId)
+            {
+                TopicId = _userInput.EnsureParam(TopicId, "Topic ID", forceReEnter: ((EnsureConfig.None & EnsureConfig.TopicId) == EnsureConfig.TopicId));
+            }
+
+            if (String.IsNullOrEmpty(TenantId) && (param & EnsureConfig.TenantId) == EnsureConfig.TenantId)
+            {
+                TenantId = _userInput.EnsureParam(TenantId, "Tenant ID", forceReEnter: ((EnsureConfig.None & EnsureConfig.TenantId) == EnsureConfig.TenantId));
+            }
+        }
+
         [Flags]
         public enum EnsureConfig
         {
             None = 0,
-            ServiceUri = 0x1
+            ServiceUri = 0x1,
+            TenantId = 0x2,
+            TopicId = 0x3
         }
     }
 }
