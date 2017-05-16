@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.ServiceFabric.Services.Runtime;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.ServiceFabric.Services.Runtime;
 
-namespace AdminService
+namespace Admin
 {
     internal static class Program
     {
@@ -20,12 +20,12 @@ namespace AdminService
                 // When Service Fabric creates an instance of this service type,
                 // an instance of the class is created in this host process.
 
-                ServiceRuntime.RegisterServiceAsync("AdminServiceType",
-                    context => new AdminService(context)).GetAwaiter().GetResult();
+                ServiceRuntime.RegisterServiceAsync("AdminType",
+                    context => new Admin(context)).GetAwaiter().GetResult();
 
-                ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(AdminService).Name);
+                ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(Admin).Name);
 
-                // Prevents this host process from terminating so services keep running.
+                // Prevents this host process from terminating so services keeps running. 
                 Thread.Sleep(Timeout.Infinite);
             }
             catch (Exception e)
