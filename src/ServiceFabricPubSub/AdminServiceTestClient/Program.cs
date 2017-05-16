@@ -16,7 +16,7 @@ namespace AdminServiceTestClient
             Task.Run(async () =>
             {
 
-                var partionKey = new ServicePartitionKey(0);
+                var partionKey = new ServicePartitionKey();
 
                 IAdminService adminServiceClient = ServiceProxy.Create<IAdminService>(
                     new Uri("fabric:/TenantApplication/AdminService"), partionKey);
