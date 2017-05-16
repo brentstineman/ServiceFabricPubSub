@@ -22,11 +22,13 @@ namespace AdminService
         private const string KEY2 = "key2";
         private const string COLLECTION_KEYS = "keys";
         private readonly FabricClient fabric;
+        private readonly string applicationName;
 
         public AdminService(StatefulServiceContext context)
             : base(context)
         {
             fabric = new FabricClient();
+            applicationName = this.Context.CodePackageActivationContext.ApplicationName;
         }
 
         /// <summary>
@@ -87,10 +89,19 @@ namespace AdminService
                 HasPersistedState = true,
                 //InitializationData = Encoding.UTF8.GetBytes(parameters),
                 ServiceTypeName = "TopicServiceType",
-                ServiceName = new Uri($"{applicationName}/topics/{topicName}")
+                ServiceName = CreateTopicUri(topicName)
             };
 
             return fabric.ServiceManager.CreateServiceAsync(serviceDescription);         
+        }
+
+        public Task DeleteTopic(string topicName)
+        {
+            Uri serviceUri = this.CreateTopicUri(topicName);
+
+            var description = new DeleteServiceDescription(serviceUri);
+
+            return fabric.ServiceManager.DeleteServiceAsync(description);
         }
 
         private async Task<string> GetKey(string keyName)
@@ -135,6 +146,16 @@ namespace AdminService
 
                 await tx.CommitAsync();
             } 
+        }
+
+        private Uri CreateTopicUri(string topicName)
+        {
+            return new Uri($"{this.applicationName}/topics/{topicName}");
+        }
+
+        public Task RegenerateKeys()
+        {
+            throw new NotImplementedException();
         }
     }
 }

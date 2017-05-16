@@ -10,5 +10,7 @@ namespace AdminService
         Task<string> GetKey1();
         Task<string> GetKey2();
         Task CreateNewTopic(string topicName);
+        Task DeleteTopic(string topicName);
+        Task RegenerateKeys();
     }
 }

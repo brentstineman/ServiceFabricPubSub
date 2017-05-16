@@ -24,15 +24,24 @@ namespace AdminServiceTestClient
 
                 Console.WriteLine($"Key: {key}");
 
-                Console.WriteLine("Hit any key to continue");
-                Console.ReadLine();
+                ReadLine();
 
-                await adminServiceClient.CreateNewTopic("topic1");
+                 await adminServiceClient.CreateNewTopic("topic1");
                 await adminServiceClient.CreateNewTopic("topic2");
 
-                Console.WriteLine("Hit any key to continue");
+                ReadLine();
+
+                await adminServiceClient.DeleteTopic("topic1");
+
+                ReadLine();
 
             }).GetAwaiter().GetResult();
+        }
+
+        private static void ReadLine()
+        {
+            Console.WriteLine("Hit any key to continue");
+            Console.ReadLine();
         }
     }
 }
