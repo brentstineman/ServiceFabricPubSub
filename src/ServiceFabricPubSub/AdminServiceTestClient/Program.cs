@@ -18,14 +18,19 @@ namespace AdminServiceTestClient
 
                 var partionKey = new ServicePartitionKey(0);
 
-                IAdminService helloWorldClient = ServiceProxy.Create<IAdminService>(
+                IAdminService adminServiceClient = ServiceProxy.Create<IAdminService>(
                     new Uri("fabric:/TenantApplication/AdminService"), partionKey);
-                string key = await helloWorldClient.GetKey1();
+                string key = await adminServiceClient.GetKey1();
 
                 Console.WriteLine($"Key: {key}");
 
                 Console.WriteLine("Hit any key to continue");
                 Console.ReadLine();
+
+                await adminServiceClient.CreateNewTopic("topic1");
+                await adminServiceClient.CreateNewTopic("topic2");
+
+                Console.WriteLine("Hit any key to continue");
 
             }).GetAwaiter().GetResult();
         }

@@ -8,7 +8,8 @@ using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
-
+using System.Fabric.Description;
+using System.Text;
 
 namespace AdminService
 {
@@ -20,10 +21,13 @@ namespace AdminService
         private const string KEY1 = "key1";
         private const string KEY2 = "key2";
         private const string COLLECTION_KEYS = "keys";
+        private readonly FabricClient fabric;
 
         public AdminService(StatefulServiceContext context)
             : base(context)
-        { }
+        {
+            fabric = new FabricClient();
+        }
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
@@ -63,6 +67,30 @@ namespace AdminService
         public async Task<string> GetKey2()
         {
             return await GetKey(KEY2);
+        }
+
+        public Task CreateNewTopic(string topicName)
+        {
+            string applicationName = this.Context.CodePackageActivationContext.ApplicationName;
+
+            StatefulServiceDescription serviceDescription = new StatefulServiceDescription()
+            {
+                ApplicationName = new Uri(applicationName),
+                MinReplicaSetSize = 3,
+                TargetReplicaSetSize = 3,
+                PartitionSchemeDescription = new UniformInt64RangePartitionSchemeDescription()
+                {
+                    LowKey = 0,
+                    HighKey = 10,
+                    PartitionCount = 1
+                },
+                HasPersistedState = true,
+                //InitializationData = Encoding.UTF8.GetBytes(parameters),
+                ServiceTypeName = "TopicServiceType",
+                ServiceName = new Uri($"{applicationName}/topics/{topicName}")
+            };
+
+            return fabric.ServiceManager.CreateServiceAsync(serviceDescription);         
         }
 
         private async Task<string> GetKey(string keyName)
