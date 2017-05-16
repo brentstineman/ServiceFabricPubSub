@@ -48,8 +48,18 @@ namespace SubscriberService
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
             await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false); // DELAY HACK TO AVOID STRANGER ERROR IF TOO QUICK STARTUP
-            var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/Topic1"),
+
+            var topicName = this.Context
+                .CodePackageActivationContext
+                .GetConfigurationPackageObject("Config")
+                 .Settings
+                 .Sections["SubscriberConfiguration"]
+                 .Parameters["TopicServiceName"]
+                 .Value;
+
+            var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/" + topicName),
                  new ServicePartitionKey(0));
+
             await topicSvc.RegisterSubscriber(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
 
             while (true)
