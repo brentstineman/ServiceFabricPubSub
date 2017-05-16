@@ -56,7 +56,7 @@
          The attribute ServiceTypeName below must match the name defined in the imported ServiceManifest.xml file. -->
     <Service Name="AdminService">
       <StatefulService ServiceTypeName="AdminServiceType" TargetReplicaSetSize="[AdminService_TargetReplicaSetSize]" MinReplicaSetSize="[AdminService_MinReplicaSetSize]">
-        <UniformInt64Partition PartitionCount="[AdminService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+         <SingletonPartition/>
       </StatefulService>
     </Service>
     <!--
