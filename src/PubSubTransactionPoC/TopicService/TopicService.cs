@@ -10,6 +10,7 @@ using Microsoft.ServiceFabric.Services.Runtime;
 using PubSubDotnetSDK;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Data.Notifications;
 
 namespace TopicService
 {
@@ -49,12 +50,62 @@ namespace TopicService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
+            this.StateManager.StateManagerChanged += StateManager_StateManagerChanged;
+            this.StateManager.TransactionChanged += StateManager_TransactionChanged;
             int count = 1;
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
-                await Push(new PubSubMessage() { Message = $"TEST  Message #{count++} : {DateTime.Now}" }); // HACK FOR TEST
+                await Push(new PubSubMessage() { Message = $"TEST  Message #{count++} : {DateTime.Now}" }); // HACK FOR TEST                
+            }
+        }
+
+        private void StateManager_TransactionChanged(object sender, NotifyTransactionChangedEventArgs e)
+        {
+            // transaction commited
+            if (e.Action == NotifyTransactionChangedAction.Commit)
+            {
+                Task.Run(() => DuplicateMessages(CancellationToken.None));
+            }
+        }
+
+        private void StateManager_StateManagerChanged(object sender, NotifyStateManagerChangedEventArgs e)
+        {
+            // state manager created
+            if (e.Action == NotifyStateManagerChangedAction.Add)
+            {
+                Task.Run(() => DuplicateMessages(CancellationToken.None));
+            }            
+        }
+
+        private async Task DuplicateMessages(CancellationToken cancellationToken)
+        {
+            // get input q
+            var inputQueue = await this.StateManager.GetOrAddAsync<IReliableConcurrentQueue<PubSubMessage>>("inputQueue");            
+
+            var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList");
+
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                // enq 1 message
+                while (inputQueue.Count > 0)
+                {
+                    var msg = await inputQueue.TryDequeueAsync(tx);
+                    if (!msg.HasValue) return;
+                    IAsyncEnumerable<KeyValuePair<string, bool>> asyncEnumerable = await lst.CreateEnumerableAsync(tx);
+                    using (IAsyncEnumerator<KeyValuePair<string, bool>> asyncEnumerator = asyncEnumerable.GetAsyncEnumerator())
+                    {
+                        while (await asyncEnumerator.MoveNextAsync(CancellationToken.None))
+                        {
+                            var queue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>(asyncEnumerator.Current.Key);
+                            await queue.EnqueueAsync(tx, msg.Value);
+                        }
+                    }
+                    ServiceEventSource.Current.ServiceMessage(this.Context, $"ENQUEUE: {msg.Value.Message}");
+                }                
+                await tx.CommitAsync();
+                
             }
         }
 
@@ -87,24 +138,14 @@ namespace TopicService
         /// <returns></returns>
         public async Task Push(PubSubMessage msg)
         {
-
-            var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList");
-
-            
+            var inputQueue = await this.StateManager.GetOrAddAsync<IReliableConcurrentQueue<PubSubMessage>>("inputQueue");
             using (var tx = this.StateManager.CreateTransaction())
             {
-                IAsyncEnumerable<KeyValuePair<string, bool>> asyncEnumerable = await lst.CreateEnumerableAsync(tx);
-                using (IAsyncEnumerator<KeyValuePair<string, bool>> asyncEnumerator = asyncEnumerable.GetAsyncEnumerator())
-                {
-                    while (await asyncEnumerator.MoveNextAsync(CancellationToken.None))
-                    {
-                        var queue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>(asyncEnumerator.Current.Key);
-                        await queue.EnqueueAsync(tx, msg);
-                    }
-                }
-                await tx.CommitAsync();
-                ServiceEventSource.Current.ServiceMessage(this.Context, $"ENQUEUE: {msg.Message}");
+                await inputQueue.EnqueueAsync(tx, msg).ConfigureAwait(false);
+                await tx.CommitAsync().ConfigureAwait(false);
             }
+            ServiceEventSource.Current.ServiceMessage(this.Context, $"INPUT QUEUE: {msg.Message}");
+            
         }
 
         /// <summary>
