@@ -14,7 +14,28 @@ namespace ClientApp
         #region Tenant Commands
         public static async Task TenantRegisterNew()
         {
-            //EnsureBasicParams(EnsureExtras.Azure);
+            try
+            {
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.AppVersion);
+
+                HttpClient client = new HttpClient();
+                var response = await client.GetAsync($"{Program.ServiceFabricAdminUri.AbsoluteUri}/api/tenants/?TenantName={Program.TenantName}&AppVersion={Program.AppVersion}", HttpCompletionOption.ResponseContentRead);
+             
+                response.EnsureSuccessStatusCode();
+
+                Console.WriteLine("Created.");
+
+                Program.TenantName = String.Empty;
+                Program.AppVersion = String.Empty;
+
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed", ex);
+            }
         }
         public static async Task TenantSecurityKeyReset()
         {         
@@ -36,12 +57,12 @@ namespace ClientApp
         {
             try
             {
-                Program.EnsureParam(Program.EnsureConfig.TenantId);
-                Program.EnsureParam(Program.EnsureConfig.TopicId);
-
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.TopicName);
 
                 HttpClient client = new HttpClient();
-                var response = await client.GetAsync($"{Program.ServiceUri.AbsoluteUri}/api/request/{Program.TenantId}/{Program.TopicId}", HttpCompletionOption.ResponseContentRead);
+                var response = await client.GetAsync($"{Program.ServiceFabricUri.AbsoluteUri}/api/request/{Program.TenantName}/{Program.TopicName}", HttpCompletionOption.ResponseContentRead);
 
                 response.EnsureSuccessStatusCode();
 

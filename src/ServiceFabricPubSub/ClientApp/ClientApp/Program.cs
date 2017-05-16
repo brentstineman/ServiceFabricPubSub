@@ -13,9 +13,12 @@ namespace ClientApp
         private static Groups _groups = new Groups();
         private static Commands _flatCommands = new Commands();
         private static UserInput _userInput = null;
-        public static Uri ServiceUri = null;
-        public static string TenantId = null;
-        public static string TopicId = null;
+        public static Uri ServiceFabricUri = null;      //router service (etnry point for messages and operatins)
+        public static Uri ServiceFabricAdminUri = null; //administration service
+        public static string TenantName = null;
+        public static string TopicName = null;
+        public static string AppVersion = null;
+
 
 
         #region Properties
@@ -42,13 +45,25 @@ namespace ClientApp
 
         private static void CheckInputArgs(string[] args)
         {
-            if (args.Length == 1)
+            try
             {
-                ServiceUri = new Uri(args[0]);
+                if (args.Length == 1)
+                {
+                    ServiceFabricUri = new Uri(args[0]);
+                }
+                if (args.Length == 2)
+                {
+                    ServiceFabricUri = new Uri(args[0]);
+                    ServiceFabricAdminUri = new Uri(args[1]);
+                }
+                else if (args.Length > 0)
+                {
+                    throw new ArgumentException();
+                }
             }
-            else if (args.Length > 0)
+            catch (Exception)
             {
-                Console.WriteLine("Usage: ClientApp.exe [Service_Fabric_Url]");
+                Console.WriteLine("Usage: ClientApp.exe [Service_Fabric_Url] [Service_Fabric_Admin_Url]");
                 Console.ReadKey();
                 System.Environment.Exit(-1);
             }
@@ -104,8 +119,6 @@ namespace ClientApp
             Console.ResetColor();
             PrintBanner();
 
-            Program.EnsureInitialized(Program.EnsureConfig.ServiceUri);
-
             try
             {
                 if (!FlatDisplay)
@@ -145,7 +158,7 @@ namespace ClientApp
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"The command failed: {commandFailed.Message}");
                 if(commandFailed.InnerException != null)
-                    Console.WriteLine("Inner: ", commandFailed.InnerException.Message);
+                    Console.WriteLine("Inner: {0}", commandFailed.InnerException.Message);
                 Console.ReadKey();
             }
             catch (Exception ex)
@@ -163,33 +176,38 @@ namespace ClientApp
         }
 
         /// <summary>
-        /// Used to ask basic config parameters at startup
-        /// </summary>
-        /// <param name="param"></param>
-        public static void EnsureInitialized(EnsureConfig param)
-        {
-            if (ServiceUri == null && (param & EnsureConfig.ServiceUri) == EnsureConfig.ServiceUri)
-            {
-                string serviceUri = "";
-                var serviceUriString = _userInput.EnsureParam(serviceUri, "Service Uri", forceReEnter: ((EnsureConfig.None & EnsureConfig.ServiceUri) == EnsureConfig.ServiceUri));
-                ServiceUri = new Uri(serviceUriString);
-            }
-        }
-
-        /// <summary>
         /// Used to ask for parameters inside a command
         /// </summary>
         /// <param name="param"></param>
         public static void EnsureParam(EnsureConfig param)
         {
-            if (String.IsNullOrEmpty(TopicId) && (param & EnsureConfig.TopicId) == EnsureConfig.TopicId)
+            if (ServiceFabricUri == null && (param & EnsureConfig.ServiceFabricUri) == EnsureConfig.ServiceFabricUri)
             {
-                TopicId = _userInput.EnsureParam(TopicId, "Topic ID", forceReEnter: ((EnsureConfig.None & EnsureConfig.TopicId) == EnsureConfig.TopicId));
+                string serviceUri = "";
+                var serviceUriString = _userInput.EnsureParam(serviceUri, "Service Fabric Uri", forceReEnter: ((EnsureConfig.None & EnsureConfig.ServiceFabricUri) == EnsureConfig.ServiceFabricUri));
+                ServiceFabricUri = new Uri(serviceUriString);
             }
 
-            if (String.IsNullOrEmpty(TenantId) && (param & EnsureConfig.TenantId) == EnsureConfig.TenantId)
+            if (ServiceFabricAdminUri == null && (param & EnsureConfig.ServiceFabricAdminUri) == EnsureConfig.ServiceFabricAdminUri)
             {
-                TenantId = _userInput.EnsureParam(TenantId, "Tenant ID", forceReEnter: ((EnsureConfig.None & EnsureConfig.TenantId) == EnsureConfig.TenantId));
+                string serviceAdminUri = "";
+                var serviceAdminUriString = _userInput.EnsureParam(serviceAdminUri, "Service Fabric ADMIN Uri", forceReEnter: ((EnsureConfig.None & EnsureConfig.ServiceFabricAdminUri) == EnsureConfig.ServiceFabricAdminUri));
+                ServiceFabricUri = new Uri(serviceAdminUriString);
+            }
+
+            if (String.IsNullOrEmpty(TopicName) && (param & EnsureConfig.TopicName) == EnsureConfig.TopicName)
+            {
+                TopicName = _userInput.EnsureParam(TopicName, "Topic Name", forceReEnter: ((EnsureConfig.None & EnsureConfig.TopicName) == EnsureConfig.TopicName));
+            }
+
+            if (String.IsNullOrEmpty(TenantName) && (param & EnsureConfig.TenantName) == EnsureConfig.TenantName)
+            {
+                TenantName = _userInput.EnsureParam(TenantName, "Tenant Name", forceReEnter: ((EnsureConfig.None & EnsureConfig.TenantName) == EnsureConfig.TenantName));
+            }
+
+            if (String.IsNullOrEmpty(AppVersion) && (param & EnsureConfig.AppVersion) == EnsureConfig.AppVersion)
+            {
+                AppVersion = _userInput.EnsureParam(AppVersion, "Version", forceReEnter: ((EnsureConfig.None & EnsureConfig.AppVersion) == EnsureConfig.AppVersion));
             }
         }
 
@@ -197,9 +215,11 @@ namespace ClientApp
         public enum EnsureConfig
         {
             None = 0,
-            ServiceUri = 0x1,
-            TenantId = 0x2,
-            TopicId = 0x3
+            ServiceFabricUri = 0x1,
+            ServiceFabricAdminUri = 0x2,
+            TenantName = 0x3,
+            TopicName = 0x4,
+            AppVersion = 0x8
         }
     }
 }
