@@ -6,6 +6,7 @@ using System.Fabric.Description;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 
 namespace Administration.Controllers
@@ -18,32 +19,29 @@ namespace Administration.Controllers
         static FabricClient fabricClient = new FabricClient();
         private readonly IApplicationLifetime appLifetime;
 
-        public async Task<string> Get(string ApplicationType, string TenantName, string AppVersion)
+        [HttpGet]
+        [Route("api/Tenants")]
+        public async Task<HttpStatusCode> Get(string ApplicationType, string TenantName, string AppVersion)
         {
 
-            if (!isValidTenantName(TenantName)) return "500 - Invalid TenantName.";
+            if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
 
             ApplicationDescription application = new ApplicationDescription(
                 new Uri("fabric:/" + TenantName),
                 ApplicationType,
                 AppVersion);
-            
-            //await fabricClient.ApplicationManager.CreateApplicationAsync(application, 
-            //    operationTimeout, appLifetime.ApplicationStopping);
 
             await fabricClient.ApplicationManager.CreateApplicationAsync(application);
 
-            return "200";
-
+            return HttpStatusCode.OK;
         }
 
-        public async Task<string> Get(string TenantName, string AppVersion)
+        [HttpGet]
+        [Route("/api/tenants")]
+        public async Task<HttpStatusCode> Get(string TenantName, string AppVersion)
         {
 
-            if(!isValidTenantName(TenantName))
-                //return "500 - Invalid TenantName.";
-                throw new HttpResponseException(HttpStatusCode.NotAcceptable);
-
+            if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
 
             string ApplicationType = "TenantApplicationType";
 
@@ -52,44 +50,17 @@ namespace Administration.Controllers
                 ApplicationType,
                 AppVersion);
 
-            //await fabricClient.ApplicationManager.CreateApplicationAsync(application,
-            //    operationTimeout, appLifetime.ApplicationStopping);
-
             await fabricClient.ApplicationManager.CreateApplicationAsync(application);
 
-            return "200";
-
+            return HttpStatusCode.OK;
         }
 
-        private bool isValidTenantName(string TenantName)
+        private bool IsValidTenantName(string TenantName)
         {
             Regex r1 = new Regex("^[A-Za-z0-9]{8,15}$");
             Match match = r1.Match(TenantName);
 
             return match.Success;
-            
-        }
-
-        // GET api/tenants/5 
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/tenants 
-        public void Post([FromBody]string value)
-        {
-            // creates a new instance of the tenant application
-        }
-
-        // PUT api/tenants/5 
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-
-        // DELETE api/tenants/5 
-        public void Delete(int id)
-        {
         }
     }
 }
