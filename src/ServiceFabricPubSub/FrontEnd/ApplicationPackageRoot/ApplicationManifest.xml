@@ -9,7 +9,6 @@
        ServiceManifest.xml file. -->
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="AdministrationPkg" ServiceManifestVersion="1.0.0" />
-    <ConfigOverrides />
   </ServiceManifestImport>
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="RequestRouterServicePkg" ServiceManifestVersion="1.0.0" />
