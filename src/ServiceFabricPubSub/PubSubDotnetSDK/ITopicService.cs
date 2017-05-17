@@ -23,13 +23,26 @@ namespace PubSubDotnetSDK
         /// <returns></returns>
         Task RegisterSubscriber(string subscriberId);
 
-        
+
 
         /// <summary>
-        /// Just for testing in sprint0
+        /// peek the message (not removed from the subscriver output queue) 
+        /// </summary>
+        /// <param name="subscriberId"></param>
+        /// <returns></returns>
+        Task<PubSubMessage> InternalPeek(string subscriberId);
+
+
+
+        /// <summary>
+        /// dequeue the message and remove it from the queue (to be use by subscriber service)
         /// </summary>
         /// <param name="subcriberId">Name the of caller subscriber service</param>
-        /// <returns></returns>
-        Task<PubSubMessage> InternalPop(string subscriberId);
+        /// <returns>message, null if none available</returns>
+        Task<PubSubMessage> InternalDequeue(string subscriberId);
+
+
+
+
     }
 }
