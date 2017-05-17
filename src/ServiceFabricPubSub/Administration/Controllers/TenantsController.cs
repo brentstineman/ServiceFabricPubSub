@@ -19,26 +19,26 @@ namespace Administration.Controllers
         static FabricClient fabricClient = new FabricClient();
         private readonly IApplicationLifetime appLifetime;
 
-        [HttpGet]
-        [Route("api/Tenants")]
-        public async Task<HttpStatusCode> Get(string ApplicationType, string TenantName, string AppVersion)
-        {
+        //[HttpGet]
+        //[Route("api/tenants/extended")]
+        //public async Task<HttpStatusCode> GetTenantExtended(string ApplicationType, string TenantName, string AppVersion)
+        //{
 
-            if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
+        //    if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
 
-            ApplicationDescription application = new ApplicationDescription(
-                new Uri("fabric:/" + TenantName),
-                ApplicationType,
-                AppVersion);
+        //    ApplicationDescription application = new ApplicationDescription(
+        //        new Uri("fabric:/" + TenantName),
+        //        ApplicationType,
+        //        AppVersion);
 
-            await fabricClient.ApplicationManager.CreateApplicationAsync(application);
+        //    await fabricClient.ApplicationManager.CreateApplicationAsync(application);
 
-            return HttpStatusCode.OK;
-        }
+        //    return HttpStatusCode.OK;
+        //}
 
         [HttpGet]
         [Route("/api/tenants")]
-        public async Task<HttpStatusCode> Get(string TenantName, string AppVersion)
+        public async Task<HttpStatusCode> GetTenant(string TenantName, string AppVersion)
         {
 
             if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);

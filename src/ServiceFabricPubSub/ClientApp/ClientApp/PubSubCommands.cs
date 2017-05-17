@@ -22,19 +22,23 @@ namespace ClientApp
 
                 HttpClient client = new HttpClient();
                 var response = await client.GetAsync($"{Program.ServiceFabricAdminUri.AbsoluteUri}/api/tenants/?TenantName={Program.TenantName}&AppVersion={Program.AppVersion}", HttpCompletionOption.ResponseContentRead);
-             
+
                 response.EnsureSuccessStatusCode();
 
                 Console.WriteLine("Created.");
 
-                Program.TenantName = String.Empty;
-                Program.AppVersion = String.Empty;
 
                 Console.ReadKey();
             }
             catch (Exception ex)
             {
                 throw new CommandFailedException("Web call failed", ex);
+            }
+            finally
+            {
+                Program.TenantName = String.Empty;
+                Program.AppVersion = String.Empty;
+
             }
         }
         public static async Task TenantSecurityKeyReset()
