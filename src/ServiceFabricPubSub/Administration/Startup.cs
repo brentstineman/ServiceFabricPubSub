@@ -14,7 +14,7 @@ namespace Administration
             // Configure Web API for self-host. 
             HttpConfiguration config = new HttpConfiguration();
 
-            config.EnableSwagger(c => c.SingleApiVersion("v3", "First version"))
+            config.EnableSwagger(c => c.SingleApiVersion("v2", "First version"))
                  .EnableSwaggerUi();
 
             config.Routes.MapHttpRoute(

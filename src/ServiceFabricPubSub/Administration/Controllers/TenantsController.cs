@@ -19,31 +19,31 @@ namespace Administration.Controllers
         static FabricClient fabricClient = new FabricClient();
         private readonly IApplicationLifetime appLifetime;
 
-        //[HttpGet]
-        //[Route("api/tenants/extended")]
-        //public async Task<HttpStatusCode> GetTenantExtended(string ApplicationType, string TenantName, string AppVersion)
-        //{
-
-        //    if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
-
-        //    ApplicationDescription application = new ApplicationDescription(
-        //        new Uri("fabric:/" + TenantName),
-        //        ApplicationType,
-        //        AppVersion);
-
-        //    await fabricClient.ApplicationManager.CreateApplicationAsync(application);
-
-        //    return HttpStatusCode.OK;
-        //}
-
         [HttpGet]
-        [Route("/api/tenants")]
-        public async Task<HttpStatusCode> GetTenant(string TenantName, string AppVersion)
+        [Route("api/Tenants")]
+        public async Task<HttpStatusCode> Get(string ApplicationType, string TenantName, string AppVersion)
         {
 
             if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
 
-            string ApplicationType = "PubSubTransactionPoCType";
+            ApplicationDescription application = new ApplicationDescription(
+                new Uri("fabric:/" + TenantName),
+                ApplicationType,
+                AppVersion);
+
+            await fabricClient.ApplicationManager.CreateApplicationAsync(application);
+
+            return HttpStatusCode.OK;
+        }
+
+        [HttpGet]
+        [Route("/api/tenants")]
+        public async Task<HttpStatusCode> Get(string TenantName, string AppVersion)
+        {
+
+            if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
+
+            string ApplicationType = "TenantApplicationType";
 
             ApplicationDescription application = new ApplicationDescription(
                 new Uri("fabric:/" + TenantName),
