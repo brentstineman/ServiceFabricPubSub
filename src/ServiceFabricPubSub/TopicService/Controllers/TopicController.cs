@@ -10,7 +10,7 @@ using Microsoft.ServiceFabric.Services.Client;
 
 namespace TopicService.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api")]
     public class TopicController : Controller
     {
         private readonly IReliableStateManager stateManager;
@@ -24,15 +24,19 @@ namespace TopicService.Controllers
             this.appLifetime = appLifetime;
         }
 
-        // PUT api/topic/{topic}
-        [HttpPut]
+        [HttpPost]
         [Route("{topic}")]
         public async Task Push(string topic, [FromBody]object message)
         {
             var msg = new PubSubMessage(message.ToString());
-            var serviceRPC = ServiceProxy.Create<ITopicService>(new Uri($"fabric:/TenantApplication/{topic}"),
-               new ServicePartitionKey(0));
+            var uri = CreateTopicUri(topic);
+            var serviceRPC = ServiceProxy.Create<ITopicService>(uri);
             await serviceRPC.Push(msg);
+        }
+
+        private Uri CreateTopicUri(string topic)
+        {
+            return new Uri($"{this.context.CodePackageActivationContext.ApplicationName}/topics/{topic}");
         }
     }
 }
