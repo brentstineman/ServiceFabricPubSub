@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
-using AdminService;
+
 using Microsoft.ServiceFabric.Services.Client;
 
 namespace AdminServiceTestClient
@@ -16,24 +16,24 @@ namespace AdminServiceTestClient
             Task.Run(async () =>
             {
 
-                var partionKey = new ServicePartitionKey(0);
+                var partionKey = new ServicePartitionKey();
 
-                IAdminService adminServiceClient = ServiceProxy.Create<IAdminService>(
-                    new Uri("fabric:/TenantApplication/AdminService"), partionKey);
-                string key = await adminServiceClient.GetKey1();
+                //IAdminService adminServiceClient = ServiceProxy.Create<IAdminService>(
+                //    new Uri("fabric:/TenantApplication/AdminService"), partionKey);
+                //string key = await adminServiceClient.GetKey1();
 
-                Console.WriteLine($"Key: {key}");
+                //Console.WriteLine($"Key: {key}");
 
-                ReadLine();
+                //ReadLine();
 
-                 await adminServiceClient.CreateNewTopic("topic1");
-                await adminServiceClient.CreateNewTopic("topic2");
+                // await adminServiceClient.CreateNewTopic("topic1");
+                //await adminServiceClient.CreateNewTopic("topic2");
 
-                ReadLine();
+                //ReadLine();
 
-                await adminServiceClient.DeleteTopic("topic1");
+                //await adminServiceClient.DeleteTopic("topic1");
 
-                ReadLine();
+                //ReadLine();
 
             }).GetAwaiter().GetResult();
         }
