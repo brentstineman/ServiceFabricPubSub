@@ -27,11 +27,11 @@
     <None Include="Scripts\Deploy-FabricApplication.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="app.config" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TestWebApi\TestWebApi.csproj" />
-    <ProjectReference Include="..\AdminService\AdminService.csproj" />
+    <ProjectReference Include="..\Admin\Admin.csproj" />
     <ProjectReference Include="..\SubscriberService\SubscriberService.csproj" />
     <ProjectReference Include="..\TopicService\TopicService.csproj" />
   </ItemGroup>
