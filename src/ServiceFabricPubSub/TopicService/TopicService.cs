@@ -162,6 +162,7 @@ namespace TopicService
         /// <returns></returns>
         public async Task Push(PubSubMessage msg)
         {
+            msg.MessageID = Guid.NewGuid(); // generating a new unique ID for the incoming message.
             var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList").ConfigureAwait(false);
             var inputQueue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("inputQueue");
             using (var tx = this.StateManager.CreateTransaction())
