@@ -9,5 +9,7 @@ namespace Microsoft.ConsoleHelper
     public class CommandFailedException : Exception
     {
         public CommandFailedException(string message) : base(message) { }
+        public CommandFailedException(string message, Exception inner) : base(message,inner) { }
+
     }
 }
