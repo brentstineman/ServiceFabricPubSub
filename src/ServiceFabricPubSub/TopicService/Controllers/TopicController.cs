@@ -26,20 +26,13 @@ namespace TopicService.Controllers
 
         // PUT api/topic/{topic}
         [HttpPut]
-        public async Task Push(string topic, [FromBody]string message)
+        [Route("{topic}")]
+        public async Task Push(string topic, [FromBody]object message)
         {
-            var service = new TopicService(context);
-            var msg = new PubSubMessage(message);
+            var msg = new PubSubMessage(message.ToString());
             var serviceRPC = ServiceProxy.Create<ITopicService>(new Uri($"fabric:/TenantApplication/{topic}"),
                new ServicePartitionKey(0));
             await serviceRPC.Push(msg);
-        }
-        
-        [HttpGet]
-        [Route("")]
-        public async Task Test(string subscriberId)
-        {
-            return;
         }
     }
 }

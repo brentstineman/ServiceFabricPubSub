@@ -46,6 +46,11 @@
         <UniformInt64Partition PartitionCount="[TopicService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
       </StatefulService>
     </Service>
+    <Service Name="Admin">
+      <StatefulService ServiceTypeName="AdminType" TargetReplicaSetSize="[AdminService_TargetReplicaSetSize]" MinReplicaSetSize="[AdminService_MinReplicaSetSize]">
+        <SingletonPartition />
+      </StatefulService>
+    </Service>
     <!--
     <Service Name="TestWebApi">
       <StatelessService ServiceTypeName="TestWebApiType" InstanceCount="[TestWebApi_InstanceCount]">
