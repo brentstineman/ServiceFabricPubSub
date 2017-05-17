@@ -17,11 +17,15 @@ namespace Administration
             config.EnableSwagger(c => c.SingleApiVersion("v2", "PubSubClientApi"))
                  .EnableSwaggerUi();
 
+            config.Formatters.Clear();
+            config.Formatters.Add(new System.Net.Http.Formatting.JsonMediaTypeFormatter());
+
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
-            );
+                defaults: new { id = RouteParameter.Optional  
+                }
+         );
 
             config.Formatters.Clear();
             config.Formatters.Add(new System.Net.Http.Formatting.JsonMediaTypeFormatter());

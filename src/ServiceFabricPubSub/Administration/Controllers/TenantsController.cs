@@ -3,7 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Fabric.Description;
+using System.Fabric.Query;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -14,46 +17,44 @@ namespace Administration.Controllers
     [ServiceRequestActionFilter]
     public class TenantsController : ApiController
     {
+#       region GLOBAL 
 
         private readonly TimeSpan operationTimeout = TimeSpan.FromSeconds(20);
         static FabricClient fabricClient = new FabricClient();
-        private readonly IApplicationLifetime appLifetime;
 
-        //[HttpGet]
-        //[Route("api/Tenants")]
-        //public async Task<HttpStatusCode> Get(string ApplicationType, string TenantName, string AppVersion)
-        //{
+        private const string APPLICATION_NAME = "fabric:/FrontEnd";
+        private readonly string APPLICATIONTYPE_NAME = "FrontEndType"; //"TenantApplicationType";
+        #endregion
 
-        //    if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
-
-        //    ApplicationDescription application = new ApplicationDescription(
-        //        new Uri("fabric:/" + TenantName),
-        //        ApplicationType,
-        //        AppVersion);
-
-        //    await fabricClient.ApplicationManager.CreateApplicationAsync(application);
-
-        //    return HttpStatusCode.OK;
-        //}
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="TenantName"></param>
+        /// <param name="AppVersion"></param>
+        /// <returns></returns>
+        [HttpPut]
         [Route("/api/tenants")]
-        public async Task<HttpStatusCode> Post([FromBody]string TenantName, [FromBody]string AppVersion)
+        public async Task<HttpStatusCode> GetTenant(string TenantName, string AppVersion)
         {
-
             if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
+            
+            ApplicationList applicationList = await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/" + TenantName));
 
-            string ApplicationType = "PubSubTransactionPoCType";
+            if (applicationList.Count > 0) return HttpStatusCode.OK;
 
-            ApplicationDescription application = new ApplicationDescription(
-                new Uri("fabric:/" + TenantName),
-                ApplicationType,
-                AppVersion);
+            ApplicationDescription applicationDescripriont = new ApplicationDescription(
+                new Uri("fabric:/" + TenantName), APPLICATIONTYPE_NAME, AppVersion);
+                         
+            await fabricClient.ApplicationManager.CreateApplicationAsync(applicationDescripriont);
 
-            await fabricClient.ApplicationManager.CreateApplicationAsync(application);
-
-            return HttpStatusCode.OK;
+            return HttpStatusCode.OK; 
         }
 
+        /// <summary>
+        /// Validate the defined pattern to Tenant Name ("^[A-Za-z0-9]{8,15}$")
+        /// </summary>
+        /// <param name="TenantName"></param>
+        /// <returns></returns>
         private bool IsValidTenantName(string TenantName)
         {
             Regex r1 = new Regex("^[A-Za-z0-9]{8,15}$");
