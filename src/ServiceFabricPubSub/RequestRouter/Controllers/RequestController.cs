@@ -1,99 +1,138 @@
-﻿using System;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.IO.Ports;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace RequestRouterService.Controllers
 {
+    [RequestAuthorization]
     public class RequestController : ApiController
     {
-        // PUT api/tenantId/topicName
-        public async Task<HttpResponseMessage> Put(string tenantId, string topicName)
+        private const string TenantApplicationAdminServiceName = "Admin";
+
+        private static int? reverseProxyPort = null;
+
+        // POST api/tenantId/topicName
+        public async Task<HttpResponseMessage> Post(string tenantId, string topicName)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-            string partitionKey = string.Empty;
 
-            // TODO: Parse the partition key from the body or the input param?
+            // Assuming the message body will contain the content for the data to put to the topic.
             string messageBody = await this.Request.Content.ReadAsStringAsync();
 
-            bool isAuthenticated = await AuthenticateRequest();
+            // TODO: Clean this up everywhere . . . . 
+            await GetReverseProxyPortAsync();
 
-            if (isAuthenticated)
+            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
             {
-                // Call the Topic Service to post the message.
-                var response = await InvokeService("TenantApplication", "TopicService", string.Empty, partitionKey);
-                if (response != null && response.IsSuccessStatusCode)
-                {
-                    responseMessage.StatusCode = HttpStatusCode.Accepted;
+                // TODO: Need to use the tenant name instead of 'TenantApplication'.
 
-                    var msg = await response.Content.ReadAsStringAsync();
+                PortNumber = reverseProxyPort.Value,
+                //ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/topicName"
+                ServiceName = $"TenantApplication/{TenantApplicationAdminServiceName}/api/topics/{topicName}"
+            };
 
-                    // TODO: do something with the response.
-                }
-                else
-                {
-                    responseMessage.StatusCode = HttpStatusCode.InternalServerError;
-                    responseMessage.ReasonPhrase = response?.ReasonPhrase ?? "Internal error";
-                }
-            }
+            // TODO: Call the Topic Service to post the message.
+            //HttpResponseMessage topicResponseMessage;
+            //using (HttpClient httpClient = new HttpClient())
+            //{
+            //    topicResponseMessage = await httpClient.PutAsync(builder.Build(), null);
+            //}
+
+            //if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
+            //{
+            //    responseMessage.StatusCode = HttpStatusCode.Accepted;
+
+            //    var msg = await topicResponseMessage.Content.ReadAsStringAsync();
+
+            //    // TODO: do something with the response.
+            //}
+            //else
+            //{
+            //    responseMessage.StatusCode = HttpStatusCode.InternalServerError;
+            //    responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
+            //}
 
             return responseMessage;
-        }
-
-        private async Task<bool> AuthenticateRequest()
-        {
-            return true;
-
-            // TODO: Put some of this back when we have a better idea of the service.
-            /*
-            bool isAuthenticated = false;
-
-            // TODO: Call the real service.
-
-
-            var response = await InvokeService("FrontEnd", "Administration", string.Empty, string.Empty);
-            if (response != null && response.IsSuccessStatusCode)
-            {
-                isAuthenticated = true;
-            }
-
-            return isAuthenticated;
-            */
         }
 
         // GET api/tenantId/topicName
-        public HttpResponseMessage Get(string tenantId, string topicName)
+        public async Task<HttpResponseMessage> Get(string tenantId, string topicName)
         {
             return new HttpResponseMessage(HttpStatusCode.Accepted);
+
+            await GetReverseProxyPortAsync();
+
+            // TODO: Use the subscriber service to get items 
         }
 
-        private static async Task<HttpResponseMessage> InvokeService(string appName, string serviceName, string path, string partitionKey)
+        // GET api/tenantId
+        public async Task<HttpResponseMessage> GetTopics(string tenantId)
         {
-            HttpResponseMessage responseMessage;
-            try
-            {
-                using (HttpClient httpClient = new HttpClient())
-                {
-                    UriBuilder topicServiceUriBuilder = new UriBuilder("http", "localhost", 19008)
-                    {
-                        Path = $"{appName}/{serviceName}?PartitionKey={partitionKey}&PartitionKind=Int64Range"
-                    };
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
-                    responseMessage = await httpClient.GetAsync(topicServiceUriBuilder.Uri);
-                }
-            }
-            catch (Exception e)
+            await GetReverseProxyPortAsync();
+
+            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
             {
-                Console.WriteLine(e);
-                responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                // TODO: Need to use the tenant name instead of 'TenantApplication'.
+
+                PortNumber = reverseProxyPort.Value,
+                //ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/topicName"
+                ServiceName = $"TenantApplication/{TenantApplicationAdminServiceName}/api/topics/"
+            };
+
+            HttpResponseMessage topicResponseMessage;
+            using (HttpClient httpClient = new HttpClient())
+            {
+                topicResponseMessage = await httpClient.GetAsync(builder.Build());
+            }
+
+            IList<string> topicNameList = new List<string>();
+            if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
+            {
+
+                var msg = await topicResponseMessage.Content.ReadAsStringAsync();
+
+                dynamic x = JArray.Parse(msg);
+                foreach (dynamic node in x)
                 {
-                    ReasonPhrase = e.Message
-                };
+                    string serviceName = node.serviceName;
+                    serviceName = serviceName.Split('/').LastOrDefault();
+                    topicNameList.Add(serviceName);
+                }
+
+                string topicNamesJson = JsonConvert.SerializeObject(topicNameList,
+                    new JsonSerializerSettings
+                    {
+                        Formatting = Formatting.Indented
+                    });
+                responseMessage.Content = new StringContent(topicNamesJson);
+                responseMessage.StatusCode = HttpStatusCode.OK;
+            }
+            else
+            {
+                responseMessage.StatusCode = HttpStatusCode.InternalServerError;
+                responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
             }
 
             return responseMessage;
+        }
+
+        private static async Task GetReverseProxyPortAsync()
+        {
+            ReverseProxyPortResolver portResolver = new ReverseProxyPortResolver();
+
+            if (reverseProxyPort == null)
+            {
+                reverseProxyPort = await portResolver.GetReverseProxyPortAsync();
+            }
         }
     }
 }
