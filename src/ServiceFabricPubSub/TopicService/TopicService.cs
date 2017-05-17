@@ -52,17 +52,20 @@ namespace TopicService
         {
             this.StateManager.StateManagerChanged += StateManager_StateManagerChanged;
             this.StateManager.TransactionChanged += StateManager_TransactionChanged;
+
             int count = 1; // HACK used for testmessage autogeneration
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
 
-                // HACK : the next line push a message every second for easier testing the subscriber service
-                // TODO : To remove 
-                await Push(new PubSubMessage() { Message = $"TEST Message #{count++} : {DateTime.Now}" }).ConfigureAwait(false); // HACK FOR TEST
+                // HACK CREATE TEST MESSAGE
+                // TODO remove this next 2 line when CLI available
+                var testMsg = new PubSubMessage() { Message = $"TEST Message #{count++} : {DateTime.Now}" };
+                await Push(testMsg); // HACK FOR TEST
             }
         }
+
 
         private void StateManager_TransactionChanged(object sender, NotifyTransactionChangedEventArgs e)
         {
@@ -71,7 +74,7 @@ namespace TopicService
             // transaction commited
             if (e.Action == NotifyTransactionChangedAction.Commit)
             {
-                Task.Run(() => DuplicateMessages(CancellationToken.None)).ConfigureAwait(false);
+                Task.Run(() => DuplicateMessages(CancellationToken.None));
             }
         }
 
@@ -82,21 +85,21 @@ namespace TopicService
             // state manager created
             if (e.Action == NotifyStateManagerChangedAction.Add)
             {
-                Task.Run(() => DuplicateMessages(CancellationToken.None)).ConfigureAwait(false);
+                Task.Run(() => DuplicateMessages(CancellationToken.None));
             }            
         }
 
         private async Task DuplicateMessages(CancellationToken cancellationToken)
         {
             // get input q
-            var inputQueue = await this.StateManager.GetOrAddAsync<IReliableConcurrentQueue<PubSubMessage>>("inputQueue");            
+            var inputQueue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("inputQueue");            
 
             var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList");
 
             using (var tx = this.StateManager.CreateTransaction())
             {
                 // enq 1 message
-                while (inputQueue.Count > 0)
+                while (await inputQueue.GetCountAsync(tx).ConfigureAwait(false) > 0)
                 {
                     var msg = await inputQueue.TryDequeueAsync(tx).ConfigureAwait(false);
                     if (!msg.HasValue) return;
@@ -147,7 +150,7 @@ namespace TopicService
         public async Task Push(PubSubMessage msg)
         {
             var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList").ConfigureAwait(false);
-            var inputQueue = await this.StateManager.GetOrAddAsync<IReliableConcurrentQueue<PubSubMessage>>("inputQueue");
+            var inputQueue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("inputQueue");
             using (var tx = this.StateManager.CreateTransaction())
             {
                 await inputQueue.EnqueueAsync(tx, msg).ConfigureAwait(false);

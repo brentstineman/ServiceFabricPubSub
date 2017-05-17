@@ -48,9 +48,6 @@ namespace SubscriberService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            // HACK DELAY TO AVOID STRANGER ERROR IF TOO FAST STARTUP in emulator
-            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false); 
-
             // sent while creating service this way: StatefulServiceDescription.InitializationData = Encoding.UTF8.GetBytes(parameters),
             string topicName = Encoding.UTF8.GetString(this.Context.InitializationData);
 
