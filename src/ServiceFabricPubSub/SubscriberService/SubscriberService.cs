@@ -82,23 +82,38 @@ namespace SubscriberService
 
                     // local queue used to persist message in the subscriber.
                     var queue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("messages").ConfigureAwait(false);
+                    var syncStatusDico = await this.StateManager.GetOrAddAsync<IReliableDictionary<string,Guid>>("syncTracking").ConfigureAwait(false);
 
                     // implementation of message pump from TopicSvc to local queue.
-                    var msg = await topicSvc.InternalPeek(serviceName).ConfigureAwait(false); // peek 1st message from topic
-                    while (msg != null) 
+                    var peekedMsg = await topicSvc.InternalPeek(serviceName).ConfigureAwait(false); // peek 1st message from topic
+                    while (peekedMsg != null) 
                     {
-                        using (var tx = this.StateManager.CreateTransaction()) 
+                        using (var tx = this.StateManager.CreateTransaction())
                         {
-                            // add the message to the subscriber queue  
-                            await queue.EnqueueAsync(tx, msg);
-                            await tx.CommitAsync().ConfigureAwait(false);
-                            ServiceEventSource.Current.ServiceMessage(this.Context, $"Subscriber:{serviceName}:LocalEnqueue : msg : {msg.Message}");
+                            //retriev the last messageid inserted in the queue
+                            var lastMsgId = await syncStatusDico.TryGetValueAsync(tx, "lastMessageId");
+
+                            // if no value (first msg) or last msgid != peeked msg id -> add to queue
+                            if ((!lastMsgId.HasValue) || lastMsgId.Value!=peekedMsg.MessageID )
+                            {
+                                // add the message to the subscriber queue  
+                                await queue.EnqueueAsync(tx, peekedMsg);
+
+                                // update the lastMessageId enqueued
+                                await syncStatusDico.AddOrUpdateAsync(tx, "lastMessageId", peekedMsg.MessageID, (k, id) => peekedMsg.MessageID);
+
+                                await tx.CommitAsync().ConfigureAwait(false);
+                                ServiceEventSource.Current.ServiceMessage(this.Context, $"Subscriber:{serviceName}:LocalEnqueue : msg : {peekedMsg.Message}");
+                            }
                         }
+                        
                         // confirm the local enqueuing to the topicservice by dequeuing the last peeked message
-                        var msg2 = await topicSvc.InternalDequeue(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
+                        var dequeuedMsg = await topicSvc.InternalDequeue(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
+                        // checking 
+
 
                         // try peek next message from topic, if null lopp will terminate
-                        msg = await topicSvc.InternalPeek(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
+                        peekedMsg = await topicSvc.InternalPeek(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
