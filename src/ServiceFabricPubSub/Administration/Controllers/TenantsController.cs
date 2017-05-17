@@ -44,10 +44,10 @@ namespace Administration.Controllers
 
             ApplicationDescription applicationDescripriont = new ApplicationDescription(
                 new Uri("fabric:/" + TenantName), APPLICATIONTYPE_NAME, AppVersion);
-                        
+                         
             await fabricClient.ApplicationManager.CreateApplicationAsync(applicationDescripriont);
 
-            return HttpStatusCode.OK;
+            return HttpStatusCode.OK; 
         }
 
         /// <summary>
