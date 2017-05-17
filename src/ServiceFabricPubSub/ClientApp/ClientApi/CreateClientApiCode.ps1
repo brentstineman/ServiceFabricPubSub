@@ -1,4 +1,4 @@
-﻿$autorestExe= "C:\Users\gianlucb\AppData\Roaming\npm\autorest.cmd";
+﻿$autorestExe= "C:\Users\"+[System.Security.Principal.WindowsIdentity]::GetCurrent().Name+"\AppData\Roaming\npm\autorest.cmd";
 $swaggerFile = "swagger_api.json";
 $outputCSFile =  "ClientApi.cs";
 
@@ -11,4 +11,4 @@ If (Test-Path $swaggerFile){
 }
 
 Invoke-WebRequest -Uri http://localhost:8979/swagger/docs/v3 -OutFile $swaggerFile;
-Start-Process -FilePath $autorestExe -NoNewWindow -ArgumentList "--input-file=$swaggerFile --csharp --output-folder=. --namespace=ClientApi" -RedirectStandardOutput log.txt -RedirectStandardError logError.txt
+Start-Process -FilePath $autorestExe -NoNewWindow -ArgumentList "--input-file=$swaggerFile --csharp --output-folder=. --namespace=ClientApi" -RedirectStandardOutput log.log -RedirectStandardError logError.log

@@ -1,2 +1,0 @@
-AutoRest Code Generator
-(c) 2017 Microsoft Corporation. https://aka.ms/autorest
