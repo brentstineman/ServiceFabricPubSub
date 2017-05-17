@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Admin.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/")]
     public class SubscribersController : Controller
     {
         private readonly IReliableStateManager stateManager;
@@ -34,7 +34,7 @@ namespace Admin.Controllers
 
         // GET api/{topic}/subscribers
         [HttpGet]
-        [HttpGet("{topic}")]
+        [HttpGet("{topic}/subscribers")]
         public async Task<IActionResult> Get(string topic)
         {
             //TODO filter by topic.
@@ -49,19 +49,23 @@ namespace Admin.Controllers
                                     }));
         }
 
-        // GET api/topics/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
-        {
-            await Task.Delay(1);
-            return Ok("Coming soon");
-        }
 
-        // PUT api/topics/{topicname}/subscribers/{name}
+        // PUT api/{topicname}/subscribers/{name}
         [HttpPut("{topicName}/subscribers/{name}")]
         public async Task<IActionResult> Put(string topicName, string name)
         {
-            // TODO validate that topic is avaliable.
+            ServiceList services = await this.fabric.QueryManager.GetServiceListAsync(new Uri(applicationName));
+
+            try
+            {
+                Service topicService =  services.Where(x => x.ServiceTypeName == Constants.TOPIC_SERVICE_TYPE_NAME
+                               && x.ServiceName.ToString().Contains($"/topics/{topicName}")).Single();
+            }
+            catch (InvalidOperationException ex)
+            {
+                //Topic is not availible
+                return NotFound($"No topic found with name '{topicName}'.  Please create topic before adding subscription.");
+            }
 
             StatefulServiceDescription serviceDescription = new StatefulServiceDescription()
             {
@@ -85,7 +89,7 @@ namespace Admin.Controllers
             return new Uri($"{this.serviceContext.CodePackageActivationContext.ApplicationName}/topics/{topicName}/{subscriptionName}");
         }
 
-        // DELETE api/topics/{topicname}/subscribers/{name}
+        // DELETE api/{topicname}/subscribers/{name}
         [HttpDelete("{topicName}/subscribers/{name}")]
         public async Task<IActionResult> Delete(string topicName, string name)
         {
