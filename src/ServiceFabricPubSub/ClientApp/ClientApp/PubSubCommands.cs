@@ -19,10 +19,10 @@ namespace ClientApp
             {
                 Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
                 Program.EnsureParam(Program.EnsureConfig.TenantName);
-                Program.EnsureParam(Program.EnsureConfig.AppVersion);
+                //Program.EnsureParam(Program.EnsureConfig.AppVersion);
 
                 PubSubClientApi client = new PubSubClientApi(Program.ServiceFabricAdminUri);
-                client.Tenants.GetTenant(Program.TenantName, Program.AppVersion);
+                client.Tenants.GetTenant(Program.TenantName, "1.0.0");
               
                 Console.WriteLine("Created.");
                 Console.ReadKey();
@@ -34,8 +34,6 @@ namespace ClientApp
             finally
             {
                 Program.TenantName = String.Empty;
-                Program.AppVersion = String.Empty;
-
             }
         }
         public static async Task TenantSecurityKeyReset()

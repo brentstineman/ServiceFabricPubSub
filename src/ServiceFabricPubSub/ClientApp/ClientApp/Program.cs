@@ -17,7 +17,6 @@ namespace ClientApp
         public static Uri ServiceFabricAdminUri = null; //administration service
         public static string TenantName = null;
         public static string TopicName = null;
-        public static string AppVersion = null;
 
 
 
@@ -192,7 +191,7 @@ namespace ClientApp
             {
                 string serviceAdminUri = "";
                 var serviceAdminUriString = _userInput.EnsureParam(serviceAdminUri, "Service Fabric ADMIN Uri", forceReEnter: ((EnsureConfig.None & EnsureConfig.ServiceFabricAdminUri) == EnsureConfig.ServiceFabricAdminUri));
-                ServiceFabricUri = new Uri(serviceAdminUriString);
+                ServiceFabricAdminUri = new Uri(serviceAdminUriString);
             }
 
             if (String.IsNullOrEmpty(TopicName) && (param & EnsureConfig.TopicName) == EnsureConfig.TopicName)
@@ -205,10 +204,6 @@ namespace ClientApp
                 TenantName = _userInput.EnsureParam(TenantName, "Tenant Name", forceReEnter: ((EnsureConfig.None & EnsureConfig.TenantName) == EnsureConfig.TenantName));
             }
 
-            if (String.IsNullOrEmpty(AppVersion) && (param & EnsureConfig.AppVersion) == EnsureConfig.AppVersion)
-            {
-                AppVersion = _userInput.EnsureParam(AppVersion, "Version", forceReEnter: ((EnsureConfig.None & EnsureConfig.AppVersion) == EnsureConfig.AppVersion));
-            }
         }
 
         [Flags]
@@ -217,9 +212,8 @@ namespace ClientApp
             None = 0,
             ServiceFabricUri = 0x1,
             ServiceFabricAdminUri = 0x2,
-            TenantName = 0x3,
-            TopicName = 0x4,
-            AppVersion = 0x8
+            TenantName = 0x4,
+            TopicName = 0x8
         }
     }
 }
