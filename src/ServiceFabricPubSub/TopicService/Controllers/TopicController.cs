@@ -26,7 +26,6 @@ namespace TopicService.Controllers
 
         // PUT api/topic/{topic}
         [HttpPut]
-        [Route("")]
         public async Task Push(string topic, [FromBody]string message)
         {
             var service = new TopicService(context);
