@@ -1,4 +1,10 @@
-﻿$autorestExe= "C:\Users\gianlucb\AppData\Roaming\npm\autorest.cmd";
+﻿# This script creates the client for the FrontEnd API automatically
+# it uses AUTOREST (https://github.com/Azure/AutoRest)
+#   - starting from json file from swagger creates C# files
+#  to run first you need to install AUTOREST with npm install -g autorest
+#  then deploy the FrontEndType service and execute this script
+
+$autorestExe= $env:APPDATA + "\npm\autorest.cmd";
 $swaggerFile = "swagger_api.json";
 $outputCSFile =  "ClientApi.cs";
 
