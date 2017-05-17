@@ -26,6 +26,8 @@ namespace RequestRouterService
             {
                 var requestKeyHeaderValue = actionContext.Request.Headers.GetValues("x-request-key").FirstOrDefault();
 
+                string tenantName = GetTenantNameFromUrl(actionContext.Request.RequestUri);
+
                 // TODO: Parse the request URL to get the tenant name. Use the tenant name to call the tenant specific
                 //       application's admin service to get the key(s). 
                 //       Validate the admin key(s) against the ones from the service.
@@ -34,7 +36,7 @@ namespace RequestRouterService
                     // TODO: perform validation
                     HttpServiceUriBuilder builder = new HttpServiceUriBuilder
                     {
-                        ServiceName = "TenantApplication/AdminService"
+                        ServiceName = $"{tenantName}/AdminService/api/key1"
                     };
                     Uri serviceUri = builder.Build();
 
@@ -57,6 +59,14 @@ namespace RequestRouterService
             }
 
             return isAuthorized;
+        }
+
+        private string GetTenantNameFromUrl(Uri requestUri)
+        {
+            if (requestUri == null)
+                throw new ArgumentNullException(nameof(requestUri));
+
+            return "";
         }
     }
 }
