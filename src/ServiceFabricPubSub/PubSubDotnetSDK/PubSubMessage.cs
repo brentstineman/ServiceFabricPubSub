@@ -13,6 +13,11 @@ namespace PubSubDotnetSDK
             this.Message = null;
         }
 
+        public PubSubMessage(string message)
+        {
+            this.Message = message;
+        }
+
         [DataMember]
         public string Message { get; set; }
     }
