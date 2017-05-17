@@ -35,8 +35,16 @@ namespace Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            await Task.Delay(1);
-            return Ok("Coming Soon");
+
+            ServiceList services = await this.fabric.QueryManager.GetServiceListAsync(new Uri(applicationName));
+
+            return this.Ok(services
+                            .Where(x => x.ServiceTypeName == Constants.TOPIC_SERVICE_TYPE_NAME)
+                            .Select(x => new
+                                    {
+                                        ServiceName = x.ServiceName.ToString(),
+                                        ServiceStatus = x.ServiceStatus.ToString()
+                                    }));
         }
 
         // GET api/topics/5
