@@ -1,20 +1,15 @@
 using System;
-using System.Fabric;
-using System.Fabric.Management.ServiceModel;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Xml.Serialization;
 
 namespace RequestRouterService
 {
     public class RequestAuthorizationAttribute : AuthorizeAttribute
     {
-        private const string TenantApplicationAppName = "PubSubTransactionPoC";
+        private const string TenantApplicationAppName = "TenantApplication";
         private const string TenantApplicationAdminServiceName = "Admin";
 
         public override void OnAuthorization(HttpActionContext actionContext)
@@ -112,50 +107,6 @@ namespace RequestRouterService
                 throw new ArgumentNullException(nameof(requestUri));
 
             return requestUri.Segments[3].Trim('/');
-        }
-    }
-
-    public class ReverseProxyPortResolver
-    {
-        /// <summary>
-        /// Represents the port that the current fabric node is configured
-        /// to use when using a reverse proxy on localhost
-        /// </summary>
-        public async Task<int> GetReverseProxyPortAsync()
-        {
-            ClusterManifestType deserializedManifest;
-            using (var cl = new FabricClient())
-            {
-                var manifestStr = await cl.ClusterManager.GetClusterManifestAsync().ConfigureAwait(false);
-                var serializer = new XmlSerializer(typeof(ClusterManifestType));
-
-                using (var reader = new StringReader(manifestStr))
-                {
-                    deserializedManifest = (ClusterManifestType)serializer.Deserialize(reader);
-                }
-            }
-
-            //Fetch the setting from the correct node type
-            var nodeType = await GetNodeTypeAsync();
-            var nodeTypeSettings = deserializedManifest.NodeTypes.Single(x => x.Name.Equals(nodeType));
-            return int.Parse(nodeTypeSettings.Endpoints.HttpApplicationGatewayEndpoint.Port);
-        }
-
-        private async Task<string> GetNodeTypeAsync()
-        {
-            try
-            {
-                CancellationToken ct = CancellationToken.None;
-                var nodeContext = await FabricRuntime.GetNodeContextAsync(TimeSpan.FromSeconds(3), ct);
-                return nodeContext.NodeType;
-            }
-            catch (FabricConnectionDeniedException)
-            {
-                //this code was invoked from a non-fabric started application
-                //likely a unit test
-                return "NodeType0";
-            }
-
         }
     }
 }

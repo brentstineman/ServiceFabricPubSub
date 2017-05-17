@@ -106,6 +106,7 @@
     <Compile Include="OwinCommunicationListener.cs" />
     <Compile Include="RequestRouterService.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="ReverseProxyPortResolver.cs" />
     <Compile Include="ServiceEventSource.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="ServiceRequestActionFilterAttribute.cs" />
