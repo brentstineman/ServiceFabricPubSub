@@ -74,7 +74,7 @@ namespace Admin.Controllers
             {
                 await fabric.ServiceManager.CreateServiceAsync(serviceDescription);
             }
-            catch (FabricElementAlreadyExistsException ex)
+            catch (FabricElementAlreadyExistsException)
             {
                 //idempotent so return 200
                 return Ok();
@@ -92,11 +92,19 @@ namespace Admin.Controllers
         [HttpDelete("{name}")]
         public async Task<IActionResult> Delete(string name)
         {
+            // TODO delete all the subscribers too
+
             Uri serviceUri = this.CreateTopicUri(name);
-
             var description = new DeleteServiceDescription(serviceUri);
-
-            await fabric.ServiceManager.DeleteServiceAsync(description);
+            try
+            {
+                await fabric.ServiceManager.DeleteServiceAsync(description);
+            }
+            catch (FabricElementNotFoundException)
+            {
+                // service doesn't exist; nothing to delete
+                return Ok();
+            }
 
             return Ok();
         }

@@ -20,8 +20,8 @@ namespace Admin.Controllers
         private readonly StatefulServiceContext serviceContext;
         private readonly string applicationName;
 
-        public SubscribersController(IReliableStateManager stateManager, 
-                            StatefulServiceContext context, 
+        public SubscribersController(IReliableStateManager stateManager,
+                            StatefulServiceContext context,
                             FabricClient fabric)
         {
             this.stateManager = stateManager;
@@ -43,10 +43,10 @@ namespace Admin.Controllers
             return this.Ok(services
                             .Where(x => x.ServiceTypeName == Constants.SUBSCRIBER_SERVICE_TYPE_NAME)
                             .Select(x => new
-                                    {
-                                        ServiceName = x.ServiceName.ToString(),
-                                        ServiceStatus = x.ServiceStatus.ToString()
-                                    }));
+                            {
+                                ServiceName = x.ServiceName.ToString(),
+                                ServiceStatus = x.ServiceStatus.ToString()
+                            }));
         }
 
 
@@ -58,10 +58,10 @@ namespace Admin.Controllers
 
             try
             {
-                Service topicService =  services.Where(x => x.ServiceTypeName == Constants.TOPIC_SERVICE_TYPE_NAME
-                               && x.ServiceName.ToString().Contains($"/topics/{topicName}")).Single();
+                Service topicService = services.Where(x => x.ServiceTypeName == Constants.TOPIC_SERVICE_TYPE_NAME
+                              && x.ServiceName.ToString().Contains($"/topics/{topicName}")).Single();
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
                 //Topic is not availible
                 return NotFound($"No topic found with name '{topicName}'.  Please create topic before adding subscription.");
@@ -79,7 +79,15 @@ namespace Admin.Controllers
                 ServiceName = CreateSubscriptionUri(topicName, name)
             };
 
-            await fabric.ServiceManager.CreateServiceAsync(serviceDescription);
+            try
+            {
+                await fabric.ServiceManager.CreateServiceAsync(serviceDescription);
+            }
+            catch (FabricElementAlreadyExistsException)
+            {
+                //idempotent so return 200
+                return Ok();
+            }
 
             return Ok();
         }
@@ -96,8 +104,16 @@ namespace Admin.Controllers
             Uri serviceUri = this.CreateSubscriptionUri(topicName, name);
 
             var description = new DeleteServiceDescription(serviceUri);
+            try
+            {
+                await fabric.ServiceManager.DeleteServiceAsync(description);
 
-            await fabric.ServiceManager.DeleteServiceAsync(description);
+            }
+            catch (FabricElementNotFoundException)
+            {
+                // service doesn't exist; nothing to delete
+                return Ok();
+            }
 
             return Ok();
         }
