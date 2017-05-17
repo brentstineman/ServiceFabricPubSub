@@ -43,7 +43,7 @@ namespace Administration.Controllers
 
             if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
 
-            string ApplicationType = "TenantApplicationType";
+            string ApplicationType = "PubSubTransactionPoCType";
 
             ApplicationDescription application = new ApplicationDescription(
                 new Uri("fabric:/" + TenantName),

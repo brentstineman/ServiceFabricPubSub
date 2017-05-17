@@ -51,6 +51,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ClientApi\ClientApi.csproj">
+      <Project>{5db4cd1e-0343-478f-9a8c-2bc9b2df063b}</Project>
+      <Name>ClientApi</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft.ConsoleHelper\Microsoft.ConsoleHelper.csproj">
       <Project>{2beba84b-4404-4858-a056-ee42fc43e84c}</Project>
       <Name>Microsoft.ConsoleHelper</Name>
