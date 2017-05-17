@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
-using System.Linq;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.ServiceFabric.Data.Collections;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using PubSubDotnetSDK;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Data.Notifications;
 
 namespace TopicService
@@ -36,11 +39,21 @@ namespace TopicService
         {
             return new List<ServiceReplicaListener>()
             {
-                new ServiceReplicaListener( (context) => this.CreateServiceRemotingListener(context) )
+                new ServiceReplicaListener( (context) => this.CreateServiceRemotingListener(context),"ServiceEndpoint1" ),
+                new ServiceReplicaListener(serviceContext =>
+                    new KestrelCommunicationListener(
+                        serviceContext,
+                        (url, listener) => new WebHostBuilder().UseKestrel().ConfigureServices(
+                             services => services
+                                 .AddSingleton<StatefulServiceContext>(this.Context)
+                                 .AddSingleton<IReliableStateManager>(this.StateManager))
+                        .UseContentRoot(Directory.GetCurrentDirectory())
+                        .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.UseUniqueServiceUrl)
+                        .UseStartup<Startup>()
+                        .UseUrls(url)
+                        .Build()),"ServiceEndpoint2")
             };
         }
-
-
 
 
         /// <summary>
@@ -86,7 +99,7 @@ namespace TopicService
             if (e.Action == NotifyStateManagerChangedAction.Add)
             {
                 Task.Run(() => DuplicateMessages(CancellationToken.None));
-            }            
+            }
         }
 
         private async Task DuplicateMessages(CancellationToken cancellationToken)
@@ -113,9 +126,9 @@ namespace TopicService
                         }
                         ServiceEventSource.Current.ServiceMessage(this.Context, $"ENQUEUE: {msg.Value.Message} into {asyncEnumerator.Current.Key}");
                     }
-                }                
+                }
                 await tx.CommitAsync().ConfigureAwait(false);
-                
+
             }
         }
 
