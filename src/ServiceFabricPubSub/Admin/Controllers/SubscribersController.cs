@@ -41,7 +41,8 @@ namespace Admin.Controllers
             ServiceList services = await this.fabric.QueryManager.GetServiceListAsync(new Uri(applicationName));
 
             return this.Ok(services
-                            .Where(x => x.ServiceTypeName == Constants.SUBSCRIBER_SERVICE_TYPE_NAME)
+                            .Where(x => x.ServiceTypeName == Constants.SUBSCRIBER_SERVICE_TYPE_NAME
+                                    && x.ServiceName.IsTopic(topic))
                             .Select(x => new
                             {
                                 ServiceName = x.ServiceName.ToString(),
@@ -59,7 +60,7 @@ namespace Admin.Controllers
             try
             {
                 Service topicService = services.Where(x => x.ServiceTypeName == Constants.TOPIC_SERVICE_TYPE_NAME
-                              && x.ServiceName.ToString().Contains($"/topics/{topicName}")).Single();
+                              && x.ServiceName.IsTopic(topicName)).Single();
             }
             catch (InvalidOperationException)
             {
