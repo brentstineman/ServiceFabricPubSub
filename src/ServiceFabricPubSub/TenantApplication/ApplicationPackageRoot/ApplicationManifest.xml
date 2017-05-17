@@ -36,6 +36,12 @@
     <ConfigOverrides />
   </ServiceManifestImport>
   <DefaultServices>
+    <!-- <Service Name="Admin">
+      <StatefulService ServiceTypeName="AdminType" TargetReplicaSetSize="[AdminService_TargetReplicaSetSize]" MinReplicaSetSize="[AdminService_MinReplicaSetSize]">
+        <SingletonPartition />
+      </StatefulService>
+    </Service>
+    -->
     <!--
       <Service Name="AdminService">
       <StatefulService ServiceTypeName="AdminServiceType" TargetReplicaSetSize="[AdminService_TargetReplicaSetSize]" MinReplicaSetSize="[AdminService_MinReplicaSetSize]">

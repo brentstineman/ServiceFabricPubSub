@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Data;
 using System.Fabric;
 using Microsoft.AspNetCore.Hosting;
+using PubSubDotnetSDK;
+using System;
+using Microsoft.ServiceFabric.Services.Remoting.Client;
+using Microsoft.ServiceFabric.Services.Client;
 
 namespace TopicService.Controllers
 {
@@ -20,21 +24,23 @@ namespace TopicService.Controllers
             this.appLifetime = appLifetime;
         }
 
-        // POST api/subscriber/{subscriber}
-        [HttpPost]
-        [Route("subscriber/{subscriberId}")]
-        public async Task RegisterSubscriber(string subscriberId)
-        {
-            var service = new TopicService(context);
-            await service.RegisterSubscriber(subscriberId);
-        }
-
-        // PUT api/{message}
+        // PUT api/topic/{topic}
         [HttpPut]
-        public async Task Push([FromBody]string message)
+        [Route("")]
+        public async Task Push(string topic, [FromBody]string message)
         {
             var service = new TopicService(context);
-            await service.Push(new PubSubDotnetSDK.PubSubMessage(message));
+            var msg = new PubSubMessage(message);
+            var serviceRPC = ServiceProxy.Create<ITopicService>(new Uri($"fabric:/TenantApplication/{topic}"),
+               new ServicePartitionKey(0));
+            await serviceRPC.Push(msg);
+        }
+        
+        [HttpGet]
+        [Route("")]
+        public async Task Test(string subscriberId)
+        {
+            return;
         }
     }
 }

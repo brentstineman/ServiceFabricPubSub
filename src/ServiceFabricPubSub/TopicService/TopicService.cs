@@ -39,7 +39,7 @@ namespace TopicService
         {
             return new List<ServiceReplicaListener>()
             {
-                new ServiceReplicaListener( (context) => this.CreateServiceRemotingListener(context) ),
+                new ServiceReplicaListener( (context) => this.CreateServiceRemotingListener(context),"ServiceEndpoint1" ),
                 new ServiceReplicaListener(serviceContext =>
                     new KestrelCommunicationListener(
                         serviceContext,
@@ -51,7 +51,7 @@ namespace TopicService
                         .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.UseUniqueServiceUrl)
                         .UseStartup<Startup>()
                         .UseUrls(url)
-                        .Build()))
+                        .Build()),"ServiceEndpoint2")
             };
         }
 

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace TopicService
 {
@@ -37,7 +39,41 @@ namespace TopicService
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseMvc();
+        }
+
+        //http://stackoverflow.com/a/38935583/697126
+        public class ErrorHandlingMiddleware
+        {
+            private readonly RequestDelegate next;
+
+            public ErrorHandlingMiddleware(RequestDelegate next)
+            {
+                this.next = next;
+            }
+
+            public async Task Invoke(HttpContext context /* other scoped dependencies */)
+            {
+                try
+                {
+                    await next(context);
+                }
+                catch (Exception ex)
+                {
+                    await HandleExceptionAsync(context, ex);
+                }
+            }
+
+            private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+            {
+                var code = System.Net.HttpStatusCode.InternalServerError; // 500 if unexpected
+
+                var result = JsonConvert.SerializeObject(new { error = exception.Message });
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)code;
+                return context.Response.WriteAsync(result);
+            }
         }
     }
 }
