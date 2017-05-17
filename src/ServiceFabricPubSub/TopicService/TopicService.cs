@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Data.Collections;
@@ -11,6 +10,10 @@ using PubSubDotnetSDK;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Notifications;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 
 namespace TopicService
 {
@@ -36,11 +39,21 @@ namespace TopicService
         {
             return new List<ServiceReplicaListener>()
             {
-                new ServiceReplicaListener( (context) => this.CreateServiceRemotingListener(context) )
+                new ServiceReplicaListener( (context) => this.CreateServiceRemotingListener(context) ),
+                new ServiceReplicaListener(serviceContext =>
+                    new KestrelCommunicationListener(
+                        serviceContext,
+                        (url, listener) => new WebHostBuilder().UseKestrel().ConfigureServices(
+                             services => services
+                                 .AddSingleton<StatefulServiceContext>(this.Context)
+                                 .AddSingleton<IReliableStateManager>(this.StateManager))
+                        .UseContentRoot(Directory.GetCurrentDirectory())
+                        .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.UseUniqueServiceUrl)
+                        .UseStartup<Startup>()
+                        .UseUrls(url)
+                        .Build()))
             };
         }
-
-
 
 
         /// <summary>

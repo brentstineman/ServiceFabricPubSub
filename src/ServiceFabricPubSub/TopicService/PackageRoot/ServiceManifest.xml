@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ServiceManifest Name="TopicServicePkg"
+<ServiceManifest Name="TopicAPIPkg"
                  Version="1.0.0"
                  xmlns="http://schemas.microsoft.com/2011/01/fabric"
                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -15,6 +15,7 @@
     <EntryPoint>
       <ExeHost>
         <Program>TopicService.exe</Program>
+        <WorkingFolder>CodePackage</WorkingFolder>
       </ExeHost>
     </EntryPoint>
   </CodePackage>
@@ -28,12 +29,7 @@
       <!-- This endpoint is used by the communication listener to obtain the port on which to 
            listen. Please note that if your service is partitioned, this port is shared with 
            replicas of different partitions that are placed in your code. -->
-      <Endpoint Name="ServiceEndpoint" />
-
-      <!-- This endpoint is used by the replicator for replicating the state of your service.
-           This endpoint is configured through a ReplicatorSettings config section in the Settings.xml
-           file under the ConfigPackage. -->
-      <Endpoint Name="ReplicatorEndpoint" />
+      <Endpoint Protocol="http" Name="ServiceEndpoint" Type="Input" Port="8848" />
     </Endpoints>
   </Resources>
 </ServiceManifest>
