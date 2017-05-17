@@ -26,6 +26,9 @@ namespace RequestRouterService
             {
                 var requestKeyHeaderValue = actionContext.Request.Headers.GetValues("x-request-key").FirstOrDefault();
 
+                // TODO: Parse the request URL to get the tenant name. Use the tenant name to call the tenant specific
+                //       application's admin service to get the key(s). 
+                //       Validate the admin key(s) against the ones from the service.
                 if (!string.IsNullOrEmpty(requestKeyHeaderValue))
                 {
                     // TODO: perform validation
