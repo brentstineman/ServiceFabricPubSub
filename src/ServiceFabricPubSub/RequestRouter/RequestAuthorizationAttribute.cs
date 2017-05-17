@@ -77,7 +77,7 @@ namespace RequestRouterService
             HttpResponseMessage keyResponseMessage;
             ReverseProxyPortResolver portResolver = new ReverseProxyPortResolver();
 
-            int reverseProxyPortNumber = 19081; //await portResolver.GetReverseProxyPortAsync();
+            int reverseProxyPortNumber = await portResolver.GetReverseProxyPortAsync();
 
             HttpServiceUriBuilder builder = new HttpServiceUriBuilder
             {
