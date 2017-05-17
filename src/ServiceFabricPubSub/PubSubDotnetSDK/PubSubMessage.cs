@@ -15,7 +15,14 @@ namespace PubSubDotnetSDK
         {
             this.Message = null;
         }
-
+     
+        /// <summary>
+        /// Message content/payload
+        /// </summary>
+        public PubSubMessage(string message)
+        {
+            this.Message = message;
+        }
 
         /// <summary>
         /// unique Message ID set by the TopicService when message is received.
@@ -24,9 +31,6 @@ namespace PubSubDotnetSDK
         [DataMember]
         public Guid MessageID { get; set; } 
 
-        /// <summary>
-        /// Message content/payload
-        /// </summary>
         [DataMember]
         public string Message { get; set; }
     }

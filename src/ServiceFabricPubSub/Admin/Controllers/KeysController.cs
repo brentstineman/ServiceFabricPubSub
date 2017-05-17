@@ -14,15 +14,11 @@ namespace AdminService.Controller
     using Microsoft.ServiceFabric.Data.Collections;
 
     using Microsoft.AspNetCore.Hosting;
+    using Admin;
 
     [Route("api/[controller]")]
     public class KeysController : Controller
     {
-        private const string KEY1 = "key1";
-        private const string KEY2 = "key2";
-        private const string COLLECTION_KEYS = "keys";
-        private const string TOPIC_SERVICE_NAME = "TopicServiceType";
-
         private readonly IReliableStateManager stateManager;
 
         public KeysController(IReliableStateManager stateManager)
@@ -35,7 +31,7 @@ namespace AdminService.Controller
         [Route("key1")]
         public async Task<IActionResult> GetKey1Async()
         {
-            string key = await GetKey(KEY1);
+            string key = await GetKey(Constants.KEY1);
             return Ok(key);
         }
 
@@ -43,7 +39,7 @@ namespace AdminService.Controller
         [Route("key2")]
         public async Task<IActionResult> GetKey2Async()
         {
-            string key = await GetKey(KEY2);
+            string key = await GetKey(Constants.KEY2);
             return Ok(key);
         }
 
@@ -51,7 +47,7 @@ namespace AdminService.Controller
         [Route("key1")]
         public async Task<IActionResult> RegenerateKey1Async()
         {
-            string key = await GetKey(KEY1);
+            string key = await GetKey(Constants.KEY1);
             return Ok(key);
         }
 
@@ -59,7 +55,7 @@ namespace AdminService.Controller
         [Route("key2")]
         public async Task<IActionResult> RegenereateKey2Async()
         {
-            string key = await GetKey(KEY2);
+            string key = await GetKey(Constants.KEY2);
             return Ok(key);
         }
 
@@ -101,7 +97,7 @@ namespace AdminService.Controller
 
         private async Task<IReliableDictionary<string, string>> GetTopicDictionary()
         {
-            return await this.stateManager.GetOrAddAsync<IReliableDictionary<string, string>>(COLLECTION_KEYS);
+            return await this.stateManager.GetOrAddAsync<IReliableDictionary<string, string>>(Constants.COLLECTION_KEYS);
         }
     }
 }
