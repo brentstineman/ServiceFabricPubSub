@@ -33,6 +33,7 @@ namespace Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
+            await Task.Delay(1);
             return Ok("Coming Soon");
         }
 
@@ -40,6 +41,7 @@ namespace Admin.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
+            await Task.Delay(1);
             return Ok("Coming soon");
         }
 
