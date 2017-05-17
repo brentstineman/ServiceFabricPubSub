@@ -32,7 +32,7 @@ namespace RequestRouterService.Controllers
                 // TODO: Need to use the tenant name instead of 'TenantApplication'.
 
                 PortNumber = portNumber,
-                //ServiceName = $"{tenantName}/{TenantApplicationAdminServiceName}/api/topics/topicName"
+                //ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/topicName"
                 ServiceName = $"TenantApplication/{TenantApplicationAdminServiceName}/api/topics/{topicName}"
             };
 
@@ -64,6 +64,8 @@ namespace RequestRouterService.Controllers
         public HttpResponseMessage Get(string tenantId, string topicName)
         {
             return new HttpResponseMessage(HttpStatusCode.Accepted);
+
+            // TODO: Use the subscriber service to get items 
         }
 
         // GET api/tenantId
