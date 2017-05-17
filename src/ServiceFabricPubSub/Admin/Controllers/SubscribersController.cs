@@ -8,18 +8,19 @@ using Microsoft.ServiceFabric.Data;
 using Microsoft.AspNetCore.Hosting;
 using System.Fabric;
 using System.Fabric.Query;
+using System.Text;
 
 namespace Admin.Controllers
 {
-    [Route("api/[controller]")]
-    public class TopicsController : Controller
+    [Route("api/")]
+    public class SubscribersController : Controller
     {
         private readonly IReliableStateManager stateManager;
         private readonly FabricClient fabric;
         private readonly StatefulServiceContext serviceContext;
         private readonly string applicationName;
 
-        public TopicsController(IReliableStateManager stateManager, 
+        public SubscribersController(IReliableStateManager stateManager, 
                             StatefulServiceContext context, 
                             FabricClient fabric)
         {
@@ -31,15 +32,16 @@ namespace Admin.Controllers
         }
 
 
-        // GET api/topics
+        // GET api/{topic}/subscribers
         [HttpGet]
-        public async Task<IActionResult> Get()
+        [HttpGet("{topic}/subscribers")]
+        public async Task<IActionResult> Get(string topic)
         {
-
+            //TODO filter by topic.
             ServiceList services = await this.fabric.QueryManager.GetServiceListAsync(new Uri(applicationName));
 
             return this.Ok(services
-                            .Where(x => x.ServiceTypeName == Constants.TOPIC_SERVICE_TYPE_NAME)
+                            .Where(x => x.ServiceTypeName == Constants.SUBSCRIBER_SERVICE_TYPE_NAME)
                             .Select(x => new
                                     {
                                         ServiceName = x.ServiceName.ToString(),
@@ -47,18 +49,24 @@ namespace Admin.Controllers
                                     }));
         }
 
-        // GET api/topics/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
-        {
-            await Task.Delay(1);
-            return Ok("Coming soon");
-        }
 
-        // PUT api/topics/topicname
-        [HttpPut("{name}")]
-        public async Task<IActionResult> Put(string name)
+        // PUT api/{topicname}/subscribers/{name}
+        [HttpPut("{topicName}/subscribers/{name}")]
+        public async Task<IActionResult> Put(string topicName, string name)
         {
+            ServiceList services = await this.fabric.QueryManager.GetServiceListAsync(new Uri(applicationName));
+
+            try
+            {
+                Service topicService =  services.Where(x => x.ServiceTypeName == Constants.TOPIC_SERVICE_TYPE_NAME
+                               && x.ServiceName.ToString().Contains($"/topics/{topicName}")).Single();
+            }
+            catch (InvalidOperationException ex)
+            {
+                //Topic is not availible
+                return NotFound($"No topic found with name '{topicName}'.  Please create topic before adding subscription.");
+            }
+
             StatefulServiceDescription serviceDescription = new StatefulServiceDescription()
             {
                 ApplicationName = new Uri(this.applicationName),
@@ -66,8 +74,9 @@ namespace Admin.Controllers
                 TargetReplicaSetSize = 3,
                 PartitionSchemeDescription = new SingletonPartitionSchemeDescription(),
                 HasPersistedState = true,
-                ServiceTypeName = Constants.TOPIC_SERVICE_TYPE_NAME,
-                ServiceName = CreateTopicUri(name)
+                InitializationData = Encoding.UTF8.GetBytes(topicName),
+                ServiceTypeName = Constants.SUBSCRIBER_SERVICE_TYPE_NAME,
+                ServiceName = CreateSubscriptionUri(topicName, name)
             };
 
             await fabric.ServiceManager.CreateServiceAsync(serviceDescription);
@@ -75,16 +84,16 @@ namespace Admin.Controllers
             return Ok();
         }
 
-        private Uri CreateTopicUri(string topicName)
+        private Uri CreateSubscriptionUri(string topicName, string subscriptionName)
         {
-            return new Uri($"{this.serviceContext.CodePackageActivationContext.ApplicationName}/topics/{topicName}");
+            return new Uri($"{this.serviceContext.CodePackageActivationContext.ApplicationName}/topics/{topicName}/{subscriptionName}");
         }
 
-        // DELETE api/topics/topicname
-        [HttpDelete("{name}")]
-        public async Task<IActionResult> Delete(string name)
+        // DELETE api/{topicname}/subscribers/{name}
+        [HttpDelete("{topicName}/subscribers/{name}")]
+        public async Task<IActionResult> Delete(string topicName, string name)
         {
-            Uri serviceUri = this.CreateTopicUri(name);
+            Uri serviceUri = this.CreateSubscriptionUri(topicName, name);
 
             var description = new DeleteServiceDescription(serviceUri);
 
