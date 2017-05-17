@@ -1,4 +1,4 @@
-﻿$autorestExe= "C:\Users\"+[System.Security.Principal.WindowsIdentity]::GetCurrent().Name+"\AppData\Roaming\npm\autorest.cmd";
+﻿$autorestExe= "C:\Users\gianlucb\AppData\Roaming\npm\autorest.cmd";
 $swaggerFile = "swagger_api.json";
 $outputCSFile =  "ClientApi.cs";
 

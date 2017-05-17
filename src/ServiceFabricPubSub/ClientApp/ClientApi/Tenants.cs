@@ -17,7 +17,7 @@ namespace ClientApi
     /// <summary>
     /// Tenants operations.
     /// </summary>
-    public partial class Tenants : IServiceOperations<Firstversion>, ITenants
+    public partial class Tenants : IServiceOperations<PubSubClientApi>, ITenants
     {
         /// <summary>
         /// Initializes a new instance of the Tenants class.
@@ -28,7 +28,7 @@ namespace ClientApi
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
-        public Tenants(Firstversion client)
+        public Tenants(PubSubClientApi client)
         {
             if (client == null)
             {
@@ -38,9 +38,9 @@ namespace ClientApi
         }
 
         /// <summary>
-        /// Gets a reference to the Firstversion
+        /// Gets a reference to the PubSubClientApi
         /// </summary>
-        public Firstversion Client { get; private set; }
+        public PubSubClientApi Client { get; private set; }
 
         /// <param name='tenantName'>
         /// </param>
@@ -108,7 +108,7 @@ namespace ClientApi
             // Create HTTP transport objects
             var _httpRequest = new HttpRequestMessage();
             HttpResponseMessage _httpResponse = null;
-            _httpRequest.Method = new HttpMethod("GET");
+            _httpRequest.Method = new HttpMethod("PUT");
             _httpRequest.RequestUri = new System.Uri(_url);
             // Set Headers
 

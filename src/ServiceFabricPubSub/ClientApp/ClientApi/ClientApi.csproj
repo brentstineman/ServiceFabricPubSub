@@ -47,10 +47,10 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Firstversion.cs" />
-    <Compile Include="IFirstversion.cs" />
+    <Compile Include="IPubSubClientApi.cs" />
     <Compile Include="ITenants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PubSubClientApi.cs" />
     <Compile Include="Tenants.cs" />
     <Compile Include="TenantsExtensions.cs" />
   </ItemGroup>

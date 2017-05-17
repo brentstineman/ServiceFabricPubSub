@@ -21,7 +21,7 @@ namespace ClientApp
                 Program.EnsureParam(Program.EnsureConfig.TenantName);
                 Program.EnsureParam(Program.EnsureConfig.AppVersion);
 
-                Firstversion client = new Firstversion(Program.ServiceFabricAdminUri);
+                PubSubClientApi client = new PubSubClientApi(Program.ServiceFabricAdminUri);
                 client.Tenants.GetTenant(Program.TenantName, Program.AppVersion);
               
                 Console.WriteLine("Created.");
