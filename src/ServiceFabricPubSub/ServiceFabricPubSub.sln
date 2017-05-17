@@ -28,6 +28,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Admin", "Admin\Admin.csproj", "{8E4A4188-4B09-4FFD-B251-52C289395786}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Client App", "Test Client App", "{75EE27C6-00BF-4A4E-8772-C12AF99CEC86}"
+	ProjectSection(SolutionItems) = preProject
+		ClientApp\ClientApi\ClientApi.csproj = ClientApp\ClientApi\ClientApi.csproj
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AD0EBF1E-E980-435F-BB22-76E31A14EF25}"
 EndProject
