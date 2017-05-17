@@ -22,12 +22,9 @@ namespace ClientApp
                 Program.EnsureParam(Program.EnsureConfig.AppVersion);
 
                 Firstversion client = new Firstversion(Program.ServiceFabricAdminUri);
-                int? result = client.Tenants.GetTenant(Program.TenantName, Program.AppVersion);
+                client.Tenants.GetTenant(Program.TenantName, Program.AppVersion);
               
-
                 Console.WriteLine("Created.");
-
-
                 Console.ReadKey();
             }
             catch (Exception ex)
