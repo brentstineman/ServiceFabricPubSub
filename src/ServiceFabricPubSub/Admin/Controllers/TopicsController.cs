@@ -7,17 +7,17 @@ using System.Fabric.Description;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.AspNetCore.Hosting;
 using System.Fabric;
+using System.Fabric.Query;
 
 namespace Admin.Controllers
 {
     [Route("api/[controller]")]
     public class TopicsController : Controller
     {
-        private const string TOPIC_SERVICE_NAME = "TopicServiceType";
-
         private readonly IReliableStateManager stateManager;
         private readonly FabricClient fabric;
         private readonly StatefulServiceContext serviceContext;
+        private readonly string applicationName;
 
         public TopicsController(IReliableStateManager stateManager, 
                             StatefulServiceContext context, 
@@ -26,6 +26,8 @@ namespace Admin.Controllers
             this.stateManager = stateManager;
             this.serviceContext = context;
             this.fabric = fabric;
+
+            applicationName = this.serviceContext.CodePackageActivationContext.ApplicationName;
         }
 
 
@@ -49,21 +51,14 @@ namespace Admin.Controllers
         [HttpPut("{name}")]
         public async Task<IActionResult> Put(string name)
         {
-            string applicationName = this.serviceContext.CodePackageActivationContext.ApplicationName;
-
             StatefulServiceDescription serviceDescription = new StatefulServiceDescription()
             {
-                ApplicationName = new Uri(applicationName),
+                ApplicationName = new Uri(this.applicationName),
                 MinReplicaSetSize = 3,
                 TargetReplicaSetSize = 3,
-                PartitionSchemeDescription = new UniformInt64RangePartitionSchemeDescription()
-                {
-                    LowKey = 0,
-                    HighKey = 10,
-                    PartitionCount = 1
-                },
+                PartitionSchemeDescription = new SingletonPartitionSchemeDescription(),
                 HasPersistedState = true,
-                ServiceTypeName = TOPIC_SERVICE_NAME,
+                ServiceTypeName = Constants.TOPIC_SERVICE_TYPE_NAME,
                 ServiceName = CreateTopicUri(name)
             };
 
