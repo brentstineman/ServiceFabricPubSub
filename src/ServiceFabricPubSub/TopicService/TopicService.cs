@@ -137,8 +137,7 @@ namespace TopicService
         /// <param name="msg"></param>
         /// <returns></returns>
         public async Task Push(PubSubMessage msg)
-        {
-            var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList").ConfigureAwait(false);
+        {            
             var inputQueue = await this.StateManager.GetOrAddAsync<IReliableConcurrentQueue<PubSubMessage>>("inputQueue");
             using (var tx = this.StateManager.CreateTransaction())
             {
