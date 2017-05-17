@@ -11,6 +11,7 @@ namespace RequestRouterService.Controllers
         // PUT api/tenantId/topicName
         public async Task<HttpResponseMessage> Put(string tenantId, string topicName)
         {
+            HttpResponseMessage adminServiceResponseMessage;
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
             // TODO: Check if the tenant is valid. (TenantApplication/tenantId)
@@ -20,7 +21,6 @@ namespace RequestRouterService.Controllers
                 ServicePathAndQuery = ""
             };
 
-            HttpResponseMessage adminServiceResponseMessage;
             using (HttpClient httpClient = new HttpClient())
             {
                 adminServiceResponseMessage = await httpClient.GetAsync(adminServiceUriBuilder.Build());

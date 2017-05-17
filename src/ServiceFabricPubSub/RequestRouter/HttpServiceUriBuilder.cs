@@ -8,7 +8,7 @@ namespace RequestRouterService
         {
             Scheme = "http";
             Host = "localhost";
-            PortNumber = 19008;
+            PortNumber = 19081;
         }
 
         public Uri Build()
@@ -21,7 +21,7 @@ namespace RequestRouterService
             return uriBuilder.Uri;
         }
 
-        public int PortNumber { get; }
+        public int PortNumber { get; set; }
 
         public string Scheme { get; }
 
