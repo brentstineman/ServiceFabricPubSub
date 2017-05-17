@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +14,32 @@ namespace ClientApp
         #region Tenant Commands
         public static async Task TenantRegisterNew()
         {
-            //EnsureBasicParams(EnsureExtras.Azure);
+            try
+            {
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.AppVersion);
+
+                HttpClient client = new HttpClient();
+                var response = await client.GetAsync($"{Program.ServiceFabricAdminUri.AbsoluteUri}/api/tenants/?TenantName={Program.TenantName}&AppVersion={Program.AppVersion}", HttpCompletionOption.ResponseContentRead);
+
+                response.EnsureSuccessStatusCode();
+
+                Console.WriteLine("Created.");
+
+
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed", ex);
+            }
+            finally
+            {
+                Program.TenantName = String.Empty;
+                Program.AppVersion = String.Empty;
+
+            }
         }
         public static async Task TenantSecurityKeyReset()
         {         
@@ -32,7 +59,25 @@ namespace ClientApp
         #region Topic Commands
         public static async Task TopicPutMessage()
         {
-            throw new CommandFailedException("Failed");
+            try
+            {
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.TopicName);
+
+                HttpClient client = new HttpClient();
+                var response = await client.GetAsync($"{Program.ServiceFabricUri.AbsoluteUri}/api/request/{Program.TenantName}/{Program.TopicName}", HttpCompletionOption.ResponseContentRead);
+
+                response.EnsureSuccessStatusCode();
+
+                Console.WriteLine("Sent");
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed", ex);
+            }            
+          
         }
         public static async Task TopicAddSubscriber()
         {
