@@ -15,7 +15,6 @@
     <EntryPoint>
       <ExeHost>
         <Program>TopicService.exe</Program>
-        <WorkingFolder>CodePackage</WorkingFolder>
       </ExeHost>
     </EntryPoint>
   </CodePackage>
@@ -29,7 +28,12 @@
       <!-- This endpoint is used by the communication listener to obtain the port on which to 
            listen. Please note that if your service is partitioned, this port is shared with 
            replicas of different partitions that are placed in your code. -->
-      <Endpoint Protocol="http" Name="ServiceEndpoint" Type="Input" Port="8848" />
+      <Endpoint Name="ServiceEndpoint" />
+
+      <!-- This endpoint is used by the replicator for replicating the state of your service.
+           This endpoint is configured through a ReplicatorSettings config section in the Settings.xml
+           file under the ConfigPackage. -->
+      <Endpoint Name="ReplicatorEndpoint" />
     </Endpoints>
   </Resources>
 </ServiceManifest>

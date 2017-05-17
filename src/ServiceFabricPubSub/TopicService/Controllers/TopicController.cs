@@ -29,8 +29,8 @@ namespace TopicService.Controllers
             await service.RegisterSubscriber(subscriberId);
         }
 
-        // POST api/{message}
-        [HttpPost]
+        // PUT api/{message}
+        [HttpPut]
         public async Task Push([FromBody]string message)
         {
             var service = new TopicService(context);
