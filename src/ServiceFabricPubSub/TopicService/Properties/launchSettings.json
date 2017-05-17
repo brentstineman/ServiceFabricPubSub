@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "TopicAPI2": {
+    "TopicService": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "api/values",
