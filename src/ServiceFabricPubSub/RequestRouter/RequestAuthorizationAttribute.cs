@@ -21,6 +21,8 @@ namespace RequestRouterService
         private bool Authorize(HttpActionContext actionContext)
         {
             bool isAuthorized = false;
+            string key1 = string.Empty;
+            string key2 = string.Empty;
 
             try
             {
@@ -36,14 +38,26 @@ namespace RequestRouterService
                     // TODO: perform validation
                     HttpServiceUriBuilder builder = new HttpServiceUriBuilder
                     {
-                        ServiceName = $"{tenantName}/AdminService/api/key1"
+                        //ServiceName = $"{tenantName}/AdminService/api/key1"
+                        ServiceName = $"TenantApplication/AdminService/api/key1"
                     };
                     Uri serviceUri = builder.Build();
 
+                    HttpResponseMessage key1ResponseMessage;
                     using (HttpClient httpClient = new HttpClient())
                     {
-                        var response = httpClient.GetAsync(serviceUri).Result;
+                        key1ResponseMessage = httpClient.GetAsync(serviceUri).Result;
                     }
+
+                    if (key1ResponseMessage != null && key1ResponseMessage.IsSuccessStatusCode)
+                    {
+                        key1 = key1ResponseMessage.Content.ReadAsStringAsync().Result;
+                    }
+                }
+
+                if (key1 == requestKeyHeaderValue)
+                {
+                    isAuthorized = true;
                 }
 
                 isAuthorized = true;
@@ -66,7 +80,7 @@ namespace RequestRouterService
             if (requestUri == null)
                 throw new ArgumentNullException(nameof(requestUri));
 
-            return "";
+            return requestUri.Segments[3].Trim('/');
         }
     }
 }
