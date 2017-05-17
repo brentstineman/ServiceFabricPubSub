@@ -70,7 +70,15 @@ namespace Admin.Controllers
                 ServiceName = CreateTopicUri(name)
             };
 
-            await fabric.ServiceManager.CreateServiceAsync(serviceDescription);
+            try
+            {
+                await fabric.ServiceManager.CreateServiceAsync(serviceDescription);
+            }
+            catch (FabricElementAlreadyExistsException ex)
+            {
+                //idempotent so return 200
+                return Ok();
+            }
 
             return Ok();
         }
