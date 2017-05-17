@@ -14,7 +14,7 @@ namespace Administration
             // Configure Web API for self-host. 
             HttpConfiguration config = new HttpConfiguration();
 
-            config.EnableSwagger(c => c.SingleApiVersion("v3", "First version"))
+            config.EnableSwagger(c => c.SingleApiVersion("v2", "PubSubClientApi"))
                  .EnableSwaggerUi();
 
             config.Formatters.Clear();
@@ -26,6 +26,9 @@ namespace Administration
                 defaults: new { id = RouteParameter.Optional  
                 }
          );
+
+            config.Formatters.Clear();
+            config.Formatters.Add(new System.Net.Http.Formatting.JsonMediaTypeFormatter());
 
             appBuilder.UseWebApi(config);
         }
