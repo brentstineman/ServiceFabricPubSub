@@ -24,7 +24,7 @@ namespace SubscriberService
             : base(context)
         { }
 
-       
+        
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
@@ -48,9 +48,10 @@ namespace SubscriberService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false); // DELAY HACK TO AVOID STRANGER ERROR IF TOO QUICK STARTUP
+            // HACK DELAY TO AVOID STRANGER ERROR IF TOO FAST STARTUP in emulator
+            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false); 
 
-            // send while creating service this way: StatefulServiceDescription.InitializationData = Encoding.UTF8.GetBytes(parameters),
+            // sent while creating service this way: StatefulServiceDescription.InitializationData = Encoding.UTF8.GetBytes(parameters),
             string topicName = Encoding.UTF8.GetString(this.Context.InitializationData);
 
             topicName = string.IsNullOrEmpty(topicName) ? this.Context
@@ -61,27 +62,66 @@ namespace SubscriberService
                  .Parameters["TopicServiceName"]
                  .Value : topicName;
 
+            // TODO : replace the hard coded application name ('PubSubTransactionPoC') by a initializationData
             var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/" + topicName),
                  new ServicePartitionKey(0));
 
+            // register the subscriber to the targeted topic service in order to receive copy of message
             await topicSvc.RegisterSubscriber(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
+
 
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    // TODO : TEST & catch error on calling topic : if exception, recreate the serviceproxy. May occured if topic node changes
+                    var serviceName = this.Context.ServiceName.Segments[2];
+
+                    // EXPLANATION : a pseudo 'transactionnal' behavior is implemented using a 2 step message peek&Delete from the Topic.
+                    //     message is peeked in topic, inserted in the local queue, then (if no exception) deleted in the topic
+                    //     PROS : Easy to implement, CONS : no peek batch possible, impossible to have multiple subscriber on the same output queue
+
+                    // local queue used to persist message in the subscriber.
+                    var queue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("messages").ConfigureAwait(false);
+
+                    // implementation of message pump from TopicSvc to local queue.
+                    var msg = await topicSvc.InternalPeek(serviceName).ConfigureAwait(false); // peek 1st message from topic
+                    while (msg != null) 
+                    {
+                        using (var tx = this.StateManager.CreateTransaction()) 
+                        {
+                            // add the message to the subscriber queue  
+                            await queue.EnqueueAsync(tx, msg);
+                            await tx.CommitAsync().ConfigureAwait(false);
+                            ServiceEventSource.Current.ServiceMessage(this.Context, $"Subscriber:{serviceName}:LocalEnqueue : msg : {msg.Message}");
+                        }
+                        // confirm the local enqueuing to the topicservice by dequeuing the last peeked message
+                        var msg2 = await topicSvc.InternalDequeue(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
+
+                        // try peek next message from topic, if null lopp will terminate
+                        msg = await topicSvc.InternalPeek(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ServiceEventSource.Current.ServiceMessage(this.Context, $"EXCEPTION: {ex.ToString()}");
+                }
             }
         }
 
         public async Task<PubSubMessage> Pop()
         {
-            // TODO : replace appname & service name by value comming from configuration
-            var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/Topic1"),
-                new ServicePartitionKey(0));
-           
-            var msg = await topicSvc.InternalPop(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
-            ServiceEventSource.Current.ServiceMessage(this.Context, $"NEW SUBSCRIBER MESSAGE  POP : {msg}");
+            PubSubMessage msg = null;
+            var queue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("messages").ConfigureAwait(false);
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                var msgCV = await queue.TryDequeueAsync(tx).ConfigureAwait(false);
+                if (msgCV.HasValue)
+                    msg = msgCV.Value;
+                await tx.CommitAsync().ConfigureAwait(false);
+            }
             return msg;
         }
     }

@@ -23,7 +23,7 @@ namespace TopicService
             : base(context)
         { }
 
-
+         
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
@@ -52,30 +52,37 @@ namespace TopicService
         {
             this.StateManager.StateManagerChanged += StateManager_StateManagerChanged;
             this.StateManager.TransactionChanged += StateManager_TransactionChanged;
-            int count = 1;
+            int count = 1; // HACK used for testmessage autogeneration
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
-                await Push(new PubSubMessage() { Message = $"TEST  Message #{count++} : {DateTime.Now}" }).ConfigureAwait(false); // HACK FOR TEST
+
+                // HACK : the next line push a message every second for easier testing the subscriber service
+                // TODO : To remove 
+                await Push(new PubSubMessage() { Message = $"TEST Message #{count++} : {DateTime.Now}" }).ConfigureAwait(false); // HACK FOR TEST
             }
         }
 
         private void StateManager_TransactionChanged(object sender, NotifyTransactionChangedEventArgs e)
         {
+            // TODO : check if event target inputQueue only (no need to react on over state change)
+
             // transaction commited
             if (e.Action == NotifyTransactionChangedAction.Commit)
             {
-                Task.Run(() => DuplicateMessages(CancellationToken.None));
+                Task.Run(() => DuplicateMessages(CancellationToken.None)).ConfigureAwait(false);
             }
         }
 
         private void StateManager_StateManagerChanged(object sender, NotifyStateManagerChangedEventArgs e)
         {
+            // TODO : check if event target inputQueue only (no need to react on over state change)
+
             // state manager created
             if (e.Action == NotifyStateManagerChangedAction.Add)
             {
-                Task.Run(() => DuplicateMessages(CancellationToken.None));
+                Task.Run(() => DuplicateMessages(CancellationToken.None)).ConfigureAwait(false);
             }            
         }
 
@@ -131,6 +138,7 @@ namespace TopicService
         }
 
 
+     
         /// <summary>
         /// Enqueue a new message in the topic
         /// </summary>
@@ -149,29 +157,44 @@ namespace TopicService
             
         }
 
+
         /// <summary>
-        /// HACK Method for sprint0. 
-        /// Should be removed in next sprint.
+        /// Peek message from the queue (to be used by subscriber for pseudo transactionnal behavior)
         /// </summary>
         /// <param name="subcriberId"></param>
         /// <returns></returns>
-        public async Task<PubSubMessage> InternalPop(string subscriberId)
+        public async Task<PubSubMessage> InternalPeek(string subscriberId)
+        {
+            return await RunOnOutputQueue(subscriberId, (q, tx) => q.TryPeekAsync(tx)).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Dequeue message from the queue (to be used by subscriber for pseudo transactionnal behavior)
+        /// </summary>
+        /// <param name="subcriberId"></param>
+        /// <returns></returns>
+        public async Task<PubSubMessage> InternalDequeue(string subscriberId)
+        {
+            return await RunOnOutputQueue(subscriberId, (q, tx) => q.TryDequeueAsync(tx)).ConfigureAwait(false);
+        }
+
+        async Task<PubSubMessage> RunOnOutputQueue(string subscriberId,
+           Func<IReliableQueue<PubSubMessage>, ITransaction, Task<ConditionalValue<PubSubMessage>>> callOnQueue)
         {
             var queueName = $"queue_{subscriberId}";
-            var q = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>(queueName).ConfigureAwait(false);
-
+            var queue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>(queueName).ConfigureAwait(false);
             var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList").ConfigureAwait(false);
-
 
             PubSubMessage msg = null;
             using (var tx = this.StateManager.CreateTransaction())
             {
-                if (!await lst.ContainsKeyAsync(tx,queueName).ConfigureAwait(false))
+                if (!await lst.ContainsKeyAsync(tx, queueName).ConfigureAwait(false))
                 {
-                    await lst.AddAsync(tx, queueName,true).ConfigureAwait(false);
+                    await lst.AddAsync(tx, queueName, true).ConfigureAwait(false);
                 }
 
-                var msgCV= await q.TryDequeueAsync(tx).ConfigureAwait(false);
+                var msgCV = await callOnQueue(queue, tx).ConfigureAwait(false);
+                //var msgCV = await q.TryDequeueAsync(tx).ConfigureAwait(false);
                 if (msgCV.HasValue)
                     msg = msgCV.Value;
                 await tx.CommitAsync().ConfigureAwait(false);
