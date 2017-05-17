@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.ServiceFabric.Data.Collections;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using PubSubDotnetSDK;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Data.Notifications;
-using System.IO;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 
 namespace TopicService
 {
@@ -89,13 +89,13 @@ namespace TopicService
             if (e.Action == NotifyStateManagerChangedAction.Add)
             {
                 Task.Run(() => DuplicateMessages(CancellationToken.None));
-            }            
+            }
         }
 
         private async Task DuplicateMessages(CancellationToken cancellationToken)
         {
             // get input q
-            var inputQueue = await this.StateManager.GetOrAddAsync<IReliableConcurrentQueue<PubSubMessage>>("inputQueue");            
+            var inputQueue = await this.StateManager.GetOrAddAsync<IReliableConcurrentQueue<PubSubMessage>>("inputQueue");
 
             var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList");
 
@@ -116,9 +116,9 @@ namespace TopicService
                         }
                         ServiceEventSource.Current.ServiceMessage(this.Context, $"ENQUEUE: {msg.Value.Message} into {asyncEnumerator.Current.Key}");
                     }
-                }                
+                }
                 await tx.CommitAsync().ConfigureAwait(false);
-                
+
             }
         }
 
@@ -159,7 +159,7 @@ namespace TopicService
                 await tx.CommitAsync().ConfigureAwait(false);
             }
             ServiceEventSource.Current.ServiceMessage(this.Context, $"INPUT QUEUE: {msg.Message}");
-            
+
         }
 
         /// <summary>
@@ -179,12 +179,12 @@ namespace TopicService
             PubSubMessage msg = null;
             using (var tx = this.StateManager.CreateTransaction())
             {
-                if (!await lst.ContainsKeyAsync(tx,queueName).ConfigureAwait(false))
+                if (!await lst.ContainsKeyAsync(tx, queueName).ConfigureAwait(false))
                 {
-                    await lst.AddAsync(tx, queueName,true).ConfigureAwait(false);
+                    await lst.AddAsync(tx, queueName, true).ConfigureAwait(false);
                 }
 
-                var msgCV= await q.TryDequeueAsync(tx).ConfigureAwait(false);
+                var msgCV = await q.TryDequeueAsync(tx).ConfigureAwait(false);
                 if (msgCV.HasValue)
                     msg = msgCV.Value;
                 await tx.CommitAsync().ConfigureAwait(false);
