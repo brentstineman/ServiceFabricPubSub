@@ -107,11 +107,5 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AdminService\AdminService.csproj">
-      <Project>{B2307155-7BD0-499C-8CFC-72B276B79A9B}</Project>
-      <Name>AdminService</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
