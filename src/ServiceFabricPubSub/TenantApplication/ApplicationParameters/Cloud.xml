@@ -1,20 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/PubSubTransactionPoC" xmlns="http://schemas.microsoft.com/2011/01/fabric">
-  <Parameters>
-    <Parameter Name="TestWebApi_InstanceCount" Value="-1" />
-    <Parameter Name="Subscriber1_PartitionCount" Value="1" />
-    <Parameter Name="Subscriber1_MinReplicaSetSize" Value="3" />
-    <Parameter Name="Subscriber1_TargetReplicaSetSize" Value="3" />
-    <Parameter Name="Subscriber2_PartitionCount" Value="1" />
-    <Parameter Name="Subscriber2_MinReplicaSetSize" Value="3" />
-    <Parameter Name="Subscriber2_TargetReplicaSetSize" Value="3" />
-    <Parameter Name="Subscriber3_PartitionCount" Value="1" />
-    <Parameter Name="Subscriber3_MinReplicaSetSize" Value="3" />
-    <Parameter Name="Subscriber3_TargetReplicaSetSize" Value="3" />
-    <Parameter Name="AdminService_PartitionCount" Value="1" />
-    <Parameter Name="AdminService_MinReplicaSetSize" Value="3" />
-    <Parameter Name="AdminService_TargetReplicaSetSize" Value="3" />
-    <Parameter Name="SubscriberName" Value="Subscriber1" />
-    <Parameter Name="TopicName" Value="Topic1" />
-  </Parameters>
+<Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/TenantApplication" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+  <Parameters />
 </Application>
