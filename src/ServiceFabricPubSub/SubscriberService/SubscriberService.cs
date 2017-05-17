@@ -11,6 +11,7 @@ using PubSubDotnetSDK;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
 using Microsoft.ServiceFabric.Services.Client;
+using System.Text;
 
 namespace SubscriberService
 {
@@ -49,13 +50,16 @@ namespace SubscriberService
         {
             await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false); // DELAY HACK TO AVOID STRANGER ERROR IF TOO QUICK STARTUP
 
-            var topicName = this.Context
+            // send while creating service this way: StatefulServiceDescription.InitializationData = Encoding.UTF8.GetBytes(parameters),
+            string topicName = Encoding.UTF8.GetString(this.Context.InitializationData);
+
+            topicName = string.IsNullOrEmpty(topicName) ? this.Context
                 .CodePackageActivationContext
                 .GetConfigurationPackageObject("Config")
                  .Settings
                  .Sections["SubscriberConfiguration"]
                  .Parameters["TopicServiceName"]
-                 .Value;
+                 .Value : topicName;
 
             var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/" + topicName),
                  new ServicePartitionKey(0));
