@@ -20,10 +20,10 @@ namespace RequestRouterService
         /// </summary>
         public async Task<int> GetReverseProxyPortAsync()
         {
-            return 19081;
+            //return 19081;
             
             // NOTE: This doesn't seem to be working reliably. Need to revisit.
-            /*
+            
             ClusterManifestType deserializedManifest;
             using (var cl = new FabricClient())
             {
@@ -40,7 +40,7 @@ namespace RequestRouterService
             var nodeType = await GetNodeTypeAsync();
             var nodeTypeSettings = deserializedManifest.NodeTypes.Single(x => x.Name.Equals(nodeType));
             return int.Parse(nodeTypeSettings.Endpoints.HttpApplicationGatewayEndpoint.Port);
-            */
+            
         }
 
         private async Task<string> GetNodeTypeAsync()

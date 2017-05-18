@@ -1,21 +1,14 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using RequestRouterService;
-using System;
-using System.Collections.Generic;
-using System.Fabric;
-using System.Fabric.Description;
-using System.Fabric.Query;
+﻿using System;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using FrontEndHelper;
 
 namespace Administration.Controllers
 {
-    [RequestAuthorizationAttribute]
+    [RequestAuthorization]
     [ServiceRequestActionFilter]
     public class TopicsController : ApiController
     {
