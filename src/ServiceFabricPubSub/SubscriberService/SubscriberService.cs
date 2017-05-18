@@ -25,6 +25,8 @@ namespace SubscriberService
         { }
 
         
+        // TODO OPTIMISATION : migrate from ReliableQueue to ReliableConcurrentQueue for higher scalability (if strict delivering order not needed Or implement a ConcurrentSubcriberService for handling both case). 
+
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
@@ -43,7 +45,8 @@ namespace SubscriberService
 
         private Uri CreateTopicUri(string topicName)
         {
-            return new Uri($"{this.Context.CodePackageActivationContext.ApplicationName}/topics/{topicName}");
+            var url = $"{this.Context.CodePackageActivationContext.ApplicationName}/topics/{topicName}";
+            return new Uri(url);
         }
 
         /// <summary>
@@ -53,7 +56,7 @@ namespace SubscriberService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            // sent while creating service this way: StatefulServiceDescription.InitializationData = Encoding.UTF8.GetBytes(parameters),
+            // topicname sent while creating service this way: StatefulServiceDescription.InitializationData = Encoding.UTF8.GetBytes(parameters),
             string topicName = Encoding.UTF8.GetString(this.Context.InitializationData);
 
             topicName = string.IsNullOrEmpty(topicName) ? this.Context
@@ -63,6 +66,8 @@ namespace SubscriberService
                  .Sections["SubscriberConfiguration"]
                  .Parameters["TopicServiceName"]
                  .Value : topicName;
+
+            // TODO : check the topic name value (case where no initialization & no settings --> report error)
 
             Uri topicUri = CreateTopicUri(topicName);
             var topicSvc = ServiceProxy.Create<ITopicService>(topicUri, new ServicePartitionKey());
@@ -77,7 +82,7 @@ namespace SubscriberService
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    // TODO : TEST & catch error on calling topic : if exception, recreate the serviceproxy. May occured if topic node changes
+                    // TODO : TEST & catch error on calling topic : if exception, recreate the serviceproxy. May occured if topic hosting node changes
                     var serviceName = this.Context.ServiceName.Segments[2];
 
                     // EXPLANATION : a pseudo 'transactionnal' behavior is implemented using a 2 step message peek&Delete from the Topic.
@@ -98,9 +103,9 @@ namespace SubscriberService
                             var lastMsgId = await syncStatusDico.TryGetValueAsync(tx, "lastMessageId");
 
                             // if no value (first msg) or last msgid != peeked msg id -> add to queue
-                            if ((!lastMsgId.HasValue) || lastMsgId.Value!=peekedMsg.MessageID )
+                            if ((!lastMsgId.HasValue) || (lastMsgId.HasValue && lastMsgId.Value!=peekedMsg.MessageID ))
                             {
-                                // add the message to the subscriber queue  
+                                // add the message to the local queue  
                                 await queue.EnqueueAsync(tx, peekedMsg);
 
                                 // update the lastMessageId enqueued
@@ -115,7 +120,6 @@ namespace SubscriberService
                         var dequeuedMsg = await topicSvc.InternalDequeue(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
                         // checking 
 
-
                         // try peek next message from topic, if null lopp will terminate
                         peekedMsg = await topicSvc.InternalPeek(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
                     }
@@ -127,6 +131,10 @@ namespace SubscriberService
             }
         }
 
+        /// <summary>
+        /// Implementation of ISubscriberService.Pop() method
+        /// </summary>
+        /// <returns>count dequeue PubSubMessage or null if queue empty</returns>
         public async Task<PubSubMessage> Pop()
         {
             PubSubMessage msg = null;
@@ -139,6 +147,24 @@ namespace SubscriberService
                 await tx.CommitAsync().ConfigureAwait(false);
             }
             return msg;
+        }
+
+        /// <summary>
+        /// Implementation of ISubscriberService.CountAsync() method
+        /// </summary>
+        /// <returns>count of messages in the queue</returns>
+        public async Task<long> CountAsync()
+        {
+            // TODO OPTIMISATION :  try to optimze count method by maintaining an internal counter to avoid transactionnal call on queue, and increasing scalability
+            //        internal counter value will be initialised in service Startup , and update each time of queue/dequeue transaction occurs.
+            var queue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("messages").ConfigureAwait(false);
+            long count = 0;
+            using (var tx = this.StateManager.CreateTransaction()) // ReliableQueue need TX for count().
+            {
+                count = await queue.GetCountAsync(tx).ConfigureAwait(false);
+                tx.Abort();
+            }
+            return count;
         }
     }
 }
