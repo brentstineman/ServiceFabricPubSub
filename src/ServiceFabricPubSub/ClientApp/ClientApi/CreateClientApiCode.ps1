@@ -5,16 +5,23 @@
 #  then deploy the FrontEndType service and execute this script
 
 $autorestExe= $env:APPDATA + "\npm\autorest.cmd";
-$swaggerFile = "swagger_api.json";
-$outputCSFile =  "ClientApi.cs";
+$swaggerAdminFile = "swagger_admin_api.json";
+$swaggerRouterFile = "swagger_router_api.json";
 
-If (Test-Path $outputCSFile){
-	Remove-Item $outputCSFile
+#clean old definition files
+If (Test-Path $swaggerAdminFile){
+	Remove-Item $swaggerAdminFile
 }
 
-If (Test-Path $swaggerFile){
-	Remove-Item $swaggerFile
+If (Test-Path $swaggerRouterFile){
+	Remove-Item $swaggerRouterFile
 }
 
-Invoke-WebRequest -Uri http://localhost:8979/swagger/docs/v2 -OutFile $swaggerFile;
-Start-Process -FilePath $autorestExe -NoNewWindow -ArgumentList "--input-file=$swaggerFile --csharp --output-folder=. --namespace=ClientApi" -RedirectStandardOutput log.log -RedirectStandardError logError.log
+Remove-Item *.log
+Remove-Item *.cs
+
+Invoke-WebRequest -Uri http://localhost:8979/swagger/docs/v2 -OutFile $swaggerAdminFile;
+Invoke-WebRequest -Uri http://localhost:8277/swagger/docs/v1 -OutFile $swaggerRouterFile;
+
+Start-Process -FilePath $autorestExe -NoNewWindow -ArgumentList "--input-file=$swaggerAdminFile --csharp --output-folder=. --namespace=ClientApi.Admin" -RedirectStandardOutput log_admin.log -RedirectStandardError logError_admin.log
+Start-Process -FilePath $autorestExe -NoNewWindow -ArgumentList "--input-file=$swaggerRouterFile --csharp --output-folder=. --namespace=ClientApi.Router" -RedirectStandardOutput log_router.log -RedirectStandardError logError_router.log

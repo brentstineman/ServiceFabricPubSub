@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace SubscriberService
 {
@@ -89,7 +90,7 @@ namespace SubscriberService
             var topicSvc = ServiceProxy.Create<ITopicService>(topicUri, new ServicePartitionKey());
 
             // register the subscriber to the targeted topic service in order to receive copy of message
-            await topicSvc.RegisterSubscriber(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
+            await topicSvc.RegisterSubscriber(this.Context.ServiceName.Segments.Last()).ConfigureAwait(false);
 
 
             while (true)
@@ -98,8 +99,8 @@ namespace SubscriberService
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    // TODO : TEST & catch error on calling topic : if exception, recreate the serviceproxy. May occured if topic hosting node changes
-                    var serviceName = this.Context.ServiceName.Segments[2];
+                    // TODO : TEST & catch error on calling topic : if exception, recreate the serviceproxy. May occured if topic node changes
+                    var serviceName = this.Context.ServiceName.Segments.Last();
 
                     // EXPLANATION : a pseudo 'transactionnal' behavior is implemented using a 2 step message peek&Delete from the Topic.
                     //     message is peeked in topic, inserted in the local queue, then (if no exception) deleted in the topic
@@ -135,11 +136,11 @@ namespace SubscriberService
                         }
 
                         // confirm the local enqueuing to the topicservice by dequeuing the last peeked message
-                        var dequeuedMsg = await topicSvc.InternalDequeue(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
+                        var dequeuedMsg = await topicSvc.InternalDequeue(serviceName).ConfigureAwait(false);
                         // checking 
 
                         // try peek next message from topic, if null lopp will terminate
-                        peekedMsg = await topicSvc.InternalPeek(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
+                        peekedMsg = await topicSvc.InternalPeek(serviceName).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)

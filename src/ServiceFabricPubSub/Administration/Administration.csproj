@@ -112,6 +112,7 @@
   <ItemGroup>
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="Controllers\TenantsController.cs" />
+    <Compile Include="Controllers\TopicsController.cs" />
     <Compile Include="IApplicationLifetime.cs" />
     <Compile Include="MockApplicationLifetime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -127,6 +128,16 @@
     <None Include="PackageRoot\ServiceManifest.xml" />
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RequestRouter\RequestRouterService.csproj">
+      <Project>{21826476-5320-44F2-AE0E-B12E9060E39E}</Project>
+      <Name>RequestRouterService</Name>
+</ProjectReference>
+    <ProjectReference Include="..\FrontEndHelper\FrontEndHelper.csproj">
+      <Project>{18DEC5B2-1051-4CB5-A022-212836E5D2C0}</Project>
+      <Name>FrontEndHelper</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

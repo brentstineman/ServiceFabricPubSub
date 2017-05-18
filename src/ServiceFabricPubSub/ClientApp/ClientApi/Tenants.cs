@@ -2,7 +2,7 @@
 // Changes may cause incorrect behavior and will be lost if the code is
 // regenerated.
 
-namespace ClientApi
+namespace ClientApi.Admin
 {
     using Microsoft.Rest;
     using Newtonsoft.Json;
@@ -17,7 +17,7 @@ namespace ClientApi
     /// <summary>
     /// Tenants operations.
     /// </summary>
-    public partial class Tenants : IServiceOperations<PubSubClientApi>, ITenants
+    public partial class Tenants : IServiceOperations<PubSubAdminApi>, ITenants
     {
         /// <summary>
         /// Initializes a new instance of the Tenants class.
@@ -28,7 +28,7 @@ namespace ClientApi
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
-        public Tenants(PubSubClientApi client)
+        public Tenants(PubSubAdminApi client)
         {
             if (client == null)
             {
@@ -38,9 +38,9 @@ namespace ClientApi
         }
 
         /// <summary>
-        /// Gets a reference to the PubSubClientApi
+        /// Gets a reference to the PubSubAdminApi
         /// </summary>
-        public PubSubClientApi Client { get; private set; }
+        public PubSubAdminApi Client { get; private set; }
 
         /// <param name='tenantName'>
         /// </param>
@@ -67,7 +67,7 @@ namespace ClientApi
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<HttpOperationResponse<int?>> GetTenantWithHttpMessagesAsync(string tenantName, string appVersion, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<HttpOperationResponse<string>> CreateTenantWithHttpMessagesAsync(string tenantName, string appVersion, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (tenantName == null)
             {
@@ -87,7 +87,7 @@ namespace ClientApi
                 tracingParameters.Add("tenantName", tenantName);
                 tracingParameters.Add("appVersion", appVersion);
                 tracingParameters.Add("cancellationToken", cancellationToken);
-                ServiceClientTracing.Enter(_invocationId, this, "GetTenant", tracingParameters);
+                ServiceClientTracing.Enter(_invocationId, this, "CreateTenant", tracingParameters);
             }
             // Construct URL
             var _baseUrl = Client.BaseUri.AbsoluteUri;
@@ -164,7 +164,7 @@ namespace ClientApi
                 throw ex;
             }
             // Create Result
-            var _result = new HttpOperationResponse<int?>();
+            var _result = new HttpOperationResponse<string>();
             _result.Request = _httpRequest;
             _result.Response = _httpResponse;
             // Deserialize Response
@@ -173,7 +173,7 @@ namespace ClientApi
                 _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
                 try
                 {
-                    _result.Body = Microsoft.Rest.Serialization.SafeJsonConvert.DeserializeObject<int?>(_responseContent, Client.DeserializationSettings);
+                    _result.Body = Microsoft.Rest.Serialization.SafeJsonConvert.DeserializeObject<string>(_responseContent, Client.DeserializationSettings);
                 }
                 catch (JsonException ex)
                 {
