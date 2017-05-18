@@ -2,7 +2,7 @@
 // Changes may cause incorrect behavior and will be lost if the code is
 // regenerated.
 
-namespace ClientApi
+namespace ClientApi.Admin
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -19,9 +19,9 @@ namespace ClientApi
             /// </param>
             /// <param name='appVersion'>
             /// </param>
-            public static int? GetTenant(this ITenants operations, string tenantName, string appVersion)
+            public static string CreateTenant(this ITenants operations, string tenantName, string appVersion)
             {
-                return operations.GetTenantAsync(tenantName, appVersion).GetAwaiter().GetResult();
+                return operations.CreateTenantAsync(tenantName, appVersion).GetAwaiter().GetResult();
             }
 
             /// <param name='operations'>
@@ -34,9 +34,9 @@ namespace ClientApi
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<int?> GetTenantAsync(this ITenants operations, string tenantName, string appVersion, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<string> CreateTenantAsync(this ITenants operations, string tenantName, string appVersion, CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.GetTenantWithHttpMessagesAsync(tenantName, appVersion, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.CreateTenantWithHttpMessagesAsync(tenantName, appVersion, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }

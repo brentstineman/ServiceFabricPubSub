@@ -41,6 +41,11 @@ namespace SubscriberService
             };
         }
 
+        private Uri CreateTopicUri(string topicName)
+        {
+            return new Uri($"{this.Context.CodePackageActivationContext.ApplicationName}/topics/{topicName}");
+        }
+
         /// <summary>
         /// This is the main entry point for your service replica.
         /// This method executes when this replica of your service becomes primary and has write status.
@@ -59,9 +64,8 @@ namespace SubscriberService
                  .Parameters["TopicServiceName"]
                  .Value : topicName;
 
-            // TODO : replace the hard coded application name ('PubSubTransactionPoC') by a initializationData
-            var topicSvc = ServiceProxy.Create<ITopicService>(new Uri("fabric:/PubSubTransactionPoC/" + topicName),
-                 new ServicePartitionKey(0));
+            Uri topicUri = CreateTopicUri(topicName);
+            var topicSvc = ServiceProxy.Create<ITopicService>(topicUri, new ServicePartitionKey());
 
             // register the subscriber to the targeted topic service in order to receive copy of message
             await topicSvc.RegisterSubscriber(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);

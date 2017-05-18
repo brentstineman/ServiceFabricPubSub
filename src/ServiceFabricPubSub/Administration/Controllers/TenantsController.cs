@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using FrontEndHelper;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Fabric;
@@ -17,7 +18,7 @@ namespace Administration.Controllers
     [ServiceRequestActionFilter]
     public class TenantsController : ApiController
     {
-#       region GLOBAL 
+        #region GLOBAL 
 
         private readonly TimeSpan operationTimeout = TimeSpan.FromSeconds(20);
         static FabricClient fabricClient = new FabricClient();
@@ -33,21 +34,32 @@ namespace Administration.Controllers
         /// <param name="AppVersion"></param>
         /// <returns></returns>
         [HttpPut]
-        [Route("/api/tenants")]
-        public async Task<HttpStatusCode> GetTenant(string TenantName, string AppVersion)
+        [Route("/api/tenants/create")]
+        public async Task<string> CreateTenant(string TenantName, string AppVersion)
         {
             if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
-            
+
             ApplicationList applicationList = await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/" + TenantName));
 
-            if (applicationList.Count > 0) return HttpStatusCode.OK;
+            if (applicationList.Count > 0) throw new HttpResponseException(HttpStatusCode.Conflict);
 
             ApplicationDescription applicationDescripriont = new ApplicationDescription(
                 new Uri("fabric:/" + TenantName), APPLICATIONTYPE_NAME, AppVersion);
-                         
+
             await fabricClient.ApplicationManager.CreateApplicationAsync(applicationDescripriont);
 
-            return HttpStatusCode.OK; 
+
+            //the application has been created but might be not yet available
+            //so need to wait until we get the key
+            int i = 0;
+            var accessKey = "";
+            while (String.IsNullOrEmpty(accessKey)) {
+                accessKey  = await FrontEndHelper.FrontEndHelper.GetAuthKeyAsync(TenantName,"key1");
+                await Task.Delay(500);
+                if (++i > 10) break; //maximum retries
+            }
+
+            return accessKey;
         }
 
         /// <summary>
@@ -62,5 +74,6 @@ namespace Administration.Controllers
 
             return match.Success;
         }
+
     }
 }
