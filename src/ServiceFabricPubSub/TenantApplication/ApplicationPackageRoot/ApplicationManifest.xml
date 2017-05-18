@@ -14,6 +14,9 @@
     <Parameter Name="TopicService_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="TopicService_PartitionCount" DefaultValue="1" />
     <Parameter Name="TopicService_TargetReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="SubscriberService_PartitionCount" DefaultValue="1" />
+    <Parameter Name="SubscriberService_MinReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="SubscriberService_TargetReplicaSetSize" DefaultValue="3" />
     <Parameter Name="AdminService_PartitionCount" DefaultValue="1" />
     <Parameter Name="AdminService_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="AdminService_TargetReplicaSetSize" DefaultValue="3" />
@@ -25,10 +28,6 @@
        ServiceManifest.xml file. -->
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="TopicServicePkg" ServiceManifestVersion="1.0.0" />
-    <ConfigOverrides />
-  </ServiceManifestImport>
-  <ServiceManifestImport>
-    <ServiceManifestRef ServiceManifestName="SubscriberServicePkg" ServiceManifestVersion="1.0.0" />
     <ConfigOverrides />
   </ServiceManifestImport>
   <ServiceManifestImport>

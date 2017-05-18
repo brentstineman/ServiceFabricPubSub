@@ -32,7 +32,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Admin\Admin.csproj" />
-    <ProjectReference Include="..\SubscriberService\SubscriberService.csproj" />
     <ProjectReference Include="..\TopicService\TopicService.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
