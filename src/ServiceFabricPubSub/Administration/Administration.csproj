@@ -128,6 +128,12 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FrontEndHelper\FrontEndHelper.csproj">
+      <Project>{18DEC5B2-1051-4CB5-A022-212836E5D2C0}</Project>
+      <Name>FrontEndHelper</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

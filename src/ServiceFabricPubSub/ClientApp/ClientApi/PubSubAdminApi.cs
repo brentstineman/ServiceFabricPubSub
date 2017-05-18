@@ -2,7 +2,7 @@
 // Changes may cause incorrect behavior and will be lost if the code is
 // regenerated.
 
-namespace ClientApi.Router
+namespace ClientApi.Admin
 {
     using Microsoft.Rest;
     using Microsoft.Rest.Serialization;
@@ -12,7 +12,7 @@ namespace ClientApi.Router
     using System.Net;
     using System.Net.Http;
 
-    public partial class PubSubClientApi : ServiceClient<PubSubClientApi>, IPubSubClientApi
+    public partial class PubSubAdminApi : ServiceClient<PubSubAdminApi>, IPubSubAdminApi
     {
         /// <summary>
         /// The base URI of the service.
@@ -30,23 +30,23 @@ namespace ClientApi.Router
         public JsonSerializerSettings DeserializationSettings { get; private set; }
 
         /// <summary>
-        /// Gets the IRequest.
+        /// Gets the ITenants.
         /// </summary>
-        public virtual IRequest Request { get; private set; }
+        public virtual ITenants Tenants { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the PubSubClientApi class.
+        /// Initializes a new instance of the PubSubAdminApi class.
         /// </summary>
         /// <param name='handlers'>
         /// Optional. The delegating handlers to add to the http client pipeline.
         /// </param>
-        public PubSubClientApi(params DelegatingHandler[] handlers) : base(handlers)
+        public PubSubAdminApi(params DelegatingHandler[] handlers) : base(handlers)
         {
             Initialize();
         }
 
         /// <summary>
-        /// Initializes a new instance of the PubSubClientApi class.
+        /// Initializes a new instance of the PubSubAdminApi class.
         /// </summary>
         /// <param name='rootHandler'>
         /// Optional. The http client handler used to handle http transport.
@@ -54,13 +54,13 @@ namespace ClientApi.Router
         /// <param name='handlers'>
         /// Optional. The delegating handlers to add to the http client pipeline.
         /// </param>
-        public PubSubClientApi(HttpClientHandler rootHandler, params DelegatingHandler[] handlers) : base(rootHandler, handlers)
+        public PubSubAdminApi(HttpClientHandler rootHandler, params DelegatingHandler[] handlers) : base(rootHandler, handlers)
         {
             Initialize();
         }
 
         /// <summary>
-        /// Initializes a new instance of the PubSubClientApi class.
+        /// Initializes a new instance of the PubSubAdminApi class.
         /// </summary>
         /// <param name='baseUri'>
         /// Optional. The base URI of the service.
@@ -71,7 +71,7 @@ namespace ClientApi.Router
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
-        public PubSubClientApi(System.Uri baseUri, params DelegatingHandler[] handlers) : this(handlers)
+        public PubSubAdminApi(System.Uri baseUri, params DelegatingHandler[] handlers) : this(handlers)
         {
             if (baseUri == null)
             {
@@ -81,7 +81,7 @@ namespace ClientApi.Router
         }
 
         /// <summary>
-        /// Initializes a new instance of the PubSubClientApi class.
+        /// Initializes a new instance of the PubSubAdminApi class.
         /// </summary>
         /// <param name='baseUri'>
         /// Optional. The base URI of the service.
@@ -95,7 +95,7 @@ namespace ClientApi.Router
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
-        public PubSubClientApi(System.Uri baseUri, HttpClientHandler rootHandler, params DelegatingHandler[] handlers) : this(rootHandler, handlers)
+        public PubSubAdminApi(System.Uri baseUri, HttpClientHandler rootHandler, params DelegatingHandler[] handlers) : this(rootHandler, handlers)
         {
             if (baseUri == null)
             {
@@ -113,8 +113,8 @@ namespace ClientApi.Router
         /// </summary>
         private void Initialize()
         {
-            Request = new Request(this);
-            BaseUri = new System.Uri("http://localhost:8277");
+            Tenants = new Tenants(this);
+            BaseUri = new System.Uri("http://localhost:8979");
             SerializationSettings = new JsonSerializerSettings
             {
                 Formatting = Newtonsoft.Json.Formatting.Indented,
