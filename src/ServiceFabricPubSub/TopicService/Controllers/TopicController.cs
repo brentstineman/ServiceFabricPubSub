@@ -25,18 +25,17 @@ namespace TopicService.Controllers
         }
 
         [HttpPost]
-        [Route("{topic}")]
-        public async Task Push(string topic, [FromBody]object message)
+        public async Task Push([FromBody]object message)
         {
             var msg = new PubSubMessage(message.ToString());
-            var uri = CreateTopicUri(topic);
+            var uri = CreateTopicUri();
             var serviceRPC = ServiceProxy.Create<ITopicService>(uri);
             await serviceRPC.Push(msg);
         }
 
-        private Uri CreateTopicUri(string topic)
+        private Uri CreateTopicUri()
         {
-            return new Uri($"{this.context.CodePackageActivationContext.ApplicationName}/topics/{topic}");
+            return new Uri($"{this.context.ServiceName}");
         }
     }
 }

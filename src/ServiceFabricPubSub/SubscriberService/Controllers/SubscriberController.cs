@@ -33,7 +33,7 @@ namespace SubscriberService.Controllers
 
         private Uri CreateSubscriberUri()
         {
-            return new Uri($"{this.context.CodePackageActivationContext.ApplicationName}");
+            return new Uri($"{this.context.ServiceName}");
         }
     }
 }
