@@ -17,7 +17,7 @@ namespace ClientApp
         public static Uri ServiceFabricAdminUri = null; //administration service
         public static string TenantName = null;
         public static string TopicName = null;
-
+        public static string AccessKey = null;
 
 
         #region Properties
@@ -204,6 +204,11 @@ namespace ClientApp
                 TenantName = _userInput.EnsureParam(TenantName, "Tenant Name", forceReEnter: ((EnsureConfig.None & EnsureConfig.TenantName) == EnsureConfig.TenantName));
             }
 
+            if (String.IsNullOrEmpty(AccessKey) && (param & EnsureConfig.AccessKey) == EnsureConfig.AccessKey)
+            {
+                AccessKey = _userInput.EnsureParam(AccessKey, "Access Key", forceReEnter: ((EnsureConfig.None & EnsureConfig.AccessKey) == EnsureConfig.AccessKey));
+            }
+
         }
 
         [Flags]
@@ -213,7 +218,8 @@ namespace ClientApp
             ServiceFabricUri = 0x1,
             ServiceFabricAdminUri = 0x2,
             TenantName = 0x4,
-            TopicName = 0x8
+            TopicName = 0x8,
+            AccessKey = 0x16,
         }
     }
 }
