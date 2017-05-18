@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace SubscriberService
 {
