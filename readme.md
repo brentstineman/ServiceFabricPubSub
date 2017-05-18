@@ -35,7 +35,10 @@ The following links discuss details that are pertinent to how this solution was 
 ## How to test
 ### Prereq
 * Ensure both 'TenantApplication' and 'FrontEnd' Service Fabric applications are deployed locally.
-* For the 'ClientApp' project, specify the following as command line arguments:  http://localhost:8277/ http://localhost:8979/
+* For the 'ClientApp' project, specify the following as command line arguments:
+```  
+ClientApp.exe http://localhost:8277/ http://localhost:8979/
+```
  
 ### Create a tenant
 * Use the 'ClientApp' project to create a new tenant. The tenant name must be lowercase and 8-15 characters.
@@ -48,7 +51,7 @@ GET http://localhost:19081/{YOUR-TENANT-NAME}/Admin/api/keys/key1
 ```
 * Use the returned GUID as a key (HTTP header 'x-request-key')
  
-###Create a topic
+### Create a topic
 * Set the 'x-request-key' header with a value of the tenant's key (key 1 or key 2)
 * Invoke the following via PostMan:
 ```
