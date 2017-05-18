@@ -96,11 +96,10 @@ namespace ClientApi.Router
                 tracingParameters.Add("cancellationToken", cancellationToken);
                 ServiceClientTracing.Enter(_invocationId, this, "Get", tracingParameters);
             }
-            // Construct URL
-            var _baseUrl = Client.BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/Request/{tenantId}/{topicName}").ToString();
-            _url = _url.Replace("{tenantId}", System.Uri.EscapeDataString(tenantId));
-            _url = _url.Replace("{topicName}", System.Uri.EscapeDataString(topicName));
+            // Construct URL            
+            var _urlTemplate = "api/Request/{tenantId}/{topicName}";
+            string _url = CreateUrl(tenantId, topicName, _urlTemplate);
+
             List<string> _queryParameters = new List<string>();
             if (subscriber != null)
             {
@@ -115,20 +114,8 @@ namespace ClientApi.Router
             HttpResponseMessage _httpResponse = null;
             _httpRequest.Method = new HttpMethod("GET");
             _httpRequest.RequestUri = new System.Uri(_url);
-            // Set Headers
-
-
-            if (customHeaders != null)
-            {
-                foreach(var _header in customHeaders)
-                {
-                    if (_httpRequest.Headers.Contains(_header.Key))
-                    {
-                        _httpRequest.Headers.Remove(_header.Key);
-                    }
-                    _httpRequest.Headers.TryAddWithoutValidation(_header.Key, _header.Value);
-                }
-            }
+            // Set Headers            
+            AddCustomHeaders(customHeaders, _httpRequest);
 
             // Serialize Request
             string _requestContent = null;
@@ -145,55 +132,7 @@ namespace ClientApi.Router
             }
             HttpStatusCode _statusCode = _httpResponse.StatusCode;
             cancellationToken.ThrowIfCancellationRequested();
-            string _responseContent = null;
-            if ((int)_statusCode != 200)
-            {
-                var ex = new HttpOperationException(string.Format("Operation returned an invalid status code '{0}'", _statusCode));
-                if (_httpResponse.Content != null) {
-                    _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-                }
-                else {
-                    _responseContent = string.Empty;
-                }
-                ex.Request = new HttpRequestMessageWrapper(_httpRequest, _requestContent);
-                ex.Response = new HttpResponseMessageWrapper(_httpResponse, _responseContent);
-                if (_shouldTrace)
-                {
-                    ServiceClientTracing.Error(_invocationId, ex);
-                }
-                _httpRequest.Dispose();
-                if (_httpResponse != null)
-                {
-                    _httpResponse.Dispose();
-                }
-                throw ex;
-            }
-            // Create Result
-            var _result = new HttpOperationResponse<object>();
-            _result.Request = _httpRequest;
-            _result.Response = _httpResponse;
-            // Deserialize Response
-            if ((int)_statusCode == 200)
-            {
-                _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-                try
-                {
-                    _result.Body = Microsoft.Rest.Serialization.SafeJsonConvert.DeserializeObject<object>(_responseContent, Client.DeserializationSettings);
-                }
-                catch (JsonException ex)
-                {
-                    _httpRequest.Dispose();
-                    if (_httpResponse != null)
-                    {
-                        _httpResponse.Dispose();
-                    }
-                    throw new SerializationException("Unable to deserialize the response.", _responseContent, ex);
-                }
-            }
-            if (_shouldTrace)
-            {
-                ServiceClientTracing.Exit(_invocationId, _result);
-            }
+            HttpOperationResponse<object> _result = await GetResult(_shouldTrace, _invocationId, _httpRequest, _httpResponse, _requestContent, _statusCode);
             return _result;
         }
 
@@ -244,30 +183,18 @@ namespace ClientApi.Router
                 tracingParameters.Add("cancellationToken", cancellationToken);
                 ServiceClientTracing.Enter(_invocationId, this, "Post", tracingParameters);
             }
-            // Construct URL
-            var _baseUrl = Client.BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/Request/{tenantId}/{topicName}").ToString();
-            _url = _url.Replace("{tenantId}", System.Uri.EscapeDataString(tenantId));
-            _url = _url.Replace("{topicName}", System.Uri.EscapeDataString(topicName));
+            // Construct URL            
+            var _urlTemplate = "api/Request/{tenantId}/{topicName}";
+            string _url = CreateUrl(tenantId, topicName, _urlTemplate);
+
             // Create HTTP transport objects
             var _httpRequest = new HttpRequestMessage();
             HttpResponseMessage _httpResponse = null;
             _httpRequest.Method = new HttpMethod("POST");
             _httpRequest.RequestUri = new System.Uri(_url);
-            // Set Headers
-
-
-            if (customHeaders != null)
-            {
-                foreach(var _header in customHeaders)
-                {
-                    if (_httpRequest.Headers.Contains(_header.Key))
-                    {
-                        _httpRequest.Headers.Remove(_header.Key);
-                    }
-                    _httpRequest.Headers.TryAddWithoutValidation(_header.Key, _header.Value);
-                }
-            }
+            
+            // Set Headers            
+            AddCustomHeaders(customHeaders, _httpRequest);
 
             // Serialize Request
             string _requestContent = null;
@@ -284,58 +211,10 @@ namespace ClientApi.Router
             }
             HttpStatusCode _statusCode = _httpResponse.StatusCode;
             cancellationToken.ThrowIfCancellationRequested();
-            string _responseContent = null;
-            if ((int)_statusCode != 200)
-            {
-                var ex = new HttpOperationException(string.Format("Operation returned an invalid status code '{0}'", _statusCode));
-                if (_httpResponse.Content != null) {
-                    _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-                }
-                else {
-                    _responseContent = string.Empty;
-                }
-                ex.Request = new HttpRequestMessageWrapper(_httpRequest, _requestContent);
-                ex.Response = new HttpResponseMessageWrapper(_httpResponse, _responseContent);
-                if (_shouldTrace)
-                {
-                    ServiceClientTracing.Error(_invocationId, ex);
-                }
-                _httpRequest.Dispose();
-                if (_httpResponse != null)
-                {
-                    _httpResponse.Dispose();
-                }
-                throw ex;
-            }
-            // Create Result
-            var _result = new HttpOperationResponse<object>();
-            _result.Request = _httpRequest;
-            _result.Response = _httpResponse;
-            // Deserialize Response
-            if ((int)_statusCode == 200)
-            {
-                _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-                try
-                {
-                    _result.Body = Microsoft.Rest.Serialization.SafeJsonConvert.DeserializeObject<object>(_responseContent, Client.DeserializationSettings);
-                }
-                catch (JsonException ex)
-                {
-                    _httpRequest.Dispose();
-                    if (_httpResponse != null)
-                    {
-                        _httpResponse.Dispose();
-                    }
-                    throw new SerializationException("Unable to deserialize the response.", _responseContent, ex);
-                }
-            }
-            if (_shouldTrace)
-            {
-                ServiceClientTracing.Exit(_invocationId, _result);
-            }
+            HttpOperationResponse<object> _result = await GetResult(_shouldTrace, _invocationId, _httpRequest, _httpResponse, _requestContent, _statusCode);
             return _result;
         }
-
+        
         /// <param name='tenantId'>
         /// </param>
         /// <param name='customHeaders'>
@@ -377,28 +256,17 @@ namespace ClientApi.Router
                 ServiceClientTracing.Enter(_invocationId, this, "GetTopics", tracingParameters);
             }
             // Construct URL
-            var _baseUrl = Client.BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/Request/{tenantId}").ToString();
-            _url = _url.Replace("{tenantId}", System.Uri.EscapeDataString(tenantId));
+            var _urlTemplate = "api/Request/{tenantId}";
+            string _url = CreateUrl(tenantId, "", _urlTemplate);
+            
             // Create HTTP transport objects
             var _httpRequest = new HttpRequestMessage();
             HttpResponseMessage _httpResponse = null;
             _httpRequest.Method = new HttpMethod("GET");
             _httpRequest.RequestUri = new System.Uri(_url);
+            
             // Set Headers
-
-
-            if (customHeaders != null)
-            {
-                foreach(var _header in customHeaders)
-                {
-                    if (_httpRequest.Headers.Contains(_header.Key))
-                    {
-                        _httpRequest.Headers.Remove(_header.Key);
-                    }
-                    _httpRequest.Headers.TryAddWithoutValidation(_header.Key, _header.Value);
-                }
-            }
+            AddCustomHeaders(customHeaders, _httpRequest);
 
             // Serialize Request
             string _requestContent = null;
@@ -415,14 +283,47 @@ namespace ClientApi.Router
             }
             HttpStatusCode _statusCode = _httpResponse.StatusCode;
             cancellationToken.ThrowIfCancellationRequested();
+            HttpOperationResponse<object> _result = await GetResult(_shouldTrace, _invocationId, _httpRequest, _httpResponse, _requestContent, _statusCode);
+            return _result;
+        }
+
+        private static void AddCustomHeaders(Dictionary<string, List<string>> customHeaders, HttpRequestMessage _httpRequest)
+        {
+            if (customHeaders != null)
+            {
+                foreach (var _header in customHeaders)
+                {
+                    if (_httpRequest.Headers.Contains(_header.Key))
+                    {
+                        _httpRequest.Headers.Remove(_header.Key);
+                    }
+                    _httpRequest.Headers.TryAddWithoutValidation(_header.Key, _header.Value);
+                }
+            }
+        }
+
+        private string CreateUrl(string tenantId, string topicName, string _urlTemplate)
+        {
+            // TODO: pass dictionary with parameters
+            var _baseUrl = Client.BaseUri.AbsoluteUri;
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), _urlTemplate).ToString();
+            _url = _url.Replace("{tenantId}", System.Uri.EscapeDataString(tenantId));
+            _url = _url.Replace("{topicName}", System.Uri.EscapeDataString(topicName));
+            return _url;
+        }
+
+        private async Task<HttpOperationResponse<object>> GetResult(bool _shouldTrace, string _invocationId, HttpRequestMessage _httpRequest, HttpResponseMessage _httpResponse, string _requestContent, HttpStatusCode _statusCode)
+        {
             string _responseContent = null;
             if ((int)_statusCode != 200)
             {
                 var ex = new HttpOperationException(string.Format("Operation returned an invalid status code '{0}'", _statusCode));
-                if (_httpResponse.Content != null) {
+                if (_httpResponse.Content != null)
+                {
                     _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
                 }
-                else {
+                else
+                {
                     _responseContent = string.Empty;
                 }
                 ex.Request = new HttpRequestMessageWrapper(_httpRequest, _requestContent);
@@ -464,8 +365,10 @@ namespace ClientApi.Router
             {
                 ServiceClientTracing.Exit(_invocationId, _result);
             }
+
             return _result;
         }
+
 
     }
 }
