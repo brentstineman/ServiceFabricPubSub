@@ -14,8 +14,8 @@ namespace RequestRouterService
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
-                routeTemplate: "api/{controller}/{tenantId}/{topicName}",
-                defaults: new { tenantId = RouteParameter.Optional, topicName = RouteParameter.Optional }
+                routeTemplate: "api/{controller}/{tenantId}/{topicName}/{subscriberName}",
+                defaults: new { tenantId = RouteParameter.Optional, topicName = RouteParameter.Optional, subscriberName = RouteParameter.Optional }
             );
 
             appBuilder.UseWebApi(config);
