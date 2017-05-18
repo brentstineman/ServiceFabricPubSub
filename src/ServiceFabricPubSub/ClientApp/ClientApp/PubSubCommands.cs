@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using ClientApi;
 
 namespace ClientApp
 {
@@ -18,16 +19,12 @@ namespace ClientApp
             {
                 Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
                 Program.EnsureParam(Program.EnsureConfig.TenantName);
-                Program.EnsureParam(Program.EnsureConfig.AppVersion);
+                //Program.EnsureParam(Program.EnsureConfig.AppVersion);
 
-                HttpClient client = new HttpClient();
-                var response = await client.GetAsync($"{Program.ServiceFabricAdminUri.AbsoluteUri}/api/tenants/?TenantName={Program.TenantName}&AppVersion={Program.AppVersion}", HttpCompletionOption.ResponseContentRead);
-
-                response.EnsureSuccessStatusCode();
-
+                PubSubClientApi client = new PubSubClientApi(Program.ServiceFabricAdminUri);
+                client.Tenants.GetTenant(Program.TenantName, "1.0.0");
+              
                 Console.WriteLine("Created.");
-
-
                 Console.ReadKey();
             }
             catch (Exception ex)
@@ -37,8 +34,6 @@ namespace ClientApp
             finally
             {
                 Program.TenantName = String.Empty;
-                Program.AppVersion = String.Empty;
-
             }
         }
         public static async Task TenantSecurityKeyReset()
