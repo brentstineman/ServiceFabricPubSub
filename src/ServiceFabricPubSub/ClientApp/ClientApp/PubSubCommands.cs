@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ClientApi;
 using ClientApi.Admin;
 using ClientApi.Router;
+using Newtonsoft.Json.Linq;
 
 namespace ClientApp
 {
@@ -59,8 +60,12 @@ namespace ClientApp
 
                 PubSubClientApi client = new PubSubClientApi(Program.ServiceFabricUri);
                 var result = await client.Request.GetTopicsWithHttpMessagesAsync(Program.TenantName, AuthenticationHeader());
+                Console.WriteLine("Topics: ");
+                foreach (var item in ((JArray)result.Body).ToObject<List<string>>())
+                {
+                    Console.WriteLine($"- {item}");
+                }
                 
-                Console.WriteLine("Topics: " + result);
                 Console.ReadKey();
             }
             catch (Exception ex)
