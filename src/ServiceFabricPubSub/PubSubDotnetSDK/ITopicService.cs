@@ -23,6 +23,13 @@ namespace PubSubDotnetSDK
         /// <returns></returns>
         Task RegisterSubscriber(string subscriberId);
 
+        /// <summary>
+        /// Remove a subscriber target from a topic. 
+        /// After calling this method, the topic service will not more duplicate message for the subscriber. 
+        /// </summary>
+        /// <param name="subscriberId"></param>
+        /// <returns>true if subscriberId is known end removed, false otherwise</returns>
+        Task<bool> UnregisterSubscriber(string subscriberId);
 
 
         /// <summary>
