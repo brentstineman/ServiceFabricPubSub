@@ -11,19 +11,16 @@ namespace FrontEndHelper
 {
     public class ReverseProxyPortResolver
     {
-        // TODO: not sure if this logic is right. Need to investigate more. 
-        // HttpApplicationGatewayEndpoint port changes per node . . . . 
-
         /// <summary>
         /// Represents the port that the current fabric node is configured
         /// to use when using a reverse proxy on localhost
         /// </summary>
         public async Task<int> GetReverseProxyPortAsync()
         {
-            return 19081;
+            //return 19081;
             
             // NOTE: This doesn't seem to be working reliably. Need to revisit.
-            /*
+            
             ClusterManifestType deserializedManifest;
             using (var cl = new FabricClient())
             {
@@ -40,7 +37,7 @@ namespace FrontEndHelper
             var nodeType = await GetNodeTypeAsync();
             var nodeTypeSettings = deserializedManifest.NodeTypes.Single(x => x.Name.Equals(nodeType));
             return int.Parse(nodeTypeSettings.Endpoints.HttpApplicationGatewayEndpoint.Port);
-            */
+            
         }
 
         private async Task<string> GetNodeTypeAsync()
