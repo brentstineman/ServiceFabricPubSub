@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RequestRouterService;
 using System;
 using System.Collections.Generic;
@@ -24,22 +26,87 @@ namespace Administration.Controllers
         private const string TenantApplicationAdminServiceName = "Admin";
 
         [HttpPut()]
-        public async Task<string> CreateTopic(string TenantName, string TopicName)
+        public async Task<string> CreateTopic(string tenantId, string TopicName)
         {
             var key = HttpContext.Current.Request.Headers.GetValues("x-request-key").FirstOrDefault();
 
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
-            var client = new HttpClient();
-            
-            Uri uri = new Uri("http://localhost:19081/TenantApplication/Admin/api/topics");
-            HttpResponseMessage response = await client.PutAsJsonAsync(uri, TopicName);
-            
-            response.EnsureSuccessStatusCode();
+            int reverseProxyPort = await FrontEndHelper.FrontEndHelper.GetReverseProxyPortAsync();
 
-            return await response.Content.ReadAsStringAsync();
+            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
+            {
+                PortNumber = reverseProxyPort,
+                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/" + TopicName
+            };
+
+            HttpResponseMessage topicResponseMessage;
+            using (HttpClient httpClient = new HttpClient())
+            {
+                topicResponseMessage = await httpClient.GetAsync(builder.Build());
+            }
+
+            return "created";
 
         }
 
-        
+        [HttpDelete()]
+        public async Task<string> DeleteTopic(string TenantName, string TopicName)
+        {
+            
+            return "";
+
+        }
+
+        [HttpGet()]
+        public async Task<HttpResponseMessage> GetTopics(string tenantId)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
+            int reverseProxyPort = await FrontEndHelper.FrontEndHelper.GetReverseProxyPortAsync();
+
+            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
+            {
+                PortNumber = reverseProxyPort,
+                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/"
+            };
+
+            HttpResponseMessage topicResponseMessage;
+            using (HttpClient httpClient = new HttpClient())
+            {
+                topicResponseMessage = await httpClient.GetAsync(builder.Build());
+            }
+
+            IList<string> topicNameList = new List<string>();
+            if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
+            {
+                var msg = await topicResponseMessage.Content.ReadAsStringAsync();
+
+                dynamic x = JArray.Parse(msg);
+                foreach (dynamic node in x)
+                {
+                    string serviceName = node.serviceName;
+                    serviceName = serviceName.Split('/').LastOrDefault();
+                    topicNameList.Add(serviceName);
+                }
+
+                string topicNamesJson = JsonConvert.SerializeObject(topicNameList,
+                    new JsonSerializerSettings
+                    {
+                        Formatting = Formatting.Indented
+                    });
+                responseMessage.Content = new StringContent(topicNamesJson);
+                responseMessage.StatusCode = HttpStatusCode.OK;
+            }
+            else
+            {
+                responseMessage.StatusCode = HttpStatusCode.InternalServerError;
+                responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
+            }
+
+            return responseMessage;
+        }
+
+
     }
 }
