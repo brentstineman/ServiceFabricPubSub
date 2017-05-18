@@ -31,3 +31,53 @@ The following links discuss details that are pertinent to how this solution was 
 [Multi-tenant and dynamic application/service instantiation](https://azure.microsoft.com/en-us/resources/samples/service-fabric-dotnet-iot/)
 
 [Reliable Statement Manager & Notifications](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-reliable-services-notifications)
+
+## How to test
+### Prereq
+* Ensure both 'TenantApplication' and 'FrontEnd' Service Fabric applications are deployed locally.
+* For the 'ClientApp' project, specify the following as command line arguments:  http://localhost:8277/ http://localhost:8979/
+ 
+### Create a tenant
+* Use the 'ClientApp' project to create a new tenant. The tenant name must be lowercase and 8-15 characters.
+* In Service Fabric Explorer, you should see a 'fabric:/{YOUR-TENANT-NAME}' application under the 'TenantApplicationType' application.  There should also be a 'fabric:/{YOUR-TENANT-NAME}/Admin' service.
+ 
+### Get a key for the tenant
+* Invoke the following via PostMan:  
+```
+GET http://localhost:19081/{YOUR-TENANT-NAME}/Admin/api/keys/key1
+```
+* Use the returned GUID as a key (HTTP header 'x-request-key')
+ 
+###Create a topic
+* Set the 'x-request-key' header with a value of the tenant's key (key 1 or key 2)
+* Invoke the following via PostMan:
+```
+PUT http://localhost:19081/{YOUR-TENANT-NAME}/Admin/api/topics/{YOUR-TOPIC-NAME}
+```
+ 
+* The above (creating a topic) may be possible via the ClientApp but I haven't tried.
+ 
+### Post a message to a topic
+* Invoke the following via PostMan:
+```
+	   POST http://localhost:8277/api/request/{YOUR-TENANT-NAME}/{YOUR-TOPIC-NAME}
+	   Header Key: x-request-key
+	   Header Value: one of the tenant's keys
+	 
+	   Header Key: Content-Type
+	   Header Value: application/json
+	 
+	   Body: some JSON formatted string
+```
+### Load tests
+* Get and build https://github.com/PiDiBi/SuperBenchmarker
+Use it this way: 
+```
+sb.exe -u http://localhost:8277/api/request/davidbures/topic1 -m POST -t template.txt -n 1000 -c 10
+```
+Template.txt :
+```
+x-request-key: d7f25172-7391-4274-b657-key1-or-2
+
+"test message"
+```
