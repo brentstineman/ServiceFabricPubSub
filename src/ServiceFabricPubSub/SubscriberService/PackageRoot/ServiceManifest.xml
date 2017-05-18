@@ -15,6 +15,7 @@
     <EntryPoint>
       <ExeHost>
         <Program>SubscriberService.exe</Program>
+        <WorkingFolder>CodePackage</WorkingFolder>
       </ExeHost>
     </EntryPoint>
   </CodePackage>
@@ -28,7 +29,8 @@
       <!-- This endpoint is used by the communication listener to obtain the port on which to 
            listen. Please note that if your service is partitioned, this port is shared with 
            replicas of different partitions that are placed in your code. -->
-      <Endpoint Name="ServiceEndpoint" />
+      <Endpoint Protocol="http" Name="ServiceEndpoint1" />
+      <Endpoint Protocol="http" Name="ServiceEndpoint2" />
 
       <!-- This endpoint is used by the replicator for replicating the state of your service.
            This endpoint is configured through a ReplicatorSettings config section in the Settings.xml
