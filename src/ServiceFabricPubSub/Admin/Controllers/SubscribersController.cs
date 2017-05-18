@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Fabric;
 using System.Fabric.Query;
 using System.Text;
+using Microsoft.ServiceFabric.Data.Collections;
 
 namespace Admin.Controllers
 {
@@ -77,7 +78,7 @@ namespace Admin.Controllers
                 HasPersistedState = true,
                 InitializationData = Encoding.UTF8.GetBytes(topicName),
                 ServiceTypeName = Constants.SUBSCRIBER_SERVICE_TYPE_NAME,
-                ServiceName = CreateSubscriptionUri(topicName, name)
+                ServiceName = this.serviceContext.CreateSubscriptionUri(topicName, name)
             };
 
             try
@@ -93,30 +94,49 @@ namespace Admin.Controllers
             return Ok();
         }
 
-        private Uri CreateSubscriptionUri(string topicName, string subscriptionName)
-        {
-            return new Uri($"{this.serviceContext.CodePackageActivationContext.ApplicationName}/topics/{topicName}/{subscriptionName}");
-        }
+        
 
         // DELETE api/{topicname}/subscribers/{name}
         [HttpDelete("{topicName}/subscribers/{name}")]
         public async Task<IActionResult> Delete(string topicName, string name)
         {
-            Uri serviceUri = this.CreateSubscriptionUri(topicName, name);
+            var subscriptions = await this.stateManager.GetRemoveSubscriptionsDictionary();
 
-            var description = new DeleteServiceDescription(serviceUri);
-            try
+            using (var tx = this.stateManager.CreateTransaction())
             {
-                await fabric.ServiceManager.DeleteServiceAsync(description);
-
+                var subAlreadyDeleting = await subscriptions.ContainsKeyAsync(tx, name);
+                if (subAlreadyDeleting)
+                {
+                    tx.Abort(); // explicity close transaction
+                    return Accepted("Subscription has been registered for deletion and is processing.");
+                }
+                tx.Abort(); // explicity close transaction
             }
-            catch (FabricElementNotFoundException)
+
+            Uri serviceUri = this.serviceContext.CreateSubscriptionUri(topicName, name);
+            var description = new DeleteServiceDescription(serviceUri);
+
+            using (var tx = this.stateManager.CreateTransaction())
             {
-                // service doesn't exist; nothing to delete
-                return Ok();
+                // save id so can deregister with topic service once the service is gone.
+                // this is done in RunAsync on this service
+                await subscriptions.SetAsync(tx, name, topicName);
+
+                try
+                {
+                    await fabric.ServiceManager.DeleteServiceAsync(description);
+                }
+                catch (FabricElementNotFoundException)
+                {
+                    // service doesn't exist; nothing to delete
+                }
+
+                await tx.CommitAsync();
             }
 
             return Ok();
         }
+
+       
     }
 }
