@@ -133,6 +133,38 @@ namespace TopicService
         }
 
         /// <summary>
+        /// Remove a subscriber ID from the known subscriber , and delete outputqueue for that subscriber.
+        /// </summary>
+        /// <param name="subscriberId"></param>
+        /// <returns></returns>
+        public async Task<bool> UnregisterSubscriber(string subscriberId)
+        {
+            var lst = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList");
+            var queueName = $"queue_{subscriberId}";
+            using (var tx = this.StateManager.CreateTransaction())
+            {
+                if (await lst.ContainsKeyAsync(tx, queueName).ConfigureAwait(false))
+                {
+                    // subscriber to remove found -> removing it from lst and deleting associated queue
+                    var remResult = await lst.TryRemoveAsync(tx, queueName).ConfigureAwait(false);
+                    if (remResult.HasValue && remResult.Value == false) // failure to remove entry from dictio
+                    {
+                        return false;
+                    }
+
+                    await this.StateManager.RemoveAsync(tx, queueName);
+                    await tx.CommitAsync().ConfigureAwait(false);
+                    return true;
+                }
+                else
+                {
+                    tx.Abort(); // nothing to update -> cancel the tx
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
         /// Create a new outputqueue for a new subscriber instance
         /// </summary>
         /// <param name="subscriberId"></param>
@@ -219,5 +251,7 @@ namespace TopicService
             ServiceEventSource.Current.ServiceMessage(this.Context, $"DEQUEUE FOR {subscriberId} : {msg?.Message}");
             return msg;
         }
+
+      
     }
 }
