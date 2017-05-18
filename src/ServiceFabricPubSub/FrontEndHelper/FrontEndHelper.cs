@@ -11,6 +11,19 @@ namespace FrontEndHelper
     {
         private const string TenantApplicationAppName = "TenantApplication";
         private const string TenantApplicationAdminServiceName = "Admin";
+       
+
+        public static async Task<int> GetReverseProxyPortAsync()
+        {
+            int? reverseProxyPort = null;
+            ReverseProxyPortResolver portResolver = new ReverseProxyPortResolver();
+
+            if (reverseProxyPort == null)
+            {
+                reverseProxyPort = await portResolver.GetReverseProxyPortAsync();
+            }
+            return reverseProxyPort.Value;
+        }
 
         public static async Task<string> GetAuthKeyAsync(string tenantName, string keyName)
         {
