@@ -23,7 +23,7 @@ namespace Administration.Controllers
         static FabricClient fabricClient = new FabricClient();
 
         private const string APPLICATION_NAME = "fabric:/FrontEnd";
-        private readonly string APPLICATIONTYPE_NAME = "PubSubTransactionPoCType"; //"TenantApplicationType";
+        private readonly string APPLICATIONTYPE_NAME = "TenantApplicationType";
         #endregion
 
         /// <summary>
