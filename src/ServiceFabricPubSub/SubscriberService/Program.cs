@@ -20,7 +20,7 @@ namespace SubscriberService
                 // When Service Fabric creates an instance of this service type,
                 // an instance of the class is created in this host process.
 
-                ServiceRuntime.RegisterServiceAsync("SubscriberService2Type",
+                ServiceRuntime.RegisterServiceAsync("SubscriberServiceType",
                     context => new SubscriberService(context)).GetAwaiter().GetResult();
 
                 ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(SubscriberService).Name);
