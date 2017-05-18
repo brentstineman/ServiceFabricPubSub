@@ -31,6 +31,11 @@
            replicas of different partitions that are placed in your code. -->
       <Endpoint Protocol="http" Name="ServiceEndpoint1" />
       <Endpoint Protocol="http" Name="ServiceEndpoint2" />
+
+      <!-- This endpoint is used by the replicator for replicating the state of your service.
+           This endpoint is configured through a ReplicatorSettings config section in the Settings.xml
+           file under the ConfigPackage. -->
+      <Endpoint Name="ReplicatorEndpoint" />
     </Endpoints>
   </Resources>
 </ServiceManifest>
