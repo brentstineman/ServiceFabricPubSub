@@ -67,7 +67,7 @@ namespace Admin.Controllers
                 PartitionSchemeDescription = new SingletonPartitionSchemeDescription(),
                 HasPersistedState = true,
                 ServiceTypeName = Constants.TOPIC_SERVICE_TYPE_NAME,
-                ServiceName = CreateTopicUri(name)
+                ServiceName = this.serviceContext.CreateTopicUri(name)
             };
 
             try
@@ -83,10 +83,7 @@ namespace Admin.Controllers
             return Ok();
         }
 
-        private Uri CreateTopicUri(string topicName)
-        {
-            return new Uri($"{this.serviceContext.CodePackageActivationContext.ApplicationName}/topics/{topicName}");
-        }
+        
 
         // DELETE api/topics/topicname
         [HttpDelete("{name}")]
@@ -94,7 +91,7 @@ namespace Admin.Controllers
         {
             // TODO delete all the subscribers too
 
-            Uri serviceUri = this.CreateTopicUri(name);
+            Uri serviceUri = this.serviceContext.CreateTopicUri(name);
             var description = new DeleteServiceDescription(serviceUri);
             try
             {

@@ -14,25 +14,32 @@
     <Parameter Name="TopicService_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="TopicService_PartitionCount" DefaultValue="1" />
     <Parameter Name="TopicService_TargetReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="SubscriberService_PartitionCount" DefaultValue="1" />
+    <Parameter Name="SubscriberService_MinReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="SubscriberService_TargetReplicaSetSize" DefaultValue="3" />
     <Parameter Name="AdminService_PartitionCount" DefaultValue="1" />
     <Parameter Name="AdminService_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="AdminService_TargetReplicaSetSize" DefaultValue="3" />
     <Parameter Name="SubscriberName" DefaultValue="Subscriber1" />
     <Parameter Name="TopicName" DefaultValue="Topic1" />
   </Parameters>
+  <!--<ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="TopicServicePkg" ServiceManifestVersion="1.0.0" />
+    <ConfigOverrides />
+  </ServiceManifestImport> -->
   <!-- Import the ServiceManifest from the ServicePackage. The ServiceManifestName and ServiceManifestVersion 
        should match the Name and Version attributes of the ServiceManifest element defined in the 
        ServiceManifest.xml file. -->
+  <ServiceManifestImport>
+    <ServiceManifestRef ServiceManifestName="AdminPkg" ServiceManifestVersion="1.0.0" />
+    <ConfigOverrides />
+  </ServiceManifestImport>
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="TopicServicePkg" ServiceManifestVersion="1.0.0" />
     <ConfigOverrides />
   </ServiceManifestImport>
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="SubscriberServicePkg" ServiceManifestVersion="1.0.0" />
-    <ConfigOverrides />
-  </ServiceManifestImport>
-  <ServiceManifestImport>
-    <ServiceManifestRef ServiceManifestName="AdminPkg" ServiceManifestVersion="1.0.0" />
     <ConfigOverrides />
   </ServiceManifestImport>
   <DefaultServices>
@@ -44,6 +51,11 @@
     <!--<Service Name="TopicService">
       <StatefulService ServiceTypeName="TopicServiceType" TargetReplicaSetSize="[TopicService_TargetReplicaSetSize]" MinReplicaSetSize="[TopicService_MinReplicaSetSize]">
         <UniformInt64Partition PartitionCount="[TopicService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+      </StatefulService>
+    </Service>
+    <Service Name="SubscriberService">
+      <StatefulService ServiceTypeName="SubscriberServiceType" TargetReplicaSetSize="[SubscriberService_TargetReplicaSetSize]" MinReplicaSetSize="[SubscriberService_MinReplicaSetSize]">
+        <UniformInt64Partition PartitionCount="[SubscriberService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
       </StatefulService>
     </Service>-->
     <Service Name="Admin">
