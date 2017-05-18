@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Data.Collections;
@@ -12,6 +11,11 @@ using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
 using Microsoft.ServiceFabric.Services.Client;
 using System.Text;
+using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using Microsoft.ServiceFabric.Data;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SubscriberService
 {
@@ -24,7 +28,6 @@ namespace SubscriberService
             : base(context)
         { }
 
-        
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
@@ -37,7 +40,19 @@ namespace SubscriberService
         {
             return new List<ServiceReplicaListener>()
             {
-                new ServiceReplicaListener( (context) => this.CreateServiceRemotingListener(context) )
+                new ServiceReplicaListener( (context) => this.CreateServiceRemotingListener(context), "ServiceEndpoint1"),
+                new ServiceReplicaListener(serviceContext =>
+                    new KestrelCommunicationListener(
+                        serviceContext,
+                        (url, listener) => new WebHostBuilder().UseKestrel().ConfigureServices(
+                             services => services
+                                 .AddSingleton<StatefulServiceContext>(this.Context)
+                                 .AddSingleton<IReliableStateManager>(this.StateManager))
+                        .UseContentRoot(Directory.GetCurrentDirectory())
+                        .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.UseUniqueServiceUrl)
+                        .UseStartup<Startup>()
+                        .UseUrls(url)
+                        .Build()),"ServiceEndpoint2")
             };
         }
 
@@ -86,11 +101,11 @@ namespace SubscriberService
 
                     // local queue used to persist message in the subscriber.
                     var queue = await this.StateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("messages").ConfigureAwait(false);
-                    var syncStatusDico = await this.StateManager.GetOrAddAsync<IReliableDictionary<string,Guid>>("syncTracking").ConfigureAwait(false);
+                    var syncStatusDico = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, Guid>>("syncTracking").ConfigureAwait(false);
 
                     // implementation of message pump from TopicSvc to local queue.
                     var peekedMsg = await topicSvc.InternalPeek(serviceName).ConfigureAwait(false); // peek 1st message from topic
-                    while (peekedMsg != null) 
+                    while (peekedMsg != null)
                     {
                         using (var tx = this.StateManager.CreateTransaction())
                         {
@@ -98,7 +113,7 @@ namespace SubscriberService
                             var lastMsgId = await syncStatusDico.TryGetValueAsync(tx, "lastMessageId");
 
                             // if no value (first msg) or last msgid != peeked msg id -> add to queue
-                            if ((!lastMsgId.HasValue) || lastMsgId.Value!=peekedMsg.MessageID )
+                            if ((!lastMsgId.HasValue) || lastMsgId.Value != peekedMsg.MessageID)
                             {
                                 // add the message to the subscriber queue  
                                 await queue.EnqueueAsync(tx, peekedMsg);
@@ -110,7 +125,7 @@ namespace SubscriberService
                                 ServiceEventSource.Current.ServiceMessage(this.Context, $"Subscriber:{serviceName}:LocalEnqueue : msg : {peekedMsg.Message}");
                             }
                         }
-                        
+
                         // confirm the local enqueuing to the topicservice by dequeuing the last peeked message
                         var dequeuedMsg = await topicSvc.InternalDequeue(this.Context.ServiceName.Segments[2]).ConfigureAwait(false);
                         // checking 
