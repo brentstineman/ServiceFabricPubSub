@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Newtonsoft.Json;
@@ -14,7 +15,6 @@ namespace RequestRouterService.Controllers
     public class RequestController : ApiController
     {
         private const string TenantApplicationAdminServiceName = "Admin";
-        private const string TenantApplicationTopicServiceName = "topics";
 
         private static int? reverseProxyPort = null;
 
@@ -34,73 +34,42 @@ namespace RequestRouterService.Controllers
                 // TODO: Need to use the tenant name instead of 'TenantApplication'.
 
                 PortNumber = reverseProxyPort.Value,
-                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/api/{topicName}"
+                //ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/topicName"
+                ServiceName = $"TenantApplication/{TenantApplicationAdminServiceName}/api/topics/{topicName}"
             };
 
-            HttpResponseMessage topicResponseMessage;
-            using (HttpClient httpClient = new HttpClient())
-            {
-                HttpContent postContent = new StringContent(messageBody);
-                postContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            // TODO: Call the Topic Service to post the message.
+            //HttpResponseMessage topicResponseMessage;
+            //using (HttpClient httpClient = new HttpClient())
+            //{
+            //    topicResponseMessage = await httpClient.PutAsync(builder.Build(), null);
+            //}
 
-                topicResponseMessage = await httpClient.PostAsync(builder.Build(), postContent);
-            }
+            //if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
+            //{
+            //    responseMessage.StatusCode = HttpStatusCode.Accepted;
 
-            if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
-            {
-                responseMessage.StatusCode = HttpStatusCode.Accepted;
+            //    var msg = await topicResponseMessage.Content.ReadAsStringAsync();
 
-                var msg = await topicResponseMessage.Content.ReadAsStringAsync();
-
-                // TODO: do something with the response.
-            }
-            else
-            {
-                responseMessage.StatusCode = topicResponseMessage?.StatusCode ?? HttpStatusCode.InternalServerError;
-                responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
-            }
+            //    // TODO: do something with the response.
+            //}
+            //else
+            //{
+            //    responseMessage.StatusCode = HttpStatusCode.InternalServerError;
+            //    responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
+            //}
 
             return responseMessage;
         }
 
-        // GET api/tenantId/topicName/subscriber
-        public async Task<HttpResponseMessage> Get(string tenantId, string topicName, string subscriber)
+        // GET api/tenantId/topicName
+        public async Task<HttpResponseMessage> Get(string tenantId, string topicName)
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            return new HttpResponseMessage(HttpStatusCode.Accepted);
 
             await GetReverseProxyPortAsync();
 
-            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
-            {
-                // TODO: Need to use the tenant name instead of 'TenantApplication'.
-
-                PortNumber = reverseProxyPort.Value,
-                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/api/{topicName}"
-                //ServiceName = $"TenantApplication/{TenantApplicationTopicServiceName}/api/{topicName}"
-            };
-
-            HttpResponseMessage topicResponseMessage;
-            HttpContent postContent = this.Request.Content;
-            using (HttpClient httpClient = new HttpClient())
-            {
-                topicResponseMessage = await httpClient.PostAsync(builder.Build(), postContent);
-            }
-
-            if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
-            {
-                responseMessage.StatusCode = HttpStatusCode.Accepted;
-
-                var msg = await topicResponseMessage.Content.ReadAsStringAsync();
-
-                // TODO: do something with the response.
-            }
-            else
-            {
-                responseMessage.StatusCode = topicResponseMessage?.StatusCode ?? HttpStatusCode.InternalServerError;
-                responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
-            }
-
-            return responseMessage;
+            // TODO: Use the subscriber service to get items 
         }
 
         // GET api/tenantId
@@ -115,8 +84,8 @@ namespace RequestRouterService.Controllers
                 // TODO: Need to use the tenant name instead of 'TenantApplication'.
 
                 PortNumber = reverseProxyPort.Value,
-                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/"
-                //ServiceName = $"TenantApplication/{TenantApplicationAdminServiceName}/api/topics/"
+                //ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/topicName"
+                ServiceName = $"TenantApplication/{TenantApplicationAdminServiceName}/api/topics/"
             };
 
             HttpResponseMessage topicResponseMessage;
@@ -128,6 +97,7 @@ namespace RequestRouterService.Controllers
             IList<string> topicNameList = new List<string>();
             if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
             {
+
                 var msg = await topicResponseMessage.Content.ReadAsStringAsync();
 
                 dynamic x = JArray.Parse(msg);

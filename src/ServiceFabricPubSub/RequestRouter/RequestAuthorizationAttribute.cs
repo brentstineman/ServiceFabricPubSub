@@ -75,17 +75,16 @@ namespace RequestRouterService
         {
             string keyValue = null;
             HttpResponseMessage keyResponseMessage;
-
-            // TODO: Probably should cache this info someplace. No need to look up every time.
             ReverseProxyPortResolver portResolver = new ReverseProxyPortResolver();
+
             int reverseProxyPortNumber = await portResolver.GetReverseProxyPortAsync();
 
             HttpServiceUriBuilder builder = new HttpServiceUriBuilder
             {
                 PortNumber = reverseProxyPortNumber,
                 // http://localhost:19081/PubSubTransactionPoC/Admin/api/keys/key1
-                ServiceName = $"{tenantName}/{TenantApplicationAdminServiceName}/api/keys/{keyName}"
-                //ServiceName = $"{TenantApplicationAppName}/{TenantApplicationAdminServiceName}/api/keys/{keyName}"
+                //ServiceName = $"{tenantName}/{TenantApplicationAdminServiceName}/api/keys/key1"
+                ServiceName = $"{TenantApplicationAppName}/{TenantApplicationAdminServiceName}/api/keys/{keyName}"
             };
             Uri serviceUri = builder.Build();
 
