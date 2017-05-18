@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ClientApi;
 using ClientApi.Admin;
 using ClientApi.Router;
+using Newtonsoft.Json;
 
 namespace ClientApp
 {
@@ -37,19 +38,12 @@ namespace ClientApp
             finally
             {
                 Program.TenantName = String.Empty;
+                Program.TopicName = String.Empty;      
+                Program.AccessKey = String.Empty;
             }
         }
-        public static async Task TenantSecurityKeyReset()
-        {         
-        }
-        public static async Task TenantAddTopic()
-        {
-        }
 
-        public static async Task TenantDeleteTopic()
-        {
-        }
-        public static async Task TenantListTopics()
+        public static async Task TenantSecurityKeyReset()
         {
             try
             {
@@ -57,10 +51,12 @@ namespace ClientApp
                 Program.EnsureParam(Program.EnsureConfig.TenantName);
                 Program.EnsureParam(Program.EnsureConfig.AccessKey);
 
-                PubSubClientApi client = new PubSubClientApi(Program.ServiceFabricUri);
-                var result = await client.Request.GetTopicsWithHttpMessagesAsync(Program.TenantName, AuthenticationHeader());
-                
-                Console.WriteLine("Topics: " + result);
+                //TODO add reset security
+                PubSubAdminApi client = new PubSubAdminApi(Program.ServiceFabricAdminUri);
+                var result = await client.Topics.DeleteTopicWithHttpMessagesAsync(Program.TenantName, Program.TopicName, AuthenticationHeader());
+
+                Console.WriteLine("Deleted");
+
                 Console.ReadKey();
             }
             catch (Exception ex)
@@ -70,6 +66,94 @@ namespace ClientApp
             finally
             {
                 Program.TenantName = String.Empty;
+                Program.TopicName = String.Empty;
+            }
+        }
+
+        public static async Task TenantCreateTopic()
+        {
+            try
+            {
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.TopicName);
+                Program.EnsureParam(Program.EnsureConfig.AccessKey);
+
+                PubSubAdminApi client = new PubSubAdminApi(Program.ServiceFabricAdminUri);
+                var result = await client.Topics.CreateTopicWithHttpMessagesAsync(Program.TenantName,Program.TopicName, AuthenticationHeader());
+
+                Console.WriteLine($"Topic '{Program.TopicName}' created.");
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed", ex);
+            }
+            finally
+            {
+                Program.TenantName = String.Empty;
+                Program.TopicName = String.Empty;
+                Program.AccessKey = String.Empty;
+            }
+        }
+
+        public static async Task TenantDeleteTopic()
+        {
+            try
+            {
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.TopicName);
+                Program.EnsureParam(Program.EnsureConfig.AccessKey);
+
+                PubSubAdminApi client = new PubSubAdminApi(Program.ServiceFabricAdminUri);
+                var result = await client.Topics.DeleteTopicWithHttpMessagesAsync(Program.TenantName, Program.TopicName, AuthenticationHeader());
+
+                Console.WriteLine("Deleted");
+
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed", ex);
+            }
+            finally
+            {
+                Program.TenantName = String.Empty;
+                Program.TopicName = String.Empty;
+                Program.AccessKey = String.Empty;
+            }
+        }
+
+        public static async Task TenantListTopics()
+        {
+            try
+            {
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.AccessKey);
+
+                PubSubAdminApi client = new PubSubAdminApi(Program.ServiceFabricAdminUri);
+                var result = await client.Topics.GetTopicsWithHttpMessagesAsync(Program.TenantName, AuthenticationHeader());
+
+                List<string> topics = JsonConvert.DeserializeObject<List<string>>(result.Body.ToString());
+
+                Console.WriteLine("Topics");
+                Console.WriteLine("-------------------");
+
+                foreach (string t in topics)
+                    Console.WriteLine(t);
+
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed", ex);
+            }
+            finally
+            {
+                Program.TenantName = String.Empty;
+                Program.TopicName = String.Empty;
             }
         }
         #endregion

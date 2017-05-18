@@ -51,12 +51,12 @@ namespace Administration.Controllers
 
             //the application has been created but might be not yet available
             //so need to wait until we get the key
-            int i = 0;
+          
             var accessKey = "";
             while (String.IsNullOrEmpty(accessKey)) {
                 accessKey  = await FrontEndHelper.FrontEndHelper.GetAuthKeyAsync(TenantName,"key1");
                 await Task.Delay(500);
-                if (++i > 10) break; //maximum retries
+              
             }
 
             return accessKey;

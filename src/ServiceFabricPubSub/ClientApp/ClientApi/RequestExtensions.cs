@@ -19,40 +19,6 @@ namespace ClientApi.Router
             /// </param>
             /// <param name='topicName'>
             /// </param>
-            /// <param name='subscriber'>
-            /// </param>
-            public static object Get(this IRequest operations, string tenantId, string topicName, string subscriber)
-            {
-                return operations.GetAsync(tenantId, topicName, subscriber).GetAwaiter().GetResult();
-            }
-
-            /// <param name='operations'>
-            /// The operations group for this extension method.
-            /// </param>
-            /// <param name='tenantId'>
-            /// </param>
-            /// <param name='topicName'>
-            /// </param>
-            /// <param name='subscriber'>
-            /// </param>
-            /// <param name='cancellationToken'>
-            /// The cancellation token.
-            /// </param>
-            public static async Task<object> GetAsync(this IRequest operations, string tenantId, string topicName, string subscriber, CancellationToken cancellationToken = default(CancellationToken))
-            {
-                using (var _result = await operations.GetWithHttpMessagesAsync(tenantId, topicName, subscriber, null, cancellationToken).ConfigureAwait(false))
-                {
-                    return _result.Body;
-                }
-            }
-
-            /// <param name='operations'>
-            /// The operations group for this extension method.
-            /// </param>
-            /// <param name='tenantId'>
-            /// </param>
-            /// <param name='topicName'>
-            /// </param>
             public static object Post(this IRequest operations, string tenantId, string topicName)
             {
                 return operations.PostAsync(tenantId, topicName).GetAwaiter().GetResult();
@@ -71,6 +37,40 @@ namespace ClientApi.Router
             public static async Task<object> PostAsync(this IRequest operations, string tenantId, string topicName, CancellationToken cancellationToken = default(CancellationToken))
             {
                 using (var _result = await operations.PostWithHttpMessagesAsync(tenantId, topicName, null, cancellationToken).ConfigureAwait(false))
+                {
+                    return _result.Body;
+                }
+            }
+
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
+            /// <param name='tenantId'>
+            /// </param>
+            /// <param name='topicName'>
+            /// </param>
+            /// <param name='subscriberName'>
+            /// </param>
+            public static object Get(this IRequest operations, string tenantId, string topicName, string subscriberName)
+            {
+                return operations.GetAsync(tenantId, topicName, subscriberName).GetAwaiter().GetResult();
+            }
+
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
+            /// <param name='tenantId'>
+            /// </param>
+            /// <param name='topicName'>
+            /// </param>
+            /// <param name='subscriberName'>
+            /// </param>
+            /// <param name='cancellationToken'>
+            /// The cancellation token.
+            /// </param>
+            public static async Task<object> GetAsync(this IRequest operations, string tenantId, string topicName, string subscriberName, CancellationToken cancellationToken = default(CancellationToken))
+            {
+                using (var _result = await operations.GetWithHttpMessagesAsync(tenantId, topicName, subscriberName, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }

@@ -17,7 +17,7 @@ using System.Web.Http;
 
 namespace Administration.Controllers
 {
-    [RequestAuthorizationAttribute]
+    //[RequestAuthorizationAttribute]
     [ServiceRequestActionFilter]
     public class TopicsController : ApiController
     {
@@ -28,7 +28,7 @@ namespace Administration.Controllers
         [HttpPut()]
         public async Task<string> CreateTopic(string tenantId, string TopicName)
         {
-            var key = HttpContext.Current.Request.Headers.GetValues("x-request-key").FirstOrDefault();
+            //var key = HttpContext.Current.Request.Headers.GetValues("x-request-key").FirstOrDefault();
 
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
@@ -43,7 +43,7 @@ namespace Administration.Controllers
             HttpResponseMessage topicResponseMessage;
             using (HttpClient httpClient = new HttpClient())
             {
-                topicResponseMessage = await httpClient.GetAsync(builder.Build());
+                topicResponseMessage = await httpClient.PutAsync(builder.Build(),null);
             }
 
             return "created";
@@ -51,12 +51,60 @@ namespace Administration.Controllers
         }
 
         [HttpDelete()]
-        public async Task<string> DeleteTopic(string TenantName, string TopicName)
+        public async Task<string> DeleteTopic(string tenantId, string TopicName)
         {
-            
-            return "";
+
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
+            int reverseProxyPort = await FrontEndHelper.FrontEndHelper.GetReverseProxyPortAsync();
+
+            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
+            {
+                PortNumber = reverseProxyPort,
+                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/" + TopicName
+            };
+
+            HttpResponseMessage topicResponseMessage;
+            using (HttpClient httpClient = new HttpClient())
+            {
+                topicResponseMessage = await httpClient.DeleteAsync(builder.Build());
+            }
+
+            return "deleted";
 
         }
+
+        [HttpPatch()]
+        public async Task<string> ResetKeys(string tenantId)
+        {
+
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
+            int reverseProxyPort = await FrontEndHelper.FrontEndHelper.GetReverseProxyPortAsync();
+
+            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
+            {
+                PortNumber = reverseProxyPort,
+                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/keys/key1"
+            };
+
+            HttpServiceUriBuilder builder2 = new HttpServiceUriBuilder()
+            {
+                PortNumber = reverseProxyPort,
+                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/keys/key2"
+            };
+
+            HttpResponseMessage topicResponseMessage;
+            using (HttpClient httpClient = new HttpClient())
+            {
+                topicResponseMessage = await httpClient.GetAsync(builder.Build());
+                topicResponseMessage = await httpClient.GetAsync(builder2.Build());
+            }
+
+            return "keys reset";
+
+        }
+
 
         [HttpGet()]
         public async Task<HttpResponseMessage> GetTopics(string tenantId)

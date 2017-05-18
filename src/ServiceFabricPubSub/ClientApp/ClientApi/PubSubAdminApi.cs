@@ -35,6 +35,11 @@ namespace ClientApi.Admin
         public virtual ITenants Tenants { get; private set; }
 
         /// <summary>
+        /// Gets the ITopics.
+        /// </summary>
+        public virtual ITopics Topics { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the PubSubAdminApi class.
         /// </summary>
         /// <param name='handlers'>
@@ -114,6 +119,7 @@ namespace ClientApi.Admin
         private void Initialize()
         {
             Tenants = new Tenants(this);
+            Topics = new Topics(this);
             BaseUri = new System.Uri("http://localhost:8979");
             SerializationSettings = new JsonSerializerSettings
             {

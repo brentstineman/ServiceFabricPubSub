@@ -83,10 +83,10 @@ namespace ClientApp
         {
             var tenantsCmds = new Commands();
             tenantsCmds.RegisterCommand("Register new", PubSubCommands.TenantRegisterNew);
-            tenantsCmds.RegisterCommand("Security Key reset", PubSubCommands.TenantSecurityKeyReset);
-            tenantsCmds.RegisterCommand("Add a Topic", PubSubCommands.TenantAddTopic);
+            tenantsCmds.RegisterCommand("Add a Topic", PubSubCommands.TenantCreateTopic);
             tenantsCmds.RegisterCommand("Delete a Topic", PubSubCommands.TenantDeleteTopic);
             tenantsCmds.RegisterCommand("List Topics", PubSubCommands.TenantListTopics);
+            tenantsCmds.RegisterCommand("Security Key reset (not working)", PubSubCommands.TenantSecurityKeyReset);
             _groups.AddGroup("Tenant", tenantsCmds);
 
             var topicCmds = new Commands();
