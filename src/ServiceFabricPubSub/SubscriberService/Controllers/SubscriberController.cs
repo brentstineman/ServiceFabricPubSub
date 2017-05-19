@@ -31,7 +31,7 @@ namespace SubscriberService.Controllers
             return await serviceRPC.Pop();
         }
 
-        [HttpGet]
+        [HttpGet("count")]
         public async Task<long> Count()
         {
             var uri = CreateSubscriberUri();
