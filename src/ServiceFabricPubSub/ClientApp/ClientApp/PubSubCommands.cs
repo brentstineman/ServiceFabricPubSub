@@ -7,6 +7,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using ClientApi;
+using ClientApi.Admin;
+using ClientApi.Router;
+using Newtonsoft.Json.Linq;
 
 namespace ClientApp
 {
@@ -19,12 +22,13 @@ namespace ClientApp
             {
                 Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
                 Program.EnsureParam(Program.EnsureConfig.TenantName);
-                //Program.EnsureParam(Program.EnsureConfig.AppVersion);
 
-                PubSubClientApi client = new PubSubClientApi(Program.ServiceFabricAdminUri);
-                client.Tenants.GetTenant(Program.TenantName, "1.0.0");
+                PubSubAdminApi client = new PubSubAdminApi(Program.ServiceFabricAdminUri);
+                Program.AccessKey = client.Tenants.CreateTenant(Program.TenantName, "1.0.0");
               
-                Console.WriteLine("Created.");
+                Console.WriteLine($"Tenant '{Program.TenantName}' created.");
+                Console.WriteLine($"Access key: {Program.AccessKey}");
+
                 Console.ReadKey();
             }
             catch (Exception ex)
@@ -48,6 +52,30 @@ namespace ClientApp
         }
         public static async Task TenantListTopics()
         {
+            try
+            {
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.AccessKey);
+
+                PubSubClientApi client = new PubSubClientApi(Program.ServiceFabricUri);
+                var result = await client.Request.GetTopicsWithHttpMessagesAsync(Program.TenantName, AuthenticationHeader());
+                Console.WriteLine("Topics: ");
+                foreach (var item in ((JArray)result.Body).ToObject<List<string>>())
+                {
+                    Console.WriteLine($"- {item}");
+                }
+                
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed", ex);
+            }
+            finally
+            {
+                Program.TenantName = String.Empty;
+            }
         }
         #endregion
 
@@ -104,5 +132,13 @@ namespace ClientApp
             //EnsureBasicParams(EnsureExtras.Azure);
         }
         #endregion
+
+        private static Dictionary<string, List<string>> AuthenticationHeader() {
+            Dictionary<string, List<string>> customHeaders = new Dictionary<string, List<string>>(1);
+            var authz = new List<string>();
+            authz.Add(Program.AccessKey);
+            customHeaders.Add("x-request-key", authz);
+            return customHeaders;
+        }
     }
 }

@@ -2,7 +2,7 @@
 // Changes may cause incorrect behavior and will be lost if the code is
 // regenerated.
 
-namespace ClientApi
+namespace ClientApi.Admin
 {
     using Microsoft.Rest;
     using System.Collections;
@@ -34,6 +34,6 @@ namespace ClientApi
         /// <exception cref="Microsoft.Rest.ValidationException">
         /// Thrown when a required parameter is null
         /// </exception>
-        Task<HttpOperationResponse<int?>> GetTenantWithHttpMessagesAsync(string tenantName, string appVersion, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<HttpOperationResponse<string>> CreateTenantWithHttpMessagesAsync(string tenantName, string appVersion, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

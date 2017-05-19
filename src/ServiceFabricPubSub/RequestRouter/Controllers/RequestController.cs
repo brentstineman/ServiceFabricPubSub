@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using FrontEndHelper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -16,7 +19,7 @@ namespace RequestRouterService.Controllers
         private const string TenantApplicationAdminServiceName = "Admin";
         private const string TenantApplicationTopicServiceName = "topics";
 
-        private static int? reverseProxyPort = null;
+        private static int _reverseProxyPort;
 
         // POST api/tenantId/topicName
         public async Task<HttpResponseMessage> Post(string tenantId, string topicName)
@@ -26,15 +29,10 @@ namespace RequestRouterService.Controllers
             // Assuming the message body will contain the content for the data to put to the topic.
             string messageBody = await this.Request.Content.ReadAsStringAsync();
 
-            // TODO: Clean this up everywhere . . . . 
-            await GetReverseProxyPortAsync();
-
             HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
             {
-                // TODO: Need to use the tenant name instead of 'TenantApplication'.
-
-                PortNumber = reverseProxyPort.Value,
-                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/api/{topicName}"
+                PortNumber = await GetReverseProxyPortAsync(),
+                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/api/"
             };
 
             HttpResponseMessage topicResponseMessage;
@@ -51,8 +49,8 @@ namespace RequestRouterService.Controllers
                 responseMessage.StatusCode = HttpStatusCode.Accepted;
 
                 var msg = await topicResponseMessage.Content.ReadAsStringAsync();
-
-                // TODO: do something with the response.
+                
+                System.Diagnostics.Debug.WriteLine($"Received response of '{msg}'.");
             }
             else
             {
@@ -64,35 +62,31 @@ namespace RequestRouterService.Controllers
         }
 
         // GET api/tenantId/topicName/subscriber
-        public async Task<HttpResponseMessage> Get(string tenantId, string topicName, string subscriber)
+        public async Task<HttpResponseMessage> Get(string tenantId, string topicName, string subscriberName)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
-            await GetReverseProxyPortAsync();
-
             HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
             {
-                // TODO: Need to use the tenant name instead of 'TenantApplication'.
-
-                PortNumber = reverseProxyPort.Value,
-                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/api/{topicName}"
-                //ServiceName = $"TenantApplication/{TenantApplicationTopicServiceName}/api/{topicName}"
+                PortNumber = await GetReverseProxyPortAsync(),
+                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/{subscriberName}/api"
             };
+            Uri serviceUri = builder.Build();
 
             HttpResponseMessage topicResponseMessage;
-            HttpContent postContent = this.Request.Content;
             using (HttpClient httpClient = new HttpClient())
             {
-                topicResponseMessage = await httpClient.PostAsync(builder.Build(), postContent);
+                topicResponseMessage = await httpClient.GetAsync(serviceUri);
             }
 
             if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
             {
-                responseMessage.StatusCode = HttpStatusCode.Accepted;
+                responseMessage.StatusCode = HttpStatusCode.OK;
 
                 var msg = await topicResponseMessage.Content.ReadAsStringAsync();
 
-                // TODO: do something with the response.
+                HttpContent responseContent = new StringContent(msg, Encoding.UTF8, "application/json");
+                responseMessage.Content = responseContent;
             }
             else
             {
@@ -108,15 +102,10 @@ namespace RequestRouterService.Controllers
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
-            await GetReverseProxyPortAsync();
-
             HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
             {
-                // TODO: Need to use the tenant name instead of 'TenantApplication'.
-
-                PortNumber = reverseProxyPort.Value,
+                PortNumber = await GetReverseProxyPortAsync(),
                 ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/"
-                //ServiceName = $"TenantApplication/{TenantApplicationAdminServiceName}/api/topics/"
             };
 
             HttpResponseMessage topicResponseMessage;
@@ -155,14 +144,16 @@ namespace RequestRouterService.Controllers
             return responseMessage;
         }
 
-        private static async Task GetReverseProxyPortAsync()
+        private static async Task<int> GetReverseProxyPortAsync()
         {
             ReverseProxyPortResolver portResolver = new ReverseProxyPortResolver();
 
-            if (reverseProxyPort == null)
+            if (_reverseProxyPort == 0)
             {
-                reverseProxyPort = await portResolver.GetReverseProxyPortAsync();
+                _reverseProxyPort = await portResolver.GetReverseProxyPortAsync();
             }
+
+            return _reverseProxyPort;
         }
     }
 }

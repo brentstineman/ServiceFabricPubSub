@@ -7,13 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace RequestRouterService
+namespace FrontEndHelper
 {
     public class ReverseProxyPortResolver
     {
-        // TODO: not sure if this logic is right. Need to investigate more. 
-        // HttpApplicationGatewayEndpoint port changes per node . . . . 
-
         /// <summary>
         /// Represents the port that the current fabric node is configured
         /// to use when using a reverse proxy on localhost

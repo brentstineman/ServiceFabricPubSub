@@ -2,13 +2,13 @@
 // Changes may cause incorrect behavior and will be lost if the code is
 // regenerated.
 
-namespace ClientApi.Router
+namespace ClientApi.Admin
 {
     using Newtonsoft.Json;
 
     /// <summary>
     /// </summary>
-    public partial interface IPubSubClientApi : System.IDisposable
+    public partial interface IPubSubAdminApi : System.IDisposable
     {
         /// <summary>
         /// The base URI of the service.
@@ -27,9 +27,9 @@ namespace ClientApi.Router
 
 
         /// <summary>
-        /// Gets the IRequest.
+        /// Gets the ITenants.
         /// </summary>
-        IRequest Request { get; }
+        ITenants Tenants { get; }
 
     }
 }
