@@ -25,6 +25,9 @@ namespace Administration.Controllers
 
         private const string APPLICATION_NAME = "fabric:/FrontEnd";
         private readonly string APPLICATIONTYPE_NAME = "TenantApplicationType";
+
+        private const string TenantApplicationAppName = "TenantApplication";
+        private const string TenantApplicationAdminServiceName = "Admin";
         #endregion
 
         /// <summary>
@@ -75,5 +78,36 @@ namespace Administration.Controllers
             return match.Success;
         }
 
+        //TODO: rework this method
+        [HttpGet()]
+        public async Task<string> ResetKeys(string tenantId)
+        {
+
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
+            int reverseProxyPort = await FrontEndHelper.FrontEndHelper.GetReverseProxyPortAsync();
+
+            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
+            {
+                PortNumber = reverseProxyPort,
+                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/keys/key1"
+            };
+
+            HttpServiceUriBuilder builder2 = new HttpServiceUriBuilder()
+            {
+                PortNumber = reverseProxyPort,
+                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/keys/key2"
+            };
+
+            HttpResponseMessage topicResponseMessage;
+            using (HttpClient httpClient = new HttpClient())
+            {
+                topicResponseMessage = await httpClient.GetAsync(builder.Build());
+                topicResponseMessage = await httpClient.GetAsync(builder2.Build());
+            }
+
+            return "keys reset";
+
+        }
     }
 }

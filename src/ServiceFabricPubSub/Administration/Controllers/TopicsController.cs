@@ -74,38 +74,6 @@ namespace Administration.Controllers
 
         }
 
-        [HttpPatch()]
-        public async Task<string> ResetKeys(string tenantId)
-        {
-
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-
-            int reverseProxyPort = await FrontEndHelper.FrontEndHelper.GetReverseProxyPortAsync();
-
-            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
-            {
-                PortNumber = reverseProxyPort,
-                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/keys/key1"
-            };
-
-            HttpServiceUriBuilder builder2 = new HttpServiceUriBuilder()
-            {
-                PortNumber = reverseProxyPort,
-                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/keys/key2"
-            };
-
-            HttpResponseMessage topicResponseMessage;
-            using (HttpClient httpClient = new HttpClient())
-            {
-                topicResponseMessage = await httpClient.GetAsync(builder.Build());
-                topicResponseMessage = await httpClient.GetAsync(builder2.Build());
-            }
-
-            return "keys reset";
-
-        }
-
-
         [HttpGet()]
         public async Task<HttpResponseMessage> GetTopics(string tenantId)
         {

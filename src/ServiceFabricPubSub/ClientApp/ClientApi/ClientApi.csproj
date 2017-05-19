@@ -50,6 +50,7 @@
     <Compile Include="IPubSubAdminApi.cs" />
     <Compile Include="IPubSubClientApi.cs" />
     <Compile Include="IRequest.cs" />
+    <Compile Include="ISubscriber.cs" />
     <Compile Include="ITenants.cs" />
     <Compile Include="ITopics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -57,9 +58,11 @@
     <Compile Include="PubSubClientApi.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="RequestExtensions.cs" />
+    <Compile Include="Subscriber.cs" />
     <Compile Include="Tenants.cs" />
     <Compile Include="TenantsExtensions.cs" />
     <Compile Include="Topics.cs" />
+    <Compile Include="TopicsExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CreateClientApiCode.ps1" />

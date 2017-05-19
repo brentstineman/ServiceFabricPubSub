@@ -154,6 +154,7 @@ namespace ClientApp
             {
                 Program.TenantName = String.Empty;
                 Program.TopicName = String.Empty;
+                Program.AccessKey = String.Empty;
             }
         }
         #endregion
@@ -161,38 +162,125 @@ namespace ClientApp
         #region Topic Commands
         public static async Task TopicPutMessage()
         {
+            //this goes to the router
             try
             {
-                Program.EnsureParam(Program.EnsureConfig.ServiceFabricUri);
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
                 Program.EnsureParam(Program.EnsureConfig.TenantName);
                 Program.EnsureParam(Program.EnsureConfig.TopicName);
+                Program.EnsureParam(Program.EnsureConfig.AccessKey);
 
-                HttpClient client = new HttpClient();
-                var response = await client.GetAsync($"{Program.ServiceFabricUri.AbsoluteUri}/api/request/{Program.TenantName}/{Program.TopicName}", HttpCompletionOption.ResponseContentRead);
+                Console.WriteLine("Type your message");
+                var message = Console.ReadLine();
 
-                response.EnsureSuccessStatusCode();
+                PubSubClientApi client = new PubSubClientApi(Program.ServiceFabricUri);
+                var result = await client.Request.PostWithHttpMessagesAsync(Program.TenantName, Program.TopicName, message, AuthenticationHeader());
 
-                Console.WriteLine("Sent");
+                Console.WriteLine("Message sent.");
                 Console.ReadKey();
             }
             catch (Exception ex)
             {
                 throw new CommandFailedException("Web call failed", ex);
-            }            
-          
+            }
+            finally
+            {
+                Program.TenantName = String.Empty;
+                Program.TopicName = String.Empty;
+            }
+
         }
+
         public static async Task TopicAddSubscriber()
         {
-            //EnsureBasicParams(EnsureExtras.Azure);
+            try
+            {
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.TopicName);
+                Program.EnsureParam(Program.EnsureConfig.SubscriberName);
+                Program.EnsureParam(Program.EnsureConfig.AccessKey);
+         
+                PubSubAdminApi client = new PubSubAdminApi(Program.ServiceFabricAdminUri);
+                var result = await client.Subscriber.AddSubscriberWithHttpMessagesAsync(Program.TenantName, Program.TopicName, Program.SubscriberName, AuthenticationHeader());
+
+                Console.WriteLine($"Subscriber '{Program.SubscriberName}' created.");
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed", ex);
+            }
+            finally
+            {
+                Program.TenantName = String.Empty;
+                Program.TopicName = String.Empty;
+                Program.AccessKey = String.Empty;
+                Program.SubscriberName = String.Empty;
+            }
         }
         public static async Task TopicDeleteSubscriber()
         {
-            //EnsureBasicParams(EnsureExtras.Azure);
+            try
+            {
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.TopicName);
+                Program.EnsureParam(Program.EnsureConfig.SubscriberName);
+                Program.EnsureParam(Program.EnsureConfig.AccessKey);
+
+                PubSubAdminApi client = new PubSubAdminApi(Program.ServiceFabricAdminUri);
+                var result = await client.Subscriber.DeleteSubscriberWithHttpMessagesAsync(Program.TenantName, Program.TopicName, Program.SubscriberName, AuthenticationHeader());
+
+                Console.WriteLine($"Subscriber '{Program.SubscriberName}' deleted.");
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed", ex);
+            }
+            finally
+            {
+                Program.TenantName = String.Empty;
+                Program.TopicName = String.Empty;
+                Program.AccessKey = String.Empty;
+                Program.SubscriberName = String.Empty;
+            }
         }
 
         public static async Task TopicListSubscribers()
         {
-            //EnsureBasicParams(EnsureExtras.Azure);
+            try
+            {
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.TopicName);
+                Program.EnsureParam(Program.EnsureConfig.AccessKey);
+
+                PubSubAdminApi client = new PubSubAdminApi(Program.ServiceFabricAdminUri);
+                var result = await client.Subscriber.GetSubscribersWithHttpMessagesAsync(Program.TenantName, Program.TopicName, AuthenticationHeader());
+
+                List<string> subscribers = JsonConvert.DeserializeObject<List<string>>(result.Body.ToString());
+
+                Console.WriteLine("Subscribers");
+                Console.WriteLine("-------------------");
+
+                foreach (string s in subscribers)
+                    Console.WriteLine(s);
+
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed", ex);
+            }
+            finally
+            {
+                Program.TenantName = String.Empty;
+                Program.TopicName = String.Empty;
+                Program.AccessKey = String.Empty;
+                Program.SubscriberName = String.Empty;
+            }
         }
         #endregion
 

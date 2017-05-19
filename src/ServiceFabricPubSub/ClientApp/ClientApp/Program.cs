@@ -18,6 +18,8 @@ namespace ClientApp
         public static string TenantName = null;
         public static string TopicName = null;
         public static string AccessKey = null;
+        public static string SubscriberName = null;
+
 
 
         #region Properties
@@ -93,13 +95,13 @@ namespace ClientApp
             topicCmds.RegisterCommand("Put message", PubSubCommands.TopicPutMessage);
             topicCmds.RegisterCommand("Add subscriber", PubSubCommands.TopicAddSubscriber);
             topicCmds.RegisterCommand("Delete subscriber", PubSubCommands.TopicDeleteSubscriber);
-            topicCmds.RegisterCommand("List subscriber", PubSubCommands.TopicListSubscribers);
+            topicCmds.RegisterCommand("List subscribers", PubSubCommands.TopicListSubscribers);
             _groups.AddGroup("Topic", topicCmds);
 
             var subscriberCmds = new Commands();
-            subscriberCmds.RegisterCommand("Get message", PubSubCommands.SubscriberGetMessage);
-            subscriberCmds.RegisterCommand("Get subscriber queue depth", PubSubCommands.SubscriberGetQueueDepth);
-            subscriberCmds.RegisterCommand("Delete all queue messages", PubSubCommands.SubscriberDeleteAllQueuedMessages);
+            subscriberCmds.RegisterCommand("Get message (not implemented yet)", PubSubCommands.SubscriberGetMessage);
+            subscriberCmds.RegisterCommand("Get subscriber queue depth (not implemented yet)", PubSubCommands.SubscriberGetQueueDepth);
+            subscriberCmds.RegisterCommand("Delete all queue messages (not implemented yet)", PubSubCommands.SubscriberDeleteAllQueuedMessages);
             _groups.AddGroup("Subscriber", subscriberCmds);
 
             var settingsCmds = new Commands();
@@ -209,6 +211,11 @@ namespace ClientApp
                 AccessKey = _userInput.EnsureParam(AccessKey, "Access Key", forceReEnter: ((EnsureConfig.None & EnsureConfig.AccessKey) == EnsureConfig.AccessKey));
             }
 
+            if (String.IsNullOrEmpty(SubscriberName) && (param & EnsureConfig.SubscriberName) == EnsureConfig.SubscriberName)
+            {
+                SubscriberName = _userInput.EnsureParam(SubscriberName, "Subscriber Name", forceReEnter: ((EnsureConfig.None & EnsureConfig.SubscriberName) == EnsureConfig.SubscriberName));
+            }
+
         }
 
         [Flags]
@@ -220,6 +227,8 @@ namespace ClientApp
             TenantName = 0x4,
             TopicName = 0x8,
             AccessKey = 0x16,
+            SubscriberName = 0x32,
+
         }
     }
 }

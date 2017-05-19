@@ -30,6 +30,11 @@ namespace ClientApi.Admin
         public JsonSerializerSettings DeserializationSettings { get; private set; }
 
         /// <summary>
+        /// Gets the ISubscriber.
+        /// </summary>
+        public virtual ISubscriber Subscriber { get; private set; }
+
+        /// <summary>
         /// Gets the ITenants.
         /// </summary>
         public virtual ITenants Tenants { get; private set; }
@@ -118,6 +123,7 @@ namespace ClientApi.Admin
         /// </summary>
         private void Initialize()
         {
+            Subscriber = new Subscriber(this);
             Tenants = new Tenants(this);
             Topics = new Topics(this);
             BaseUri = new System.Uri("http://localhost:8979");

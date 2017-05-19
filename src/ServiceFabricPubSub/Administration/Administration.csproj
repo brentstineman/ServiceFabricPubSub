@@ -111,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\SwaggerConfig.cs" />
+    <Compile Include="Controllers\SubscriberController.cs" />
     <Compile Include="Controllers\TenantsController.cs" />
     <Compile Include="Controllers\TopicsController.cs" />
     <Compile Include="IApplicationLifetime.cs" />

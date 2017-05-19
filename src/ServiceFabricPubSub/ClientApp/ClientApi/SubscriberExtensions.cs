@@ -8,18 +8,20 @@ namespace ClientApi.Admin
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Extension methods for Topics.
+    /// Extension methods for Subscriber.
     /// </summary>
-    public static partial class TopicsExtensions
+    public static partial class SubscriberExtensions
     {
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
             /// <param name='tenantId'>
             /// </param>
-            public static object GetTopics(this ITopics operations, string tenantId)
+            /// <param name='topicName'>
+            /// </param>
+            public static object GetSubscribers(this ISubscriber operations, string tenantId, string topicName)
             {
-                return operations.GetTopicsAsync(tenantId).GetAwaiter().GetResult();
+                return operations.GetSubscribersAsync(tenantId, topicName).GetAwaiter().GetResult();
             }
 
             /// <param name='operations'>
@@ -27,12 +29,14 @@ namespace ClientApi.Admin
             /// </param>
             /// <param name='tenantId'>
             /// </param>
+            /// <param name='topicName'>
+            /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<object> GetTopicsAsync(this ITopics operations, string tenantId, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<object> GetSubscribersAsync(this ISubscriber operations, string tenantId, string topicName, CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.GetTopicsWithHttpMessagesAsync(tenantId, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.GetSubscribersWithHttpMessagesAsync(tenantId, topicName, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }
@@ -45,9 +49,11 @@ namespace ClientApi.Admin
             /// </param>
             /// <param name='topicName'>
             /// </param>
-            public static string CreateTopic(this ITopics operations, string tenantId, string topicName)
+            /// <param name='subscriberName'>
+            /// </param>
+            public static object AddSubscriber(this ISubscriber operations, string tenantId, string topicName, string subscriberName)
             {
-                return operations.CreateTopicAsync(tenantId, topicName).GetAwaiter().GetResult();
+                return operations.AddSubscriberAsync(tenantId, topicName, subscriberName).GetAwaiter().GetResult();
             }
 
             /// <param name='operations'>
@@ -57,12 +63,14 @@ namespace ClientApi.Admin
             /// </param>
             /// <param name='topicName'>
             /// </param>
+            /// <param name='subscriberName'>
+            /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<string> CreateTopicAsync(this ITopics operations, string tenantId, string topicName, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<object> AddSubscriberAsync(this ISubscriber operations, string tenantId, string topicName, string subscriberName, CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.CreateTopicWithHttpMessagesAsync(tenantId, topicName, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.AddSubscriberWithHttpMessagesAsync(tenantId, topicName, subscriberName, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }
@@ -75,9 +83,11 @@ namespace ClientApi.Admin
             /// </param>
             /// <param name='topicName'>
             /// </param>
-            public static string DeleteTopic(this ITopics operations, string tenantId, string topicName)
+            /// <param name='subscriberName'>
+            /// </param>
+            public static object DeleteSubscriber(this ISubscriber operations, string tenantId, string topicName, string subscriberName)
             {
-                return operations.DeleteTopicAsync(tenantId, topicName).GetAwaiter().GetResult();
+                return operations.DeleteSubscriberAsync(tenantId, topicName, subscriberName).GetAwaiter().GetResult();
             }
 
             /// <param name='operations'>
@@ -87,12 +97,14 @@ namespace ClientApi.Admin
             /// </param>
             /// <param name='topicName'>
             /// </param>
+            /// <param name='subscriberName'>
+            /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<string> DeleteTopicAsync(this ITopics operations, string tenantId, string topicName, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<object> DeleteSubscriberAsync(this ISubscriber operations, string tenantId, string topicName, string subscriberName, CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.DeleteTopicWithHttpMessagesAsync(tenantId, topicName, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.DeleteSubscriberWithHttpMessagesAsync(tenantId, topicName, subscriberName, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }
