@@ -98,8 +98,7 @@ namespace Admin.Controllers
                 await DeleteService(r.ServiceName);
             }
 
-<<<<<<< HEAD
-            await DeleteService(CreateTopicUri(name));
+            await DeleteService(this.serviceContext.CreateTopicUri(name));
 
             return Ok();
         }
@@ -113,10 +112,6 @@ namespace Admin.Controllers
         private async Task DeleteService(Uri targetUri)
         {
             var description = new DeleteServiceDescription(targetUri);
-=======
-            Uri serviceUri = this.serviceContext.CreateTopicUri(name);
-            var description = new DeleteServiceDescription(serviceUri);
->>>>>>> 921efff302ccc34ab036f8c14a78156f6cc53f7a
             try
             {
                 await fabric.ServiceManager.DeleteServiceAsync(description);
