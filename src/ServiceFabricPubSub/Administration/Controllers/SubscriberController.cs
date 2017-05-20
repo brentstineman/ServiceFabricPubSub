@@ -19,6 +19,7 @@ namespace Administration.Controllers
         private const string TenantApplicationAppName = "TenantApplication";
         private const string TenantApplicationAdminServiceName = "Admin";
 
+        //TODO: to complete
         [HttpGet()]
         public async Task<HttpResponseMessage> GetSubscribers(string tenantId, string topicName)
         {
@@ -69,7 +70,7 @@ namespace Administration.Controllers
             return responseMessage;
         }
 
-
+        //TODO: to complete
         [HttpPut()]
         public async Task<HttpResponseMessage> AddSubscriber(string tenantId, string topicName, string subscriberName)
         {
@@ -102,6 +103,7 @@ namespace Administration.Controllers
             return responseMessage;
         }
 
+        //TODO: to complete
         [HttpDelete()]
         public async Task<HttpResponseMessage> DeleteSubscriber(string tenantId, string topicName, string subscriberName)
         {

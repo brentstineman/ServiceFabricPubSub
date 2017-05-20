@@ -37,7 +37,7 @@ namespace RequestRouterService.Controllers
                 // TODO: Need to use the tenant name instead of 'TenantApplication'.
 
                 PortNumber = reverseProxyPort.Value,
-                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/api/{topicName}"
+                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/api/topics/{topicName}"
             };
 
             HttpResponseMessage topicResponseMessage;
