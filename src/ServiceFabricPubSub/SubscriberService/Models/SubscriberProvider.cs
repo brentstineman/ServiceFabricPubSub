@@ -1,9 +1,6 @@
 ﻿using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
 using PubSubDotnetSDK;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SubscriberService.Models
@@ -31,9 +28,18 @@ namespace SubscriberService.Models
             return count;
         }
 
-        public Task<PubSubMessage> Pop()
+        public async Task<PubSubMessage> Pop()
         {
-            throw new NotImplementedException();
+            PubSubMessage msg = null;
+            var queue = await this.stateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("messages").ConfigureAwait(false);
+            using (var tx = this.stateManager.CreateTransaction())
+            {
+                var msgCV = await queue.TryDequeueAsync(tx).ConfigureAwait(false);
+                if (msgCV.HasValue)
+                    msg = msgCV.Value;
+                await tx.CommitAsync().ConfigureAwait(false);
+            }
+            return msg;
         }
     }
 }

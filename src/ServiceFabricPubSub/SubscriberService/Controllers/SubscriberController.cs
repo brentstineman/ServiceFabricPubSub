@@ -3,8 +3,6 @@ using Microsoft.ServiceFabric.Data;
 using System.Fabric;
 using Microsoft.AspNetCore.Hosting;
 using PubSubDotnetSDK;
-using Microsoft.ServiceFabric.Services.Remoting.Client;
-using System;
 using System.Threading.Tasks;
 
 namespace SubscriberService.Controllers
@@ -28,20 +26,13 @@ namespace SubscriberService.Controllers
         [HttpGet]
         public async Task<PubSubMessage> Pop()
         {
-            var uri = CreateSubscriberUri();
-            var serviceRPC = ServiceProxy.Create<ISubscriberService>(uri);
-            return await serviceRPC.Pop();
+            return await subscriberService.Pop();
         }
 
         [HttpGet("count")]
         public async Task<long> Count()
         {
             return await subscriberService.CountAsync();
-        }
-
-        private Uri CreateSubscriberUri()
-        {
-            return new Uri($"{this.context.ServiceName}");
         }
     }
 }

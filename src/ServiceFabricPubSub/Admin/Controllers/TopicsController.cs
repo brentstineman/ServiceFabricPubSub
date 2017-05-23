@@ -86,7 +86,6 @@ namespace Admin.Controllers
             return Ok();
         }
 
-        
 
         // DELETE api/topics/topicname
         [HttpDelete("{name}")]

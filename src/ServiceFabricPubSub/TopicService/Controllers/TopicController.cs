@@ -4,9 +4,6 @@ using Microsoft.ServiceFabric.Data;
 using System.Fabric;
 using Microsoft.AspNetCore.Hosting;
 using PubSubDotnetSDK;
-using System;
-using Microsoft.ServiceFabric.Services.Remoting.Client;
-using Microsoft.ServiceFabric.Services.Client;
 
 namespace TopicService.Controllers
 {
@@ -16,26 +13,20 @@ namespace TopicService.Controllers
         private readonly IReliableStateManager stateManager;
         private readonly IApplicationLifetime appLifetime;
         private readonly StatefulServiceContext context;
+        private readonly ITopicService topicService;
 
-        public TopicController(IReliableStateManager stateManager, StatefulServiceContext context, IApplicationLifetime appLifetime)
+        public TopicController(IReliableStateManager stateManager, StatefulServiceContext context, IApplicationLifetime appLifetime, ITopicService topicService)
         {
             this.stateManager = stateManager;
             this.context = context;
             this.appLifetime = appLifetime;
+            this.topicService = topicService;
         }
 
         [HttpPost]
         public async Task Push([FromBody]object message)
         {
-            var msg = new PubSubMessage(message.ToString());
-            var uri = CreateTopicUri();
-            var serviceRPC = ServiceProxy.Create<ITopicService>(uri);
-            await serviceRPC.Push(msg);
-        }
-
-        private Uri CreateTopicUri()
-        {
-            return new Uri($"{this.context.ServiceName}");
+            await topicService.Push(new PubSubMessage(message.ToString()));
         }
     }
 }
