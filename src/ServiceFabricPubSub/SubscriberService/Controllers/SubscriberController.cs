@@ -15,12 +15,14 @@ namespace SubscriberService.Controllers
         private readonly IReliableStateManager stateManager;
         private readonly IApplicationLifetime appLifetime;
         private readonly StatefulServiceContext context;
+        private readonly ISubscriberService subscriberService;
 
-        public SubscriberController(IReliableStateManager stateManager, StatefulServiceContext context, IApplicationLifetime appLifetime)
+        public SubscriberController(IReliableStateManager stateManager, StatefulServiceContext context, IApplicationLifetime appLifetime, ISubscriberService subscriberService)
         {
             this.stateManager = stateManager;
             this.context = context;
             this.appLifetime = appLifetime;
+            this.subscriberService = subscriberService;
         }
 
         [HttpGet]
@@ -34,9 +36,7 @@ namespace SubscriberService.Controllers
         [HttpGet("count")]
         public async Task<long> Count()
         {
-            var uri = CreateSubscriberUri();
-            var serviceRPC = ServiceProxy.Create<ISubscriberService>(uri);
-            return await serviceRPC.CountAsync();
+            return await subscriberService.CountAsync();
         }
 
         private Uri CreateSubscriberUri()

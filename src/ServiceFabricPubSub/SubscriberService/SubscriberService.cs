@@ -17,6 +17,7 @@ using System.IO;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using SubscriberService.Models;
 
 namespace SubscriberService
 {
@@ -51,7 +52,8 @@ namespace SubscriberService
                         (url, listener) => new WebHostBuilder().UseKestrel().ConfigureServices(
                              services => services
                                  .AddSingleton<StatefulServiceContext>(this.Context)
-                                 .AddSingleton<IReliableStateManager>(this.StateManager))
+                                 .AddSingleton<IReliableStateManager>(this.StateManager)
+                                 .AddSingleton<ISubscriberService>(new SubscriberProvider(this.StateManager)))
                         .UseContentRoot(Directory.GetCurrentDirectory())
                         .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.UseUniqueServiceUrl)
                         .UseStartup<Startup>()
