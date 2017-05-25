@@ -9,10 +9,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
-using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
-using System.Fabric.Query;
+using Admin.Models;
 using System.Fabric.Description;
 using PubSubDotnetSDK;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
@@ -48,7 +47,9 @@ namespace Admin
                                         services => services
                                             .AddSingleton<StatefulServiceContext>(this.Context)
                                             .AddSingleton<IReliableStateManager>(this.StateManager)
-                                             .AddSingleton<FabricClient>(new FabricClient()))
+                                            .AddSingleton<FabricClient>(new FabricClient())
+                                            .AddSingleton<ISubscriberFabricProvider>(new SubscriberFabricProvider()) // This call needs to be refactored
+                                            )
                                     .UseContentRoot(Directory.GetCurrentDirectory())
                                     .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.UseUniqueServiceUrl)
                                     .UseStartup<Startup>()
