@@ -31,6 +31,14 @@ namespace SubscriberService.Controllers
             return await serviceRPC.Pop();
         }
 
+        [HttpGet]
+        public async Task<long> Count()
+        {
+            var uri = CreateSubscriberUri();
+            var serviceRPC = ServiceProxy.Create<ISubscriberService>(uri);
+            return await serviceRPC.CountAsync();
+        }
+
         private Uri CreateSubscriberUri()
         {
             return new Uri($"{this.context.ServiceName}");

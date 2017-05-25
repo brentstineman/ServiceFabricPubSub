@@ -7,43 +7,40 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using FrontEndHelper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace RequestRouterService.Controllers
 {
-    //TODO: add authz (HACK for testing)
-    //[RequestAuthorization]
+    [RequestAuthorization]
     public class RequestController : ApiController
     {
         private const string TenantApplicationAdminServiceName = "Admin";
         private const string TenantApplicationTopicServiceName = "topics";
 
-        private static int? reverseProxyPort = null;
+        private static int _reverseProxyPort;
+
+        //is this method sending to the right endpoint?
 
         // POST api/tenantId/topicName
-        public async Task<HttpResponseMessage> Post(string tenantId, string topicName, string message)
+        public async Task<HttpResponseMessage> Post(string tenantId, string topicName)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
             // Assuming the message body will contain the content for the data to put to the topic.
-            //string messageBody = await this.Request.Content.ReadAsStringAsync();
-
-            // TODO: Clean this up everywhere . . . . 
-            await GetReverseProxyPortAsync();
+            string messageBody = await this.Request.Content.ReadAsStringAsync();
 
             HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
             {
-                // TODO: Need to use the tenant name instead of 'TenantApplication'.
-
-                PortNumber = reverseProxyPort.Value,
-                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/api/topics/{topicName}"
+                PortNumber = await GetReverseProxyPortAsync(),
+                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/api/"
             };
 
             HttpResponseMessage topicResponseMessage;
             using (HttpClient httpClient = new HttpClient())
             {
-                HttpContent postContent = new StringContent(message);
+                HttpContent postContent = new StringContent(messageBody);
                 postContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
                 topicResponseMessage = await httpClient.PostAsync(builder.Build(), postContent);
@@ -54,8 +51,8 @@ namespace RequestRouterService.Controllers
                 responseMessage.StatusCode = HttpStatusCode.Accepted;
 
                 var msg = await topicResponseMessage.Content.ReadAsStringAsync();
-
-                // TODO: do something with the response.
+                
+                System.Diagnostics.Debug.WriteLine($"Received response of '{msg}'.");
             }
             else
             {
@@ -71,11 +68,9 @@ namespace RequestRouterService.Controllers
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
-            await GetReverseProxyPortAsync();
-
             HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
             {
-                PortNumber = reverseProxyPort.Value,
+                PortNumber = await GetReverseProxyPortAsync(),
                 ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/{subscriberName}/api"
             };
             Uri serviceUri = builder.Build();
@@ -105,62 +100,62 @@ namespace RequestRouterService.Controllers
         }
 
         // GET api/tenantId
-        //public async Task<HttpResponseMessage> GetTopics(string tenantId)
-        //{
-        //    HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+        public async Task<HttpResponseMessage> GetTopics(string tenantId)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
-        //    await GetReverseProxyPortAsync();
+            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
+            {
+                PortNumber = await GetReverseProxyPortAsync(),
+                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/"
+            };
 
-        //    HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
-        //    {
-        //        PortNumber = reverseProxyPort.Value,
-        //        ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/"
-        //    };
+            HttpResponseMessage topicResponseMessage;
+            using (HttpClient httpClient = new HttpClient())
+            {
+                topicResponseMessage = await httpClient.GetAsync(builder.Build());
+            }
 
-        //    HttpResponseMessage topicResponseMessage;
-        //    using (HttpClient httpClient = new HttpClient())
-        //    {
-        //        topicResponseMessage = await httpClient.GetAsync(builder.Build());
-        //    }
+            IList<string> topicNameList = new List<string>();
+            if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
+            {
+                var msg = await topicResponseMessage.Content.ReadAsStringAsync();
 
-        //    IList<string> topicNameList = new List<string>();
-        //    if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
-        //    {
-        //        var msg = await topicResponseMessage.Content.ReadAsStringAsync();
+                dynamic x = JArray.Parse(msg);
+                foreach (dynamic node in x)
+                {
+                    string serviceName = node.serviceName;
+                    serviceName = serviceName.Split('/').LastOrDefault();
+                    topicNameList.Add(serviceName);
+                }
 
-        //        dynamic x = JArray.Parse(msg);
-        //        foreach (dynamic node in x)
-        //        {
-        //            string serviceName = node.serviceName;
-        //            serviceName = serviceName.Split('/').LastOrDefault();
-        //            topicNameList.Add(serviceName);
-        //        }
+                string topicNamesJson = JsonConvert.SerializeObject(topicNameList,
+                    new JsonSerializerSettings
+                    {
+                        Formatting = Formatting.Indented
+                    });
+                responseMessage.Content = new StringContent(topicNamesJson);
+                responseMessage.StatusCode = HttpStatusCode.OK;
+            }
+            else
+            {
+                responseMessage.StatusCode = HttpStatusCode.InternalServerError;
+                responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
+            }
 
-        //        string topicNamesJson = JsonConvert.SerializeObject(topicNameList,
-        //            new JsonSerializerSettings
-        //            {
-        //                Formatting = Formatting.Indented
-        //            });
-        //        responseMessage.Content = new StringContent(topicNamesJson);
-        //        responseMessage.StatusCode = HttpStatusCode.OK;
-        //    }
-        //    else
-        //    {
-        //        responseMessage.StatusCode = HttpStatusCode.InternalServerError;
-        //        responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
-        //    }
+            return responseMessage;
+        }
 
-        //    return responseMessage;
-        //}
-
-        private static async Task GetReverseProxyPortAsync()
+        private static async Task<int> GetReverseProxyPortAsync()
         {
             ReverseProxyPortResolver portResolver = new ReverseProxyPortResolver();
 
-            if (reverseProxyPort == null)
+            if (_reverseProxyPort == 0)
             {
-                reverseProxyPort = await portResolver.GetReverseProxyPortAsync();
+                _reverseProxyPort = await portResolver.GetReverseProxyPortAsync();
             }
+
+            return _reverseProxyPort;
         }
     }
 }

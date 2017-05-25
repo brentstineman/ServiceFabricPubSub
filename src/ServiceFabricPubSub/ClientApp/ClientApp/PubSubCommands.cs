@@ -187,6 +187,7 @@ namespace ClientApp
             {
                 Program.TenantName = String.Empty;
                 Program.TopicName = String.Empty;
+                Program.AccessKey = String.Empty;
             }
 
         }
@@ -287,16 +288,16 @@ namespace ClientApp
         #region Subscriber Commands
         public static async Task SubscriberGetMessage()
         {
-            //EnsureBasicParams(EnsureExtras.Azure);
+ 
         }
         public static async Task SubscriberGetQueueDepth()
         {
-            //EnsureBasicParams(EnsureExtras.Azure);
+          
         }
 
         public static async Task SubscriberDeleteAllQueuedMessages()
         {
-            //EnsureBasicParams(EnsureExtras.Azure);
+
         }
         #endregion
 

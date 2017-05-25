@@ -25,7 +25,7 @@ namespace TopicService.Controllers
         }
 
         [HttpPost]
-        public async Task Push([FromBody]object message)
+        public async Task Post([FromBody]object message)
         {
             var msg = new PubSubMessage(message.ToString());
             var uri = CreateTopicUri();

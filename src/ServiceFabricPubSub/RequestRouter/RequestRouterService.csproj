@@ -119,14 +119,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\SwaggerConfig.cs" />
-    <Compile Include="HttpServiceUriBuilder.cs" />
-    <Compile Include="RequestAuthorizationAttribute.cs" />
     <Compile Include="Controllers\RequestController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OwinCommunicationListener.cs" />
     <Compile Include="RequestRouterService.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="ReverseProxyPortResolver.cs" />
     <Compile Include="ServiceEventSource.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="ServiceRequestActionFilterAttribute.cs" />
@@ -136,6 +133,12 @@
     <None Include="PackageRoot\ServiceManifest.xml" />
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FrontEndHelper\FrontEndHelper.csproj">
+      <Project>{18dec5b2-1051-4cb5-a022-212836e5d2c0}</Project>
+      <Name>FrontEndHelper</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
