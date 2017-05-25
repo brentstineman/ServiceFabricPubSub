@@ -10,6 +10,10 @@ using System.Web.Http;
 using FrontEndHelper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Fabric;
+using PubSubDotnetSDK;
+using Microsoft.ServiceFabric.Services.Remoting.Client;
+using Microsoft.ServiceFabric.Services.Client;
 
 namespace RequestRouterService.Controllers
 {
@@ -21,129 +25,91 @@ namespace RequestRouterService.Controllers
 
         private static int _reverseProxyPort;
 
-        //is this method sending to the right endpoint?
+    public async Task<HttpResponseMessage> Post(string tenantId, string topicName, string message)
+    {
+            try
+            {
+                HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+
+                var msg = new PubSubMessage() { Message = message };
+                var topicSvc = ServiceProxy.Create<ITopicService>(new Uri($"fabric:/{tenantId}/{TenantApplicationTopicServiceName}/{topicName}"));
+                await topicSvc.Push(msg);
+
+                return responseMessage;
+            }
+            catch (Exception ex)
+            {
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+        }
+
+
 
         // POST api/tenantId/topicName
-        public async Task<HttpResponseMessage> Post(string tenantId, string topicName)
-        {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+        //public async Task<HttpResponseMessage> Post(string tenantId, string topicName)
+        //{
+        //    HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 
-            // Assuming the message body will contain the content for the data to put to the topic.
-            string messageBody = await this.Request.Content.ReadAsStringAsync();
+        //    // Assuming the message body will contain the content for the data to put to the topic.
+        //    string messageBody = await this.Request.Content.ReadAsStringAsync();
 
-            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
-            {
-                PortNumber = await GetReverseProxyPortAsync(),
-                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/api/"
-            };
+        //    HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
+        //    {
+        //        PortNumber = await GetReverseProxyPortAsync(),
+        //        ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/api/"
+        //    };
 
-            HttpResponseMessage topicResponseMessage;
-            using (HttpClient httpClient = new HttpClient())
-            {
-                HttpContent postContent = new StringContent(messageBody);
-                postContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        //    HttpResponseMessage topicResponseMessage;
+        //    using (HttpClient httpClient = new HttpClient())
+        //    {
+        //        HttpContent postContent = new StringContent(messageBody);
+        //        postContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-                topicResponseMessage = await httpClient.PostAsync(builder.Build(), postContent);
-            }
+        //        topicResponseMessage = await httpClient.PostAsync(builder.Build(), postContent);
+        //    }
 
-            if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
-            {
-                responseMessage.StatusCode = HttpStatusCode.Accepted;
+        //    if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
+        //    {
+        //        responseMessage.StatusCode = HttpStatusCode.Accepted;
 
-                var msg = await topicResponseMessage.Content.ReadAsStringAsync();
-                
-                System.Diagnostics.Debug.WriteLine($"Received response of '{msg}'.");
-            }
-            else
-            {
-                responseMessage.StatusCode = topicResponseMessage?.StatusCode ?? HttpStatusCode.InternalServerError;
-                responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
-            }
+        //        var msg = await topicResponseMessage.Content.ReadAsStringAsync();
 
-            return responseMessage;
-        }
+        //        System.Diagnostics.Debug.WriteLine($"Received response of '{msg}'.");
+        //    }
+        //    else
+        //    {
+        //        responseMessage.StatusCode = topicResponseMessage?.StatusCode ?? HttpStatusCode.InternalServerError;
+        //        responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
+        //    }
+
+        //    return responseMessage;
+        //}
 
         // GET api/tenantId/topicName/subscriber
         public async Task<HttpResponseMessage> Get(string tenantId, string topicName, string subscriberName)
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-
-            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
+            try
             {
-                PortNumber = await GetReverseProxyPortAsync(),
-                ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/{subscriberName}/api"
-            };
-            Uri serviceUri = builder.Build();
+                HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+          
+                var topicSvc = ServiceProxy.Create<ISubscriberService>(new Uri($"fabric:/{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/{subscriberName}"));
+                var msg = await topicSvc.Pop();
 
-            HttpResponseMessage topicResponseMessage;
-            using (HttpClient httpClient = new HttpClient())
-            {
-                topicResponseMessage = await httpClient.GetAsync(serviceUri);
-            }
-
-            if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
-            {
-                responseMessage.StatusCode = HttpStatusCode.OK;
-
-                var msg = await topicResponseMessage.Content.ReadAsStringAsync();
-
-                HttpContent responseContent = new StringContent(msg, Encoding.UTF8, "application/json");
-                responseMessage.Content = responseContent;
-            }
-            else
-            {
-                responseMessage.StatusCode = topicResponseMessage?.StatusCode ?? HttpStatusCode.InternalServerError;
-                responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
-            }
-
-            return responseMessage;
-        }
-
-        // GET api/tenantId
-        public async Task<HttpResponseMessage> GetTopics(string tenantId)
-        {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-
-            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
-            {
-                PortNumber = await GetReverseProxyPortAsync(),
-                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/topics/"
-            };
-
-            HttpResponseMessage topicResponseMessage;
-            using (HttpClient httpClient = new HttpClient())
-            {
-                topicResponseMessage = await httpClient.GetAsync(builder.Build());
-            }
-
-            IList<string> topicNameList = new List<string>();
-            if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
-            {
-                var msg = await topicResponseMessage.Content.ReadAsStringAsync();
-
-                dynamic x = JArray.Parse(msg);
-                foreach (dynamic node in x)
-                {
-                    string serviceName = node.serviceName;
-                    serviceName = serviceName.Split('/').LastOrDefault();
-                    topicNameList.Add(serviceName);
-                }
-
-                string topicNamesJson = JsonConvert.SerializeObject(topicNameList,
+         
+                string msgJson = JsonConvert.SerializeObject(msg,
                     new JsonSerializerSettings
                     {
                         Formatting = Formatting.Indented
                     });
-                responseMessage.Content = new StringContent(topicNamesJson);
-                responseMessage.StatusCode = HttpStatusCode.OK;
+                responseMessage.Content = new StringContent(msgJson);
+
+                return responseMessage;
             }
-            else
+            catch (Exception ex)
             {
-                responseMessage.StatusCode = HttpStatusCode.InternalServerError;
-                responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
             }
 
-            return responseMessage;
         }
 
         private static async Task<int> GetReverseProxyPortAsync()

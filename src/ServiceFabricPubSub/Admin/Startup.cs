@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System.Net;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Admin
 {
@@ -32,6 +33,10 @@ namespace Admin
         {
             // Add framework services.
             services.AddMvc();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "Admin APIs", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -39,6 +44,15 @@ namespace Admin
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+            /*Enabling swagger file*/
+            app.UseSwagger();
+
+            /*Enabling Swagger ui, consider doing it on Development env only*/
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Admin APIs");
+            });
 
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseMvc();

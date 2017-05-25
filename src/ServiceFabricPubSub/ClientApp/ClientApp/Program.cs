@@ -99,14 +99,14 @@ namespace ClientApp
             _groups.AddGroup("Topic", topicCmds);
 
             var subscriberCmds = new Commands();
-            subscriberCmds.RegisterCommand("Get message (not implemented yet)", PubSubCommands.SubscriberGetMessage);
-            subscriberCmds.RegisterCommand("Get subscriber queue depth (not implemented yet)", PubSubCommands.SubscriberGetQueueDepth);
-            subscriberCmds.RegisterCommand("Delete all queue messages (not implemented yet)", PubSubCommands.SubscriberDeleteAllQueuedMessages);
+            subscriberCmds.RegisterCommand("Get message", PubSubCommands.SubscriberGetMessage);
+            //subscriberCmds.RegisterCommand("Get subscriber queue depth (not implemented yet)", PubSubCommands.SubscriberGetQueueDepth);
+            //subscriberCmds.RegisterCommand("Delete all queue messages (not implemented yet)", PubSubCommands.SubscriberDeleteAllQueuedMessages);
             _groups.AddGroup("Subscriber", subscriberCmds);
 
-            var settingsCmds = new Commands();
-            settingsCmds.RegisterCommand("Toggle display mode", GenericCommands.ToggleFlatDisplayCmd);
-            _groups.AddGroup("Settings", settingsCmds);
+            //var settingsCmds = new Commands();
+            //settingsCmds.RegisterCommand("Toggle display mode", GenericCommands.ToggleFlatDisplayCmd);
+            //_groups.AddGroup("Settings", settingsCmds);
 
             _flatCommands = _groups.ToFlatCommands();
         }

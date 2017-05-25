@@ -10,6 +10,7 @@ using ClientApi;
 using ClientApi.Admin;
 using ClientApi.Router;
 using Newtonsoft.Json;
+using PubSubDotnetSDK;
 
 namespace ClientApp
 {
@@ -288,7 +289,32 @@ namespace ClientApp
         #region Subscriber Commands
         public static async Task SubscriberGetMessage()
         {
- 
+            try
+            {
+                Program.EnsureParam(Program.EnsureConfig.ServiceFabricAdminUri);
+                Program.EnsureParam(Program.EnsureConfig.TenantName);
+                Program.EnsureParam(Program.EnsureConfig.TopicName);
+                Program.EnsureParam(Program.EnsureConfig.SubscriberName);
+                Program.EnsureParam(Program.EnsureConfig.AccessKey);
+
+                PubSubClientApi client = new PubSubClientApi(Program.ServiceFabricUri);
+                dynamic result = await client.Request.GetWithHttpMessagesAsync(Program.TenantName, Program.TopicName, Program.SubscriberName, AuthenticationHeader());
+
+                Console.WriteLine("Message: " + result.Body.Message);
+          
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                throw new CommandFailedException("Web call failed", ex);
+            }
+            finally
+            {
+                Program.TenantName = String.Empty;
+                Program.TopicName = String.Empty;
+                Program.AccessKey = String.Empty;
+                Program.SubscriberName = String.Empty;
+            }
         }
         public static async Task SubscriberGetQueueDepth()
         {

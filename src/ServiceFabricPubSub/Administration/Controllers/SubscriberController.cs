@@ -12,14 +12,13 @@ using System.Web.Http;
 
 namespace Administration.Controllers
 {
-    //[RequestAuthorizationAttribute]
+    [RequestAuthorizationAttribute]
     [ServiceRequestActionFilter]
     public class SubscriberController : ApiController
     {
         private const string TenantApplicationAppName = "TenantApplication";
         private const string TenantApplicationAdminServiceName = "Admin";
 
-        //TODO: to complete
         [HttpGet()]
         public async Task<HttpResponseMessage> GetSubscribers(string tenantId, string topicName)
         {
@@ -34,43 +33,42 @@ namespace Administration.Controllers
                 ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/{topicName}/subscribers"
             };
 
-            HttpResponseMessage topicResponseMessage;
+            HttpResponseMessage response;
             using (HttpClient httpClient = new HttpClient())
             {
-                topicResponseMessage = await httpClient.GetAsync(builder.Build());
+                response = await httpClient.GetAsync(builder.Build());
             }
 
-            IList<string> topicNameList = new List<string>();
-            if (topicResponseMessage != null && topicResponseMessage.IsSuccessStatusCode)
+            IList<string> subscribers = new List<string>();
+            if (response != null && response.IsSuccessStatusCode)
             {
-                var msg = await topicResponseMessage.Content.ReadAsStringAsync();
+                var msg = await response.Content.ReadAsStringAsync();
 
                 dynamic x = JArray.Parse(msg);
                 foreach (dynamic node in x)
                 {
                     string serviceName = node.serviceName;
                     serviceName = serviceName.Split('/').LastOrDefault();
-                    topicNameList.Add(serviceName);
+                    subscribers.Add(serviceName);
                 }
 
-                string topicNamesJson = JsonConvert.SerializeObject(topicNameList,
+                string subscribersNames = JsonConvert.SerializeObject(subscribers,
                     new JsonSerializerSettings
                     {
                         Formatting = Formatting.Indented
                     });
-                responseMessage.Content = new StringContent(topicNamesJson);
+                responseMessage.Content = new StringContent(subscribersNames);
                 responseMessage.StatusCode = HttpStatusCode.OK;
             }
             else
             {
                 responseMessage.StatusCode = HttpStatusCode.InternalServerError;
-                responseMessage.ReasonPhrase = topicResponseMessage?.ReasonPhrase ?? "Internal error";
+                responseMessage.ReasonPhrase = response?.ReasonPhrase ?? "Internal error";
             }
 
             return responseMessage;
         }
 
-        //TODO: to complete
         [HttpPut()]
         public async Task<HttpResponseMessage> AddSubscriber(string tenantId, string topicName, string subscriberName)
         {
@@ -103,7 +101,6 @@ namespace Administration.Controllers
             return responseMessage;
         }
 
-        //TODO: to complete
         [HttpDelete()]
         public async Task<HttpResponseMessage> DeleteSubscriber(string tenantId, string topicName, string subscriberName)
         {

@@ -18,7 +18,7 @@ using System.Web.Http;
 
 namespace Administration.Controllers
 {
-    //[RequestAuthorizationAttribute]
+    [RequestAuthorizationAttribute]
     [ServiceRequestActionFilter]
     public class TopicsController : ApiController
     {

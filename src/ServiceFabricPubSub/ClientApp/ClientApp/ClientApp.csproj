@@ -56,6 +56,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\PubSubDotnetSDK\PubSubDotnetSDK.csproj">
+      <Project>{28D2B442-6BB7-440F-B27F-946DB89E92D8}</Project>
+      <Name>PubSubDotnetSDK</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ClientApi\ClientApi.csproj">
       <Project>{5db4cd1e-0343-478f-9a8c-2bc9b2df063b}</Project>
       <Name>ClientApi</Name>
