@@ -4,6 +4,7 @@ using System.Fabric;
 using Microsoft.AspNetCore.Hosting;
 using PubSubDotnetSDK;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace SubscriberService.Controllers
 {
@@ -23,10 +24,18 @@ namespace SubscriberService.Controllers
             this.subscriberService = subscriberService;
         }
 
-        [HttpGet]
+      
+        //for remoting
         public async Task<PubSubMessage> Pop()
         {
             return await subscriberService.Pop();
+        }
+
+        [HttpGet]
+        public PubSubMessage GetPop()
+        {
+            var msg = subscriberService.Pop().Result;
+            return msg;
         }
 
         [HttpGet("count")]

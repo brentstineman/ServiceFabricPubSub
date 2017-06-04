@@ -16,6 +16,7 @@ namespace FrontEndHelper
         private static string NodeName = FabricRuntime.GetNodeContext().NodeName;        
         private static FabricClient Client = new FabricClient(new FabricClientSettings() { HealthReportSendInterval = TimeSpan.FromSeconds(0) });
 
+        //works only as admin
         public static void SendReport(bool good,string component)
         {
             // Test whether the resource can be accessed from the node

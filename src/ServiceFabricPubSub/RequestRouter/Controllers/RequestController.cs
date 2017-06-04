@@ -14,6 +14,7 @@ using System.Fabric;
 using PubSubDotnetSDK;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
 using Microsoft.ServiceFabric.Services.Client;
+using RequestRouter;
 
 namespace RequestRouterService.Controllers
 {
@@ -25,25 +26,54 @@ namespace RequestRouterService.Controllers
 
         private static int _reverseProxyPort;
 
-    public async Task<HttpResponseMessage> Post(string tenantId, string topicName, string message)
-    {
+        public async Task<HttpResponseMessage> Post(string tenantId, string topicName, string message)
+        {
             try
             {
-                HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+                ServiceEventSource.Current.Message($"[Router] New Message received for {tenantId}/{topicName}: {message}");
 
-                var msg = new PubSubMessage() { Message = message };
-                var topicSvc = ServiceProxy.Create<ITopicService>(new Uri($"fabric:/{tenantId}/{TenantApplicationTopicServiceName}/{topicName}"));
-                await topicSvc.Push(msg);
+                HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
+                {
+                    PortNumber = await FrontEndHelper.FrontEndHelper.GetReverseProxyPortAsync(),
+                    ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/api"
+                };
+
+                HttpResponseMessage msg;
+                PubSubMessage pubsubMessage = new PubSubMessage() { Message = message };
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    string msgJson = JsonConvert.SerializeObject(pubsubMessage,
+                       new JsonSerializerSettings
+                       {
+                           Formatting = Formatting.Indented
+                       });
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));//ACCEPT header
+                   
+                    msg = await httpClient.PostAsync(
+                        builder.Build(),
+                        new StringContent(msgJson, Encoding.UTF8, "application/json")
+                        );
+                }
+
+                HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+                if (!msg.IsSuccessStatusCode)
+                {
+                    responseMessage.StatusCode = HttpStatusCode.InternalServerError;
+                }
 
                 return responseMessage;
+
+                //using remoting
+
+                //var msg = new PubSubMessage() { Message = message };
+                //var topicSvc = ServiceProxy.Create<ITopicService>(new Uri($"fabric:/{tenantId}/{TenantApplicationTopicServiceName}/{topicName}"));
+                //await topicSvc.Push(msg);
             }
             catch (Exception ex)
             {
                 return new HttpResponseMessage(HttpStatusCode.InternalServerError);
             }
         }
-
-
 
         // POST api/tenantId/topicName
         //public async Task<HttpResponseMessage> Post(string tenantId, string topicName)
@@ -90,20 +120,49 @@ namespace RequestRouterService.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
-          
-                var topicSvc = ServiceProxy.Create<ISubscriberService>(new Uri($"fabric:/{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/{subscriberName}"));
-                var msg = await topicSvc.Pop();
+                ServiceEventSource.Current.Message($"[Router] Message read for {tenantId}/{topicName}/{subscriberName}");
 
-         
-                string msgJson = JsonConvert.SerializeObject(msg,
-                    new JsonSerializerSettings
-                    {
-                        Formatting = Formatting.Indented
-                    });
-                responseMessage.Content = new StringContent(msgJson);
+                HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
+                {
+                    PortNumber = await FrontEndHelper.FrontEndHelper.GetReverseProxyPortAsync(),
+                    ServiceName = $"{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/{subscriberName}/api"
+                };
+
+                HttpResponseMessage msg;
+                PubSubMessage pubSubMsg = null;
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    string pubSubMsgJson = await httpClient.GetStringAsync(builder.Build());
+                    if(!String.IsNullOrEmpty(pubSubMsgJson))
+                        pubSubMsg = JsonConvert.DeserializeObject<PubSubMessage>(pubSubMsgJson);
+                }
+
+                HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+                if (pubSubMsg != null)
+                {
+                    string msgJson = JsonConvert.SerializeObject(pubSubMsg.Message,
+                        new JsonSerializerSettings
+                        {
+                            Formatting = Formatting.Indented
+                        });
+                    responseMessage.Content = new StringContent(msgJson);
+                }
+                else
+                {
+                    responseMessage.StatusCode = HttpStatusCode.NoContent;
+                }
 
                 return responseMessage;
+
+                //using remoting
+                //var topicSvc = ServiceProxy.Create<ISubscriberService>(new Uri($"fabric:/{tenantId}/{TenantApplicationTopicServiceName}/{topicName}/{subscriberName}"));
+                //var msg = await topicSvc.Pop();
+                //string msgJson = JsonConvert.SerializeObject(msg.Content,
+                //    new JsonSerializerSettings
+                //    {
+                //        Formatting = Formatting.Indented
+                //    });
+                //responseMessage.Content = new StringContent(msgJson);
             }
             catch (Exception ex)
             {

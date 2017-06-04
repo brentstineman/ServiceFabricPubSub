@@ -30,6 +30,7 @@ namespace TopicService.Models
 
         public async Task Push(PubSubMessage msg)
         {
+            ServiceEventSource.Current.Message($"Topic Push called: {msg.Message}");
             msg.MessageID = Guid.NewGuid(); // generating a new unique ID for the incoming message.
             var lst = await this.stateManager.GetOrAddAsync<IReliableDictionary<string, bool>>("queueList").ConfigureAwait(false);
             var inputQueue = await this.stateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("inputQueue");
@@ -38,7 +39,8 @@ namespace TopicService.Models
                 await inputQueue.EnqueueAsync(tx, msg).ConfigureAwait(false);
                 await tx.CommitAsync().ConfigureAwait(false);
             }
-            ServiceEventSource.Current.ServiceMessage(context, $"INPUT QUEUE: {msg.Message}");
+
+            //ServiceEventSource.Current.ServiceMessage(context, $"Input queue: {msg.Message}");
         }
 
         public Task RegisterSubscriber(string subscriberId)

@@ -92,17 +92,17 @@ namespace ClientApp
             _groups.AddGroup("Tenant", tenantsCmds);
 
             var topicCmds = new Commands();
-            topicCmds.RegisterCommand("Put message", PubSubCommands.TopicPutMessage);
             topicCmds.RegisterCommand("Add subscriber", PubSubCommands.TopicAddSubscriber);
             topicCmds.RegisterCommand("Delete subscriber", PubSubCommands.TopicDeleteSubscriber);
             topicCmds.RegisterCommand("List subscribers", PubSubCommands.TopicListSubscribers);
             _groups.AddGroup("Topic", topicCmds);
 
-            var subscriberCmds = new Commands();
-            subscriberCmds.RegisterCommand("Get message", PubSubCommands.SubscriberGetMessage);
+            var messagesCmds = new Commands();
+            messagesCmds.RegisterCommand("Get message", PubSubCommands.SubscriberGetMessage);
+            messagesCmds.RegisterCommand("Put message", PubSubCommands.TopicPutMessage);
             //subscriberCmds.RegisterCommand("Get subscriber queue depth (not implemented yet)", PubSubCommands.SubscriberGetQueueDepth);
             //subscriberCmds.RegisterCommand("Delete all queue messages (not implemented yet)", PubSubCommands.SubscriberDeleteAllQueuedMessages);
-            _groups.AddGroup("Subscriber", subscriberCmds);
+            _groups.AddGroup("Messages", messagesCmds);
 
             //var settingsCmds = new Commands();
             //settingsCmds.RegisterCommand("Toggle display mode", GenericCommands.ToggleFlatDisplayCmd);

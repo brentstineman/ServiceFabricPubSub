@@ -68,17 +68,17 @@ namespace TopicService
             this.StateManager.StateManagerChanged += StateManager_StateManagerChanged;
             this.StateManager.TransactionChanged += StateManager_TransactionChanged;
 
-            int count = 1; // HACK used for testmessage autogeneration
-            while (true)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+            //int count = 1; // HACK used for testmessage autogeneration
+            //while (true)
+            //{
+            //    cancellationToken.ThrowIfCancellationRequested();
+            //    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
 
-                // HACK CREATE TEST MESSAGE
-                // TODO remove this next 2 line when CLI available
-                var testMsg = new PubSubMessage() { Message = $"TEST Message #{count++} : {DateTime.Now}" };
-                await Push(testMsg); // HACK FOR TEST
-            }
+            //    // HACK CREATE TEST MESSAGE
+            //    // TODO remove this next 2 line when CLI available
+            //    var testMsg = new PubSubMessage() { Message = $"TEST Message #{count++} : {DateTime.Now}" };
+            //    await Push(testMsg); // HACK FOR TEST
+            //}
         }
 
 

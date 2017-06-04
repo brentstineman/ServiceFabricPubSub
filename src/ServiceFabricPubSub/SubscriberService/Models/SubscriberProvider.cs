@@ -25,20 +25,27 @@ namespace SubscriberService.Models
                 count = await queue.GetCountAsync(tx).ConfigureAwait(false);
                 tx.Abort();
             }
+            ServiceEventSource.Current.Message($"Subscribed Count called: {count}");
             return count;
         }
 
         public async Task<PubSubMessage> Pop()
         {
+            
             PubSubMessage msg = null;
             var queue = await this.stateManager.GetOrAddAsync<IReliableQueue<PubSubMessage>>("messages").ConfigureAwait(false);
             using (var tx = this.stateManager.CreateTransaction())
             {
                 var msgCV = await queue.TryDequeueAsync(tx).ConfigureAwait(false);
-                if (msgCV.HasValue)
+                if (msgCV.HasValue) { 
                     msg = msgCV.Value;
+                    ServiceEventSource.Current.Message($"Subscribed Pop called. Message found: {msg.Message}");
+                }
+                else
+                    ServiceEventSource.Current.Message($"Subscribed Pop called. No Messages available");
                 await tx.CommitAsync().ConfigureAwait(false);
             }
+            
             return msg;
         }
     }

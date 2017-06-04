@@ -44,35 +44,42 @@ namespace Administration.Controllers
         {
             if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
 
-            ApplicationList applicationList = await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/" + TenantName));
+            try
+            {
+                ApplicationList applicationList = await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/" + TenantName));
 
-            if (applicationList.Count > 0) throw new HttpResponseException(HttpStatusCode.Conflict);
+                if (applicationList.Count > 0) throw new HttpResponseException(HttpStatusCode.Conflict);
 
-            ApplicationDescription applicationDescripriont = new ApplicationDescription(
-                new Uri("fabric:/" + TenantName), APPLICATIONTYPE_NAME, AppVersion);
+                ApplicationDescription applicationDescripriont = new ApplicationDescription(
+                    new Uri("fabric:/" + TenantName), APPLICATIONTYPE_NAME, AppVersion);
 
-            SFHealthHelper.SendReport(false, "TenantCreation");
-            ServiceEventSource.Current.Message($"Creation of a new tenant {TenantName}");
+                SFHealthHelper.SendReport(false, "TenantCreation");
 
-            await fabricClient.ApplicationManager.CreateApplicationAsync(applicationDescripriont);
+                ServiceEventSource.Current.Message($"Creation of a new tenant {TenantName}");
+
+                await fabricClient.ApplicationManager.CreateApplicationAsync(applicationDescripriont);
 
 
-            //the application has been created but might be not yet available
-            //so need to wait until we get the key
+                //the application has been created but might be not yet available
+                //so need to wait until we get the key
+                ServiceEventSource.Current.Message($"Waiting for a new tenant key...");
+                var accessKey = "";
+                while (String.IsNullOrEmpty(accessKey))
+                {
+                    accessKey = await FrontEndHelper.FrontEndHelper.GetAuthKeyAsync(TenantName, "key1");
+                    await Task.Delay(500);
+                }
 
-            ServiceEventSource.Current.Message($"Waiting for key");
-            var accessKey = "";
-            while (String.IsNullOrEmpty(accessKey)) {
-                accessKey  = await FrontEndHelper.FrontEndHelper.GetAuthKeyAsync(TenantName,"key1");
-                await Task.Delay(500);
-              
+                ServiceEventSource.Current.Message($"Tenant {TenantName} created. Key={accessKey}");
+
+                return accessKey;
+            }
+            catch (Exception ex)
+            {
+                SFHealthHelper.SendReport(false, "TenantCreation");
+                throw new HttpResponseException(HttpStatusCode.InternalServerError);
             }
 
-            await Task.Delay(5000);
-            SFHealthHelper.SendReport(true, "TenantCreation");
-            ServiceEventSource.Current.Message($"Tenant creation done");
-
-            return accessKey;
         }
 
         /// <summary>

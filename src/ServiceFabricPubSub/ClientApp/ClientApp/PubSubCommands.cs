@@ -25,7 +25,7 @@ namespace ClientApp
                 Program.EnsureParam(Program.EnsureConfig.TenantName);
 
                 PubSubAdminApi client = new PubSubAdminApi(Program.ServiceFabricAdminUri);
-                Program.AccessKey = client.Tenants.CreateTenant(Program.TenantName, "1.0.2");
+                Program.AccessKey = client.Tenants.CreateTenant(Program.TenantName, "1.0.6");
               
                 Console.WriteLine($"Tenant '{Program.TenantName}' created.");
                 Console.WriteLine($"Access key: {Program.AccessKey}");
@@ -300,7 +300,7 @@ namespace ClientApp
                 PubSubClientApi client = new PubSubClientApi(Program.ServiceFabricUri);
                 dynamic result = await client.Request.GetWithHttpMessagesAsync(Program.TenantName, Program.TopicName, Program.SubscriberName, AuthenticationHeader());
 
-                Console.WriteLine("Message: " + result.Body.Message);
+                Console.WriteLine("Message: " + result.Body);
           
                 Console.ReadKey();
             }
