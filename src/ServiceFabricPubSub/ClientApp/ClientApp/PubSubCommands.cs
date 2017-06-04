@@ -25,7 +25,7 @@ namespace ClientApp
                 Program.EnsureParam(Program.EnsureConfig.TenantName);
 
                 PubSubAdminApi client = new PubSubAdminApi(Program.ServiceFabricAdminUri);
-                Program.AccessKey = client.Tenants.CreateTenant(Program.TenantName, "1.0.0");
+                Program.AccessKey = client.Tenants.CreateTenant(Program.TenantName, "1.0.2");
               
                 Console.WriteLine($"Tenant '{Program.TenantName}' created.");
                 Console.WriteLine($"Access key: {Program.AccessKey}");

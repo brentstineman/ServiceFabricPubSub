@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Fabric.Description;
+using System.Fabric.Health;
 using System.Fabric.Query;
 using System.Linq;
 using System.Net;
@@ -12,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using static System.Fabric.FabricClient;
 
 namespace Administration.Controllers
 {
@@ -49,18 +51,26 @@ namespace Administration.Controllers
             ApplicationDescription applicationDescripriont = new ApplicationDescription(
                 new Uri("fabric:/" + TenantName), APPLICATIONTYPE_NAME, AppVersion);
 
+            SFHealthHelper.SendReport(false, "TenantCreation");
+            ServiceEventSource.Current.Message($"Creation of a new tenant {TenantName}");
+
             await fabricClient.ApplicationManager.CreateApplicationAsync(applicationDescripriont);
 
 
             //the application has been created but might be not yet available
             //so need to wait until we get the key
-          
+
+            ServiceEventSource.Current.Message($"Waiting for key");
             var accessKey = "";
             while (String.IsNullOrEmpty(accessKey)) {
                 accessKey  = await FrontEndHelper.FrontEndHelper.GetAuthKeyAsync(TenantName,"key1");
                 await Task.Delay(500);
               
             }
+
+            await Task.Delay(5000);
+            SFHealthHelper.SendReport(true, "TenantCreation");
+            ServiceEventSource.Current.Message($"Tenant creation done");
 
             return accessKey;
         }
