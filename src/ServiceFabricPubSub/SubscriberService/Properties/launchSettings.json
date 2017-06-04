@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "SubscriberService2": {
+    "SubscriberService": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "api/values",

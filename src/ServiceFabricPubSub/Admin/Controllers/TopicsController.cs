@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Fabric.Description;
 using Microsoft.ServiceFabric.Data;
-using Microsoft.AspNetCore.Hosting;
 using System.Fabric;
 using System.Fabric.Query;
+using Admin.Models;
 
 namespace Admin.Controllers
 {
@@ -18,14 +18,17 @@ namespace Admin.Controllers
         private readonly FabricClient fabric;
         private readonly StatefulServiceContext serviceContext;
         private readonly string applicationName;
+        private readonly ISubscriberFabricProvider subscribeProvider;
 
         public TopicsController(IReliableStateManager stateManager, 
                             StatefulServiceContext context, 
-                            FabricClient fabric)
+                            FabricClient fabric,
+                            ISubscriberFabricProvider subscribeProvider)
         {
             this.stateManager = stateManager;
             this.serviceContext = context;
             this.fabric = fabric;
+            this.subscribeProvider = subscribeProvider;
 
             applicationName = this.serviceContext.CodePackageActivationContext.ApplicationName;
         }
@@ -83,16 +86,31 @@ namespace Admin.Controllers
             return Ok();
         }
 
-        
 
         // DELETE api/topics/topicname
         [HttpDelete("{name}")]
         public async Task<IActionResult> Delete(string name)
         {
-            // TODO delete all the subscribers too
+            var result = await this.subscribeProvider.GetSubscribers(name, applicationName);
+            foreach(var r in result)
+            {
+                await DeleteService(r.ServiceName);
+            }
 
-            Uri serviceUri = this.serviceContext.CreateTopicUri(name);
-            var description = new DeleteServiceDescription(serviceUri);
+            await DeleteService(this.serviceContext.CreateTopicUri(name));
+
+            return Ok();
+        }
+
+        private async Task DeleteService(string serviceName)
+        {
+            var targetUri = new Uri(serviceName);
+            await DeleteService(targetUri);
+        }
+
+        private async Task DeleteService(Uri targetUri)
+        {
+            var description = new DeleteServiceDescription(targetUri);
             try
             {
                 await fabric.ServiceManager.DeleteServiceAsync(description);
@@ -100,10 +118,7 @@ namespace Admin.Controllers
             catch (FabricElementNotFoundException)
             {
                 // service doesn't exist; nothing to delete
-                return Ok();
             }
-
-            return Ok();
         }
     }
 }

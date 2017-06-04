@@ -14,6 +14,7 @@ using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Data.Notifications;
+using TopicService.Models;
 
 namespace TopicService
 {
@@ -46,7 +47,8 @@ namespace TopicService
                         (url, listener) => new WebHostBuilder().UseKestrel().ConfigureServices(
                              services => services
                                  .AddSingleton<StatefulServiceContext>(this.Context)
-                                 .AddSingleton<IReliableStateManager>(this.StateManager))
+                                 .AddSingleton<IReliableStateManager>(this.StateManager)
+                                 .AddSingleton<ITopicService>(new TopicProvider(this.StateManager, this.Context)))
                         .UseContentRoot(Directory.GetCurrentDirectory())
                         .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.UseUniqueServiceUrl)
                         .UseStartup<Startup>()

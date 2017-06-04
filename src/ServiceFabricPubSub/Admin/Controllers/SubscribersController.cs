@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Fabric.Description;
 using Microsoft.ServiceFabric.Data;
-using Microsoft.AspNetCore.Hosting;
 using System.Fabric;
 using System.Fabric.Query;
 using System.Text;
-using Microsoft.ServiceFabric.Data.Collections;
+using Admin.Models;
 
 namespace Admin.Controllers
 {
@@ -20,14 +18,18 @@ namespace Admin.Controllers
         private readonly FabricClient fabric;
         private readonly StatefulServiceContext serviceContext;
         private readonly string applicationName;
+        private readonly ISubscriberFabricProvider provider;
 
-        public SubscribersController(IReliableStateManager stateManager,
+        public SubscribersController(
+                            IReliableStateManager stateManager,
                             StatefulServiceContext context,
-                            FabricClient fabric)
+                            FabricClient fabric,
+                            ISubscriberFabricProvider provider)
         {
             this.stateManager = stateManager;
             this.serviceContext = context;
             this.fabric = fabric;
+            this.provider = provider;
 
             applicationName = this.serviceContext.CodePackageActivationContext.ApplicationName;
         }
@@ -39,16 +41,7 @@ namespace Admin.Controllers
         public async Task<IActionResult> Get(string topic)
         {
             //TODO filter by topic.
-            ServiceList services = await this.fabric.QueryManager.GetServiceListAsync(new Uri(applicationName));
-
-            return this.Ok(services
-                            .Where(x => x.ServiceTypeName == Constants.SUBSCRIBER_SERVICE_TYPE_NAME
-                                    && x.ServiceName.IsTopic(topic))
-                            .Select(x => new
-                            {
-                                ServiceName = x.ServiceName.ToString(),
-                                ServiceStatus = x.ServiceStatus.ToString()
-                            }));
+            return this.Ok(await provider.GetSubscribers(topic, applicationName));
         }
 
 
