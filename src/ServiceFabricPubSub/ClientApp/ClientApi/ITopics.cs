@@ -11,9 +11,9 @@ namespace ClientApi.Admin
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Tenants operations.
+    /// Topics operations.
     /// </summary>
-    public partial interface ITenants
+    public partial interface ITopics
     {
         /// <param name='tenantId'>
         /// </param>
@@ -32,10 +32,10 @@ namespace ClientApi.Admin
         /// <exception cref="Microsoft.Rest.ValidationException">
         /// Thrown when a required parameter is null
         /// </exception>
-        Task<HttpOperationResponse<string>> ResetKeysWithHttpMessagesAsync(string tenantId, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
-        /// <param name='tenantName'>
+        Task<HttpOperationResponse<object>> GetTopicsWithHttpMessagesAsync(string tenantId, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        /// <param name='tenantId'>
         /// </param>
-        /// <param name='appVersion'>
+        /// <param name='topicName'>
         /// </param>
         /// <param name='customHeaders'>
         /// The headers that will be added to request.
@@ -52,6 +52,26 @@ namespace ClientApi.Admin
         /// <exception cref="Microsoft.Rest.ValidationException">
         /// Thrown when a required parameter is null
         /// </exception>
-        Task<HttpOperationResponse<string>> CreateTenantWithHttpMessagesAsync(string tenantName, string appVersion, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<HttpOperationResponse<string>> CreateTopicWithHttpMessagesAsync(string tenantId, string topicName, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        /// <param name='tenantId'>
+        /// </param>
+        /// <param name='topicName'>
+        /// </param>
+        /// <param name='customHeaders'>
+        /// The headers that will be added to request.
+        /// </param>
+        /// <param name='cancellationToken'>
+        /// The cancellation token.
+        /// </param>
+        /// <exception cref="Microsoft.Rest.HttpOperationException">
+        /// Thrown when the operation returned an invalid status code
+        /// </exception>
+        /// <exception cref="Microsoft.Rest.SerializationException">
+        /// Thrown when unable to deserialize the response
+        /// </exception>
+        /// <exception cref="Microsoft.Rest.ValidationException">
+        /// Thrown when a required parameter is null
+        /// </exception>
+        Task<HttpOperationResponse<string>> DeleteTopicWithHttpMessagesAsync(string tenantId, string topicName, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

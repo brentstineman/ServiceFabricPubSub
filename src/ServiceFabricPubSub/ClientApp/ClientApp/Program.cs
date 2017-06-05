@@ -18,6 +18,8 @@ namespace ClientApp
         public static string TenantName = null;
         public static string TopicName = null;
         public static string AccessKey = null;
+        public static string SubscriberName = null;
+
 
 
         #region Properties
@@ -83,28 +85,28 @@ namespace ClientApp
         {
             var tenantsCmds = new Commands();
             tenantsCmds.RegisterCommand("Register new", PubSubCommands.TenantRegisterNew);
-            tenantsCmds.RegisterCommand("Security Key reset", PubSubCommands.TenantSecurityKeyReset);
-            tenantsCmds.RegisterCommand("Add a Topic", PubSubCommands.TenantAddTopic);
+            tenantsCmds.RegisterCommand("Add a Topic", PubSubCommands.TenantCreateTopic);
             tenantsCmds.RegisterCommand("Delete a Topic", PubSubCommands.TenantDeleteTopic);
             tenantsCmds.RegisterCommand("List Topics", PubSubCommands.TenantListTopics);
+            tenantsCmds.RegisterCommand("Security Key reset (not working)", PubSubCommands.TenantSecurityKeyReset);
             _groups.AddGroup("Tenant", tenantsCmds);
 
             var topicCmds = new Commands();
-            topicCmds.RegisterCommand("Put message", PubSubCommands.TopicPutMessage);
             topicCmds.RegisterCommand("Add subscriber", PubSubCommands.TopicAddSubscriber);
             topicCmds.RegisterCommand("Delete subscriber", PubSubCommands.TopicDeleteSubscriber);
-            topicCmds.RegisterCommand("List subscriber", PubSubCommands.TopicListSubscribers);
+            topicCmds.RegisterCommand("List subscribers", PubSubCommands.TopicListSubscribers);
             _groups.AddGroup("Topic", topicCmds);
 
-            var subscriberCmds = new Commands();
-            subscriberCmds.RegisterCommand("Get message", PubSubCommands.SubscriberGetMessage);
-            subscriberCmds.RegisterCommand("Get subscriber queue depth", PubSubCommands.SubscriberGetQueueDepth);
-            subscriberCmds.RegisterCommand("Delete all queue messages", PubSubCommands.SubscriberDeleteAllQueuedMessages);
-            _groups.AddGroup("Subscriber", subscriberCmds);
+            var messagesCmds = new Commands();
+            messagesCmds.RegisterCommand("Get message", PubSubCommands.SubscriberGetMessage);
+            messagesCmds.RegisterCommand("Put message", PubSubCommands.TopicPutMessage);
+            //subscriberCmds.RegisterCommand("Get subscriber queue depth (not implemented yet)", PubSubCommands.SubscriberGetQueueDepth);
+            //subscriberCmds.RegisterCommand("Delete all queue messages (not implemented yet)", PubSubCommands.SubscriberDeleteAllQueuedMessages);
+            _groups.AddGroup("Messages", messagesCmds);
 
-            var settingsCmds = new Commands();
-            settingsCmds.RegisterCommand("Toggle display mode", GenericCommands.ToggleFlatDisplayCmd);
-            _groups.AddGroup("Settings", settingsCmds);
+            //var settingsCmds = new Commands();
+            //settingsCmds.RegisterCommand("Toggle display mode", GenericCommands.ToggleFlatDisplayCmd);
+            //_groups.AddGroup("Settings", settingsCmds);
 
             _flatCommands = _groups.ToFlatCommands();
         }
@@ -209,6 +211,11 @@ namespace ClientApp
                 AccessKey = _userInput.EnsureParam(AccessKey, "Access Key", forceReEnter: ((EnsureConfig.None & EnsureConfig.AccessKey) == EnsureConfig.AccessKey));
             }
 
+            if (String.IsNullOrEmpty(SubscriberName) && (param & EnsureConfig.SubscriberName) == EnsureConfig.SubscriberName)
+            {
+                SubscriberName = _userInput.EnsureParam(SubscriberName, "Subscriber Name", forceReEnter: ((EnsureConfig.None & EnsureConfig.SubscriberName) == EnsureConfig.SubscriberName));
+            }
+
         }
 
         [Flags]
@@ -220,6 +227,8 @@ namespace ClientApp
             TenantName = 0x4,
             TopicName = 0x8,
             AccessKey = 0x16,
+            SubscriberName = 0x32,
+
         }
     }
 }

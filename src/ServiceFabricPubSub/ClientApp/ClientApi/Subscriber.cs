@@ -2,7 +2,7 @@
 // Changes may cause incorrect behavior and will be lost if the code is
 // regenerated.
 
-namespace ClientApi.Router
+namespace ClientApi.Admin
 {
     using Microsoft.Rest;
     using Newtonsoft.Json;
@@ -15,12 +15,12 @@ namespace ClientApi.Router
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Request operations.
+    /// Subscriber operations.
     /// </summary>
-    public partial class Request : IServiceOperations<PubSubClientApi>, IRequest
+    public partial class Subscriber : IServiceOperations<PubSubAdminApi>, ISubscriber
     {
         /// <summary>
-        /// Initializes a new instance of the Request class.
+        /// Initializes a new instance of the Subscriber class.
         /// </summary>
         /// <param name='client'>
         /// Reference to the service client.
@@ -28,7 +28,7 @@ namespace ClientApi.Router
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
-        public Request(PubSubClientApi client)
+        public Subscriber(PubSubAdminApi client)
         {
             if (client == null)
             {
@@ -38,15 +38,13 @@ namespace ClientApi.Router
         }
 
         /// <summary>
-        /// Gets a reference to the PubSubClientApi
+        /// Gets a reference to the PubSubAdminApi
         /// </summary>
-        public PubSubClientApi Client { get; private set; }
+        public PubSubAdminApi Client { get; private set; }
 
         /// <param name='tenantId'>
         /// </param>
         /// <param name='topicName'>
-        /// </param>
-        /// <param name='message'>
         /// </param>
         /// <param name='customHeaders'>
         /// Headers that will be added to request.
@@ -69,7 +67,7 @@ namespace ClientApi.Router
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<HttpOperationResponse<object>> PostWithHttpMessagesAsync(string tenantId, string topicName, string message, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<HttpOperationResponse<object>> GetSubscribersWithHttpMessagesAsync(string tenantId, string topicName, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (tenantId == null)
             {
@@ -78,10 +76,6 @@ namespace ClientApi.Router
             if (topicName == null)
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "topicName");
-            }
-            if (message == null)
-            {
-                throw new ValidationException(ValidationRules.CannotBeNull, "message");
             }
             // Tracing
             bool _shouldTrace = ServiceClientTracing.IsEnabled;
@@ -92,19 +86,20 @@ namespace ClientApi.Router
                 Dictionary<string, object> tracingParameters = new Dictionary<string, object>();
                 tracingParameters.Add("tenantId", tenantId);
                 tracingParameters.Add("topicName", topicName);
-                tracingParameters.Add("message", message);
                 tracingParameters.Add("cancellationToken", cancellationToken);
-                ServiceClientTracing.Enter(_invocationId, this, "Post", tracingParameters);
+                ServiceClientTracing.Enter(_invocationId, this, "GetSubscribers", tracingParameters);
             }
             // Construct URL
             var _baseUrl = Client.BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/Request/{tenantId}/{topicName}").ToString();
-            _url = _url.Replace("{tenantId}", System.Uri.EscapeDataString(tenantId));
-            _url = _url.Replace("{topicName}", System.Uri.EscapeDataString(topicName));
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/Subscriber").ToString();
             List<string> _queryParameters = new List<string>();
-            if (message != null)
+            if (tenantId != null)
             {
-                _queryParameters.Add(string.Format("message={0}", System.Uri.EscapeDataString(message)));
+                _queryParameters.Add(string.Format("tenantId={0}", System.Uri.EscapeDataString(tenantId)));
+            }
+            if (topicName != null)
+            {
+                _queryParameters.Add(string.Format("topicName={0}", System.Uri.EscapeDataString(topicName)));
             }
             if (_queryParameters.Count > 0)
             {
@@ -113,7 +108,7 @@ namespace ClientApi.Router
             // Create HTTP transport objects
             var _httpRequest = new HttpRequestMessage();
             HttpResponseMessage _httpResponse = null;
-            _httpRequest.Method = new HttpMethod("POST");
+            _httpRequest.Method = new HttpMethod("GET");
             _httpRequest.RequestUri = new System.Uri(_url);
             // Set Headers
 
@@ -224,7 +219,7 @@ namespace ClientApi.Router
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<HttpOperationResponse<object>> GetWithHttpMessagesAsync(string tenantId, string topicName, string subscriberName, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<HttpOperationResponse<object>> AddSubscriberWithHttpMessagesAsync(string tenantId, string topicName, string subscriberName, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (tenantId == null)
             {
@@ -249,18 +244,193 @@ namespace ClientApi.Router
                 tracingParameters.Add("topicName", topicName);
                 tracingParameters.Add("subscriberName", subscriberName);
                 tracingParameters.Add("cancellationToken", cancellationToken);
-                ServiceClientTracing.Enter(_invocationId, this, "Get", tracingParameters);
+                ServiceClientTracing.Enter(_invocationId, this, "AddSubscriber", tracingParameters);
             }
             // Construct URL
             var _baseUrl = Client.BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/Request/{tenantId}/{topicName}/{subscriberName}").ToString();
-            _url = _url.Replace("{tenantId}", System.Uri.EscapeDataString(tenantId));
-            _url = _url.Replace("{topicName}", System.Uri.EscapeDataString(topicName));
-            _url = _url.Replace("{subscriberName}", System.Uri.EscapeDataString(subscriberName));
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/Subscriber").ToString();
+            List<string> _queryParameters = new List<string>();
+            if (tenantId != null)
+            {
+                _queryParameters.Add(string.Format("tenantId={0}", System.Uri.EscapeDataString(tenantId)));
+            }
+            if (topicName != null)
+            {
+                _queryParameters.Add(string.Format("topicName={0}", System.Uri.EscapeDataString(topicName)));
+            }
+            if (subscriberName != null)
+            {
+                _queryParameters.Add(string.Format("subscriberName={0}", System.Uri.EscapeDataString(subscriberName)));
+            }
+            if (_queryParameters.Count > 0)
+            {
+                _url += "?" + string.Join("&", _queryParameters);
+            }
             // Create HTTP transport objects
             var _httpRequest = new HttpRequestMessage();
             HttpResponseMessage _httpResponse = null;
-            _httpRequest.Method = new HttpMethod("GET");
+            _httpRequest.Method = new HttpMethod("PUT");
+            _httpRequest.RequestUri = new System.Uri(_url);
+            // Set Headers
+
+
+            if (customHeaders != null)
+            {
+                foreach(var _header in customHeaders)
+                {
+                    if (_httpRequest.Headers.Contains(_header.Key))
+                    {
+                        _httpRequest.Headers.Remove(_header.Key);
+                    }
+                    _httpRequest.Headers.TryAddWithoutValidation(_header.Key, _header.Value);
+                }
+            }
+
+            // Serialize Request
+            string _requestContent = null;
+            // Send Request
+            if (_shouldTrace)
+            {
+                ServiceClientTracing.SendRequest(_invocationId, _httpRequest);
+            }
+            cancellationToken.ThrowIfCancellationRequested();
+            _httpResponse = await Client.HttpClient.SendAsync(_httpRequest, cancellationToken).ConfigureAwait(false);
+            if (_shouldTrace)
+            {
+                ServiceClientTracing.ReceiveResponse(_invocationId, _httpResponse);
+            }
+            HttpStatusCode _statusCode = _httpResponse.StatusCode;
+            cancellationToken.ThrowIfCancellationRequested();
+            string _responseContent = null;
+            if ((int)_statusCode != 200)
+            {
+                var ex = new HttpOperationException(string.Format("Operation returned an invalid status code '{0}'", _statusCode));
+                if (_httpResponse.Content != null) {
+                    _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+                }
+                else {
+                    _responseContent = string.Empty;
+                }
+                ex.Request = new HttpRequestMessageWrapper(_httpRequest, _requestContent);
+                ex.Response = new HttpResponseMessageWrapper(_httpResponse, _responseContent);
+                if (_shouldTrace)
+                {
+                    ServiceClientTracing.Error(_invocationId, ex);
+                }
+                _httpRequest.Dispose();
+                if (_httpResponse != null)
+                {
+                    _httpResponse.Dispose();
+                }
+                throw ex;
+            }
+            // Create Result
+            var _result = new HttpOperationResponse<object>();
+            _result.Request = _httpRequest;
+            _result.Response = _httpResponse;
+            // Deserialize Response
+            if ((int)_statusCode == 200)
+            {
+                _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+                try
+                {
+                    _result.Body = Microsoft.Rest.Serialization.SafeJsonConvert.DeserializeObject<object>(_responseContent, Client.DeserializationSettings);
+                }
+                catch (JsonException ex)
+                {
+                    _httpRequest.Dispose();
+                    if (_httpResponse != null)
+                    {
+                        _httpResponse.Dispose();
+                    }
+                    throw new SerializationException("Unable to deserialize the response.", _responseContent, ex);
+                }
+            }
+            if (_shouldTrace)
+            {
+                ServiceClientTracing.Exit(_invocationId, _result);
+            }
+            return _result;
+        }
+
+        /// <param name='tenantId'>
+        /// </param>
+        /// <param name='topicName'>
+        /// </param>
+        /// <param name='subscriberName'>
+        /// </param>
+        /// <param name='customHeaders'>
+        /// Headers that will be added to request.
+        /// </param>
+        /// <param name='cancellationToken'>
+        /// The cancellation token.
+        /// </param>
+        /// <exception cref="HttpOperationException">
+        /// Thrown when the operation returned an invalid status code
+        /// </exception>
+        /// <exception cref="SerializationException">
+        /// Thrown when unable to deserialize the response
+        /// </exception>
+        /// <exception cref="ValidationException">
+        /// Thrown when a required parameter is null
+        /// </exception>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when a required parameter is null
+        /// </exception>
+        /// <return>
+        /// A response object containing the response body and response headers.
+        /// </return>
+        public async Task<HttpOperationResponse<object>> DeleteSubscriberWithHttpMessagesAsync(string tenantId, string topicName, string subscriberName, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (tenantId == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "tenantId");
+            }
+            if (topicName == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "topicName");
+            }
+            if (subscriberName == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "subscriberName");
+            }
+            // Tracing
+            bool _shouldTrace = ServiceClientTracing.IsEnabled;
+            string _invocationId = null;
+            if (_shouldTrace)
+            {
+                _invocationId = ServiceClientTracing.NextInvocationId.ToString();
+                Dictionary<string, object> tracingParameters = new Dictionary<string, object>();
+                tracingParameters.Add("tenantId", tenantId);
+                tracingParameters.Add("topicName", topicName);
+                tracingParameters.Add("subscriberName", subscriberName);
+                tracingParameters.Add("cancellationToken", cancellationToken);
+                ServiceClientTracing.Enter(_invocationId, this, "DeleteSubscriber", tracingParameters);
+            }
+            // Construct URL
+            var _baseUrl = Client.BaseUri.AbsoluteUri;
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/Subscriber").ToString();
+            List<string> _queryParameters = new List<string>();
+            if (tenantId != null)
+            {
+                _queryParameters.Add(string.Format("tenantId={0}", System.Uri.EscapeDataString(tenantId)));
+            }
+            if (topicName != null)
+            {
+                _queryParameters.Add(string.Format("topicName={0}", System.Uri.EscapeDataString(topicName)));
+            }
+            if (subscriberName != null)
+            {
+                _queryParameters.Add(string.Format("subscriberName={0}", System.Uri.EscapeDataString(subscriberName)));
+            }
+            if (_queryParameters.Count > 0)
+            {
+                _url += "?" + string.Join("&", _queryParameters);
+            }
+            // Create HTTP transport objects
+            var _httpRequest = new HttpRequestMessage();
+            HttpResponseMessage _httpResponse = null;
+            _httpRequest.Method = new HttpMethod("DELETE");
             _httpRequest.RequestUri = new System.Uri(_url);
             // Set Headers
 

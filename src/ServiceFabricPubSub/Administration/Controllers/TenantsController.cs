@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Fabric.Description;
+using System.Fabric.Health;
 using System.Fabric.Query;
 using System.Linq;
 using System.Net;
@@ -12,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using static System.Fabric.FabricClient;
 
 namespace Administration.Controllers
 {
@@ -25,6 +27,9 @@ namespace Administration.Controllers
 
         private const string APPLICATION_NAME = "fabric:/FrontEnd";
         private readonly string APPLICATIONTYPE_NAME = "TenantApplicationType";
+
+        private const string TenantApplicationAppName = "TenantApplication";
+        private const string TenantApplicationAdminServiceName = "Admin";
         #endregion
 
         /// <summary>
@@ -39,27 +44,42 @@ namespace Administration.Controllers
         {
             if (!IsValidTenantName(TenantName)) throw new HttpResponseException(HttpStatusCode.BadRequest);
 
-            ApplicationList applicationList = await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/" + TenantName));
+            try
+            {
+                ApplicationList applicationList = await fabricClient.QueryManager.GetApplicationListAsync(new Uri("fabric:/" + TenantName));
 
-            if (applicationList.Count > 0) throw new HttpResponseException(HttpStatusCode.Conflict);
+                if (applicationList.Count > 0) throw new HttpResponseException(HttpStatusCode.Conflict);
 
-            ApplicationDescription applicationDescripriont = new ApplicationDescription(
-                new Uri("fabric:/" + TenantName), APPLICATIONTYPE_NAME, AppVersion);
+                ApplicationDescription applicationDescripriont = new ApplicationDescription(
+                    new Uri("fabric:/" + TenantName), APPLICATIONTYPE_NAME, AppVersion);
 
-            await fabricClient.ApplicationManager.CreateApplicationAsync(applicationDescripriont);
+                SFHealthHelper.SendReport(false, "TenantCreation");
+
+                ServiceEventSource.Current.Message($"Creation of a new tenant {TenantName}");
+
+                await fabricClient.ApplicationManager.CreateApplicationAsync(applicationDescripriont);
 
 
-            //the application has been created but might be not yet available
-            //so need to wait until we get the key
-            int i = 0;
-            var accessKey = "";
-            while (String.IsNullOrEmpty(accessKey)) {
-                accessKey  = await FrontEndHelper.FrontEndHelper.GetAuthKeyAsync(TenantName,"key1");
-                await Task.Delay(500);
-                if (++i > 10) break; //maximum retries
+                //the application has been created but might be not yet available
+                //so need to wait until we get the key
+                ServiceEventSource.Current.Message($"Waiting for a new tenant key...");
+                var accessKey = "";
+                while (String.IsNullOrEmpty(accessKey))
+                {
+                    accessKey = await FrontEndHelper.FrontEndHelper.GetAuthKeyAsync(TenantName, "key1");
+                    await Task.Delay(500);
+                }
+
+                ServiceEventSource.Current.Message($"Tenant {TenantName} created. Key={accessKey}");
+
+                return accessKey;
+            }
+            catch (Exception ex)
+            {
+                SFHealthHelper.SendReport(false, "TenantCreation");
+                throw new HttpResponseException(HttpStatusCode.InternalServerError);
             }
 
-            return accessKey;
         }
 
         /// <summary>
@@ -75,5 +95,36 @@ namespace Administration.Controllers
             return match.Success;
         }
 
+        //TODO: rework this method
+        [HttpGet()]
+        public async Task<string> ResetKeys(string tenantId)
+        {
+
+            HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
+            int reverseProxyPort = await FrontEndHelper.FrontEndHelper.GetReverseProxyPortAsync();
+
+            HttpServiceUriBuilder builder = new HttpServiceUriBuilder()
+            {
+                PortNumber = reverseProxyPort,
+                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/keys/key1"
+            };
+
+            HttpServiceUriBuilder builder2 = new HttpServiceUriBuilder()
+            {
+                PortNumber = reverseProxyPort,
+                ServiceName = $"{tenantId}/{TenantApplicationAdminServiceName}/api/keys/key2"
+            };
+
+            HttpResponseMessage topicResponseMessage;
+            using (HttpClient httpClient = new HttpClient())
+            {
+                topicResponseMessage = await httpClient.GetAsync(builder.Build());
+                topicResponseMessage = await httpClient.GetAsync(builder2.Build());
+            }
+
+            return "keys reset";
+
+        }
     }
 }

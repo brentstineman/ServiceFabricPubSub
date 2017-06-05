@@ -15,6 +15,32 @@ namespace ClientApi.Admin
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
+            /// <param name='tenantId'>
+            /// </param>
+            public static string ResetKeys(this ITenants operations, string tenantId)
+            {
+                return operations.ResetKeysAsync(tenantId).GetAwaiter().GetResult();
+            }
+
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
+            /// <param name='tenantId'>
+            /// </param>
+            /// <param name='cancellationToken'>
+            /// The cancellation token.
+            /// </param>
+            public static async Task<string> ResetKeysAsync(this ITenants operations, string tenantId, CancellationToken cancellationToken = default(CancellationToken))
+            {
+                using (var _result = await operations.ResetKeysWithHttpMessagesAsync(tenantId, null, cancellationToken).ConfigureAwait(false))
+                {
+                    return _result.Body;
+                }
+            }
+
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
             /// <param name='tenantName'>
             /// </param>
             /// <param name='appVersion'>

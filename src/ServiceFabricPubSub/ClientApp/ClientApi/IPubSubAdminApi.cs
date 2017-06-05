@@ -27,9 +27,19 @@ namespace ClientApi.Admin
 
 
         /// <summary>
+        /// Gets the ISubscriber.
+        /// </summary>
+        ISubscriber Subscriber { get; }
+
+        /// <summary>
         /// Gets the ITenants.
         /// </summary>
         ITenants Tenants { get; }
+
+        /// <summary>
+        /// Gets the ITopics.
+        /// </summary>
+        ITopics Topics { get; }
 
     }
 }

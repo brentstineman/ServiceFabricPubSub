@@ -73,8 +73,15 @@ namespace FrontEndHelper
         {
             if (requestUri == null)
                 throw new ArgumentNullException(nameof(requestUri));
-
-            return requestUri.Segments[3].Trim('/');
+            try
+            {
+                return requestUri.Segments[3].Trim('/');
+            }
+            catch (IndexOutOfRangeException ior)
+            {
+                var queryDictionary = System.Web.HttpUtility.ParseQueryString(requestUri.Query);
+                return queryDictionary["tenantId"];
+            }
         }
     }
 }

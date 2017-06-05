@@ -24,9 +24,9 @@ namespace TopicService.Controllers
         }
 
         [HttpPost]
-        public async Task Push([FromBody]object message)
+        public async Task Post([FromBody]PubSubMessage message)
         {
-            await topicService.Push(new PubSubMessage(message.ToString()));
+            await topicService.Push(message);
         }
     }
 }
